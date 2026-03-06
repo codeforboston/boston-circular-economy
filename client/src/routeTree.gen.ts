@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './pages/__root'
 import { Route as IndexRouteImport } from './pages/index'
+import { Route as DevIndexRouteImport } from './pages/dev/index'
 import { Route as DevPrototypeExampleIndexRouteImport } from './pages/dev/prototype-example/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DevIndexRoute = DevIndexRouteImport.update({
+  id: '/dev/',
+  path: '/dev/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DevPrototypeExampleIndexRoute =
@@ -26,27 +32,31 @@ const DevPrototypeExampleIndexRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dev/': typeof DevIndexRoute
   '/dev/prototype-example/': typeof DevPrototypeExampleIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dev': typeof DevIndexRoute
   '/dev/prototype-example': typeof DevPrototypeExampleIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dev/': typeof DevIndexRoute
   '/dev/prototype-example/': typeof DevPrototypeExampleIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dev/prototype-example/'
+  fullPaths: '/' | '/dev/' | '/dev/prototype-example/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dev/prototype-example'
-  id: '__root__' | '/' | '/dev/prototype-example/'
+  to: '/' | '/dev' | '/dev/prototype-example'
+  id: '__root__' | '/' | '/dev/' | '/dev/prototype-example/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DevIndexRoute: typeof DevIndexRoute
   DevPrototypeExampleIndexRoute: typeof DevPrototypeExampleIndexRoute
 }
 
@@ -57,6 +67,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dev/': {
+      id: '/dev/'
+      path: '/dev'
+      fullPath: '/dev/'
+      preLoaderRoute: typeof DevIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dev/prototype-example/': {
@@ -71,6 +88,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DevIndexRoute: DevIndexRoute,
   DevPrototypeExampleIndexRoute: DevPrototypeExampleIndexRoute,
 }
 export const routeTree = rootRouteImport

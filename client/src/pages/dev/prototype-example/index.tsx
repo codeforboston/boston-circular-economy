@@ -1,14 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/dev/prototype-example/')({
-  component: Prototype1,
+  component: PrototypeExample,
 })
 
-function Prototype1() {
+function PrototypeExample() {
   return (
     <main>
-      <h1>Prototype 1</h1>
-      <p>Dev/prototype sandbox.</p>
+      <h1>Prototype Example</h1>
+      <p>prototype-eample sandbox.</p>
     </main>
   )
 }
