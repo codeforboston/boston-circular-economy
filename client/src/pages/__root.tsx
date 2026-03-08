@@ -5,6 +5,7 @@ export const Route = createRootRoute({
     <>
       <nav>
         <Link to="/">Home</Link>
+        <Link to="/dev">Prototypes</Link>
       </nav>
       <Outlet />
     </>
