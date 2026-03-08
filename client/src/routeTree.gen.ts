@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './pages/__root'
 import { Route as IndexRouteImport } from './pages/index'
 import { Route as DevIndexRouteImport } from './pages/dev/index'
-import { Route as DevPrototypeExampleRouteImport } from './pages/dev/prototype-example'
 import { Route as DevPrototypeFolderExampleIndexRouteImport } from './pages/dev/prototype-folder-example/index'
 
 const IndexRoute = IndexRouteImport.update({
@@ -24,11 +23,6 @@ const DevIndexRoute = DevIndexRouteImport.update({
   path: '/dev/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DevPrototypeExampleRoute = DevPrototypeExampleRouteImport.update({
-  id: '/dev/prototype-example',
-  path: '/dev/prototype-example',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const DevPrototypeFolderExampleIndexRoute =
   DevPrototypeFolderExampleIndexRouteImport.update({
     id: '/dev/prototype-folder-example/',
@@ -38,43 +32,30 @@ const DevPrototypeFolderExampleIndexRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/dev/prototype-example': typeof DevPrototypeExampleRoute
   '/dev/': typeof DevIndexRoute
   '/dev/prototype-folder-example/': typeof DevPrototypeFolderExampleIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/dev/prototype-example': typeof DevPrototypeExampleRoute
   '/dev': typeof DevIndexRoute
   '/dev/prototype-folder-example': typeof DevPrototypeFolderExampleIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/dev/prototype-example': typeof DevPrototypeExampleRoute
   '/dev/': typeof DevIndexRoute
   '/dev/prototype-folder-example/': typeof DevPrototypeFolderExampleIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/dev/prototype-example'
-    | '/dev/'
-    | '/dev/prototype-folder-example/'
+  fullPaths: '/' | '/dev/' | '/dev/prototype-folder-example/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dev/prototype-example' | '/dev' | '/dev/prototype-folder-example'
-  id:
-    | '__root__'
-    | '/'
-    | '/dev/prototype-example'
-    | '/dev/'
-    | '/dev/prototype-folder-example/'
+  to: '/' | '/dev' | '/dev/prototype-folder-example'
+  id: '__root__' | '/' | '/dev/' | '/dev/prototype-folder-example/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DevPrototypeExampleRoute: typeof DevPrototypeExampleRoute
   DevIndexRoute: typeof DevIndexRoute
   DevPrototypeFolderExampleIndexRoute: typeof DevPrototypeFolderExampleIndexRoute
 }
@@ -95,13 +76,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DevIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dev/prototype-example': {
-      id: '/dev/prototype-example'
-      path: '/dev/prototype-example'
-      fullPath: '/dev/prototype-example'
-      preLoaderRoute: typeof DevPrototypeExampleRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/dev/prototype-folder-example/': {
       id: '/dev/prototype-folder-example/'
       path: '/dev/prototype-folder-example'
@@ -114,7 +88,6 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DevPrototypeExampleRoute: DevPrototypeExampleRoute,
   DevIndexRoute: DevIndexRoute,
   DevPrototypeFolderExampleIndexRoute: DevPrototypeFolderExampleIndexRoute,
 }

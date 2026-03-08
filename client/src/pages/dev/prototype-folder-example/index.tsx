@@ -8,7 +8,7 @@ function PrototypeExample() {
   return (
     <main>
       <h1>Prototype Example</h1>
-      <p>prototype-eample sandbox.</p>
+      <p>As a convention for prototype development, we will place our prototypes in src/pages/dev/{'<prototype-name>'}/index.ts</p>
     </main>
   )
 }
