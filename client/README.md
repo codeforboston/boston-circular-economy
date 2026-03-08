@@ -17,3 +17,14 @@ To add a new route, create a file at the corresponding path under `src/pages/`. 
 | `src/pages/items/index.tsx` | `/items` |
 | `src/pages/items/$id.tsx` | `/items/:id` |
 | `src/pages/resources/get-involved.tsx` | `/resources/get-involved` |
+
+### Route components
+
+Components used only by a single route live in a `-components/` directory next to that route's `index.tsx`.
+
+| File | Used by |
+|------|---------|
+| `src/pages/items/-components/ItemCard.tsx` | `src/pages/items/index.tsx` |
+| `src/pages/items/-components/ItemDetail.tsx` | `src/pages/items/$id.tsx` |
+
+The `-` prefix ensures these directories are not treated as route segments by TanStack Router.
