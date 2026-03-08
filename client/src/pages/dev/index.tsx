@@ -13,10 +13,6 @@ function DevIndex() {
 
   return (
     <main>
-      <style>{`
-        .dev-index a:link { color: #5aacff; }
-        .dev-index a:visited { color: #c084fc; }
-      `}</style>
       <h1>Dev Prototypes</h1>
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         <div className="dev-index" style={{ textAlign: 'left' }}>

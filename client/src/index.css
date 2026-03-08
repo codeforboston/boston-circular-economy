@@ -1,8 +1,5 @@
 :root {
-  background-color: #242424;
-  text-align: center;
   text-rendering: optimizeLegibility;
-  color: rgba(255, 255, 255, 0.87);
 }
 
 body {
