@@ -4,12 +4,18 @@ export const Route = createFileRoute('/dev/')({
   component: DevIndex,
 })
 
-const modules = import.meta.glob('./*/index.tsx')
+const folderModules = import.meta.glob('./*/index.tsx')
+const fileModules = import.meta.glob('./*.tsx', { eager: false })
 
 function DevIndex() {
-  const prototypes = Object.keys(modules).map((path) =>
+  const fromFolders = Object.keys(folderModules).map((path) =>
     path.replace(/^\.\//, '').replace(/\/index\.tsx$/, ''),
   )
+  const fromFiles = Object.keys(fileModules)
+    .map((path) => path.replace(/^\.\//, '').replace(/\.tsx$/, ''))
+    .filter((name) => name !== 'index')
+
+  const prototypes = [...fromFiles, ...fromFolders].sort()
 
   return (
     <main>
