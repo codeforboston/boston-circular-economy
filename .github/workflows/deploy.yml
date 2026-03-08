@@ -34,13 +34,11 @@ jobs:
         with:
           node-version: lts/*
           cache: 'npm'
-          cache-dependency-path: ./client/package-lock.json
+          cache-dependency-path: ./package-lock.json
       - name: Install dependencies
-        working-directory: ./client
         run: npm ci
       - name: Build
-        working-directory: ./client
-        run: npm run build
+        run: npm run build -w client
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
