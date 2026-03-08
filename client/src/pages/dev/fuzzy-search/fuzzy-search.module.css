@@ -1,0 +1,10 @@
+.resultsBox {
+  border: 1px solid black;
+  margin-top: 4px;
+  padding: 8px;
+}
+
+.resultsList {
+  margin: 0;
+  padding-left: 1.25rem;
+}

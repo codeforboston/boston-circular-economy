@@ -1,0 +1,11 @@
+{
+  "name": "boston-circular-economy",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w client"
+  }
+}
