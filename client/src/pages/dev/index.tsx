@@ -14,16 +14,14 @@ function DevIndex() {
   return (
     <main>
       <h1>Dev Prototypes</h1>
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <div className="dev-index" style={{ textAlign: 'left' }}>
-          <ul style={{ paddingLeft: '1.25rem', margin: '0.25rem 0' }}>
-            {prototypes.map((name) => (
-              <li key={name}>
-                <Link to={`/dev/${name}/` as '/dev'}>{name}</Link>
-              </li>
-            ))}
-          </ul>
-        </div>
+      <div className="dev-index" style={{ textAlign: 'left' }}>
+        <ul style={{ paddingLeft: '1.25rem', margin: '0.25rem 0' }}>
+          {prototypes.map((name) => (
+            <li key={name}>
+              <Link to={`/dev/${name}/` as '/dev'}>{name}</Link>
+            </li>
+          ))}
+        </ul>
       </div>
     </main>
   )
