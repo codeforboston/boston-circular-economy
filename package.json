@@ -6,6 +6,6 @@
     "server"
   ],
   "scripts": {
-    "dev": "npm run dev -w client"
+    "dev": "npm run dev -w client & npm run dev -w server"
   }
 }
