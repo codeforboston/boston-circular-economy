@@ -2059,24 +2059,6 @@
       "social": {
         "facebook": "https://www.facebook.com/Jordan-the-lady-191765987539159/"
       }
-    },
-    "circular_activities": [
-      "alter",
-      "repair"
-    ],
-    "material_categories": [
-      "clothing"
-    ],
-    "availability": {
-      "opening_hours": "Mo-Sa 10:00-18:00",
-      "is_persistent": true
-    },
-    "accessibility": {
-      "wheelchair": "unknown"
-    },
-    "brand": null,
-    "operator": null,
-    "osm_id": null,
-    "last_verified": null
+    }
   }
 ]
