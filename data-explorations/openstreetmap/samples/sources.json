@@ -1,0 +1,2064 @@
+[
+  {
+    "source_id": "osm-node-1546690479",
+    "source_type": "organization",
+    "name": "Goodwill",
+    "lat": 42.3947393,
+    "lon": -71.1216433,
+    "address": {
+      "street": "230 Elm Street",
+      "city": "Somerville",
+      "state": "MA",
+      "postcode": "02144"
+    },
+    "contact": {
+      "phone": "+1-617-628-3618",
+      "email": null,
+      "website": "https://www.goodwillmass.org/",
+      "social": null
+    },
+    "circular_activities": [
+      "donate",
+      "resell"
+    ],
+    "material_categories": [],
+    "availability": {
+      "opening_hours": "Mo-We 10:00-18:00; Th-Sa 10:00-19:00; Su 12:00-18:00",
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": "Goodwill",
+    "operator": "Morgan Memorial Goodwill Industries",
+    "osm_id": 1546690479,
+    "last_verified": "2025-12-15"
+  },
+  {
+    "source_id": "osm-node-2298266051",
+    "source_type": "organization",
+    "name": "Goodwill",
+    "lat": 42.312046,
+    "lon": -71.1140475,
+    "address": {
+      "street": "678 Centre Street",
+      "city": null,
+      "state": null,
+      "postcode": null
+    },
+    "contact": {
+      "phone": "+1617-522-1415",
+      "email": null,
+      "website": "https://www.goodwill.org/",
+      "social": null
+    },
+    "circular_activities": [
+      "donate",
+      "resell"
+    ],
+    "material_categories": [],
+    "availability": {
+      "opening_hours": "Mo-We 9:00-18:00; Th-Sa 9:00-19:00; Su 12:00-18:00",
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": "Goodwill",
+    "operator": "Morgan Memorial Goodwill Industries",
+    "osm_id": 2298266051,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-2707308542",
+    "source_type": "organization",
+    "name": "Goodwill",
+    "lat": 42.3641243,
+    "lon": -71.101937,
+    "address": {
+      "street": "520 Massachusetts Avenue",
+      "city": "Cambridge",
+      "state": "MA",
+      "postcode": "02139"
+    },
+    "contact": {
+      "phone": "+1-617-868-6330",
+      "email": null,
+      "website": "https://www.goodwillmass.org/store-hours-locations/",
+      "social": null
+    },
+    "circular_activities": [
+      "donate",
+      "resell",
+      "reuse"
+    ],
+    "material_categories": [],
+    "availability": {
+      "opening_hours": "Mo-Sa 11:00-18:00",
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "yes"
+    },
+    "brand": "Goodwill",
+    "operator": "Morgan Memorial Goodwill Industries",
+    "osm_id": 2707308542,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-2707308543",
+    "source_type": "organization",
+    "name": "Boomerangs",
+    "lat": 42.3647282,
+    "lon": -71.102226,
+    "address": {
+      "street": "563 Massachusetts Avenue",
+      "city": "Cambridge",
+      "state": "MA",
+      "postcode": "02139"
+    },
+    "contact": {
+      "phone": "+1-617-749-4278",
+      "email": null,
+      "website": "https://shop.mtwyouth.org/pages/boomerangs",
+      "social": null
+    },
+    "circular_activities": [
+      "resell",
+      "reuse"
+    ],
+    "material_categories": [],
+    "availability": {
+      "opening_hours": "Tu-Su 10:00-17:00",
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 2707308543,
+    "last_verified": "2025-12-15"
+  },
+  {
+    "source_id": "osm-node-2812075301",
+    "source_type": "organization",
+    "name": "Tighten Up Tailors",
+    "lat": 42.2176765,
+    "lon": -70.9366509,
+    "address": {
+      "street": "176A Middle Street",
+      "city": null,
+      "state": null,
+      "postcode": null
+    },
+    "contact": {
+      "phone": "+1 508-496-8811",
+      "email": null,
+      "website": null,
+      "social": null
+    },
+    "circular_activities": [
+      "alter",
+      "repair"
+    ],
+    "material_categories": [
+      "clothing"
+    ],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 2812075301,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-3400360738",
+    "source_type": "organization",
+    "name": "Goodwill",
+    "lat": 42.3518055,
+    "lon": -71.1193275,
+    "address": {
+      "street": "965 Commonwealth Avenue",
+      "city": "Boston",
+      "state": "MA",
+      "postcode": "02215"
+    },
+    "contact": {
+      "phone": "+1-617-254-0112",
+      "email": null,
+      "website": "https://www.goodwillmass.org/",
+      "social": null
+    },
+    "circular_activities": [
+      "donate",
+      "resell",
+      "reuse"
+    ],
+    "material_categories": [],
+    "availability": {
+      "opening_hours": "Mo-Sa 10:00-19:00; Su 12:00-18:00",
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": "Goodwill",
+    "operator": "Morgan Memorial Goodwill Industries",
+    "osm_id": 3400360738,
+    "last_verified": "2025-08-02"
+  },
+  {
+    "source_id": "osm-node-3400368765",
+    "source_type": "organization",
+    "name": "Goodwill",
+    "lat": 42.331177,
+    "lon": -71.0801264,
+    "address": {
+      "street": "1010 Harrison Avenue",
+      "city": "Boston",
+      "state": null,
+      "postcode": null
+    },
+    "contact": {
+      "phone": "+1-617-541-1270",
+      "email": null,
+      "website": "https://www.goodwillmass.org/store-hours-locations/",
+      "social": null
+    },
+    "circular_activities": [
+      "donate",
+      "resell"
+    ],
+    "material_categories": [],
+    "availability": {
+      "opening_hours": "Mo-Sa 09:00-18:00",
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": "Goodwill",
+    "operator": "Morgan Memorial Goodwill Industries",
+    "osm_id": 3400368765,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-3400374541",
+    "source_type": "organization",
+    "name": "Goodwill",
+    "lat": 42.3360032,
+    "lon": -71.0460386,
+    "address": {
+      "street": "470 West Broadway",
+      "city": "Boston",
+      "state": "MA",
+      "postcode": "02127"
+    },
+    "contact": {
+      "phone": "+1-617-307-6367",
+      "email": null,
+      "website": "https://www.goodwillmass.org/store-hours-locations/",
+      "social": null
+    },
+    "circular_activities": [
+      "donate",
+      "resell"
+    ],
+    "material_categories": [],
+    "availability": {
+      "opening_hours": "Mo-Sa 10:00-18:00",
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": "Goodwill",
+    "operator": "Morgan Memorial Goodwill Industries",
+    "osm_id": 3400374541,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-3499668823",
+    "source_type": "organization",
+    "name": "The Little Fox Children's Resale Shop",
+    "lat": 42.4057193,
+    "lon": -71.1416114,
+    "address": {
+      "street": null,
+      "city": null,
+      "state": null,
+      "postcode": null
+    },
+    "contact": {
+      "phone": null,
+      "email": null,
+      "website": "https://www.littlefoxshop.com/",
+      "social": null
+    },
+    "circular_activities": [
+      "resell",
+      "reuse"
+    ],
+    "material_categories": [],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 3499668823,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-4035718727",
+    "source_type": "organization",
+    "name": "40 South St. Vintage",
+    "lat": 42.3082781,
+    "lon": -71.1153647,
+    "address": {
+      "street": "40 South Street",
+      "city": "Jamaica Plain",
+      "state": "MA",
+      "postcode": "02130"
+    },
+    "contact": {
+      "phone": "+1-617-522-5066",
+      "email": "hilken@fortysouthst.com",
+      "website": "https://www.fortysouthst.com/",
+      "social": {
+        "facebook": "https://www.facebook.com/40southvintage"
+      }
+    },
+    "circular_activities": [
+      "resell",
+      "reuse"
+    ],
+    "material_categories": [
+      "clothing"
+    ],
+    "availability": {
+      "opening_hours": "Th-Fr 12:00-18:00; Sa 11:00-18:00; Su 12:00-17:00",
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 4035718727,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-4137279570",
+    "source_type": "organization",
+    "name": "Ali Cleaners",
+    "lat": 42.3717934,
+    "lon": -71.0987096,
+    "address": {
+      "street": "164A Hampshire Street",
+      "city": null,
+      "state": null,
+      "postcode": null
+    },
+    "contact": {
+      "phone": "+16173547455",
+      "email": null,
+      "website": null,
+      "social": null
+    },
+    "circular_activities": [
+      "alter",
+      "repair"
+    ],
+    "material_categories": [
+      "clothing"
+    ],
+    "availability": {
+      "opening_hours": "Mo-Sa 10:00-18:00",
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 4137279570,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-5197250407",
+    "source_type": "organization",
+    "name": "GC Garage",
+    "lat": 42.3461535,
+    "lon": -71.0874091,
+    "address": {
+      "street": null,
+      "city": null,
+      "state": null,
+      "postcode": null
+    },
+    "contact": {
+      "phone": null,
+      "email": null,
+      "website": null,
+      "social": null
+    },
+    "circular_activities": [
+      "rent",
+      "repair"
+    ],
+    "material_categories": [
+      "musical_instruments"
+    ],
+    "availability": {
+      "opening_hours": "Mo-Fr 11:00-19:00;Sa 10:00-19:00;Su 12:00-19:00",
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 5197250407,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-5372431948",
+    "source_type": "organization",
+    "name": "Collins Office Systems, Inc.",
+    "lat": 42.4236979,
+    "lon": -71.1757635,
+    "address": {
+      "street": "1193B Massachusetts Avenue",
+      "city": "Arlington",
+      "state": "MA",
+      "postcode": "02476"
+    },
+    "contact": {
+      "phone": "+1-781-648-1323",
+      "email": null,
+      "website": "http://www.collinsofficesystems.net",
+      "social": {
+        "facebook": "https://www.facebook.com/Collins-Office-Systems-Inc-339885679357635/"
+      }
+    },
+    "circular_activities": [
+      "repair"
+    ],
+    "material_categories": [
+      "electronics"
+    ],
+    "availability": {
+      "opening_hours": "Mo-Fr 08:30-17:00; Sa 09:00-13:00",
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 5372431948,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-6080865116",
+    "source_type": "organization",
+    "name": "Jack's Tailoring & Dry Cleaning",
+    "lat": 42.3896994,
+    "lon": -71.1200336,
+    "address": {
+      "street": null,
+      "city": null,
+      "state": null,
+      "postcode": null
+    },
+    "contact": {
+      "phone": null,
+      "email": null,
+      "website": null,
+      "social": null
+    },
+    "circular_activities": [
+      "alter",
+      "repair"
+    ],
+    "material_categories": [
+      "clothing"
+    ],
+    "availability": {
+      "opening_hours": "Mo-Sa 09:00-15:00",
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 6080865116,
+    "last_verified": "2024-02-15"
+  },
+  {
+    "source_id": "osm-node-6117499350",
+    "source_type": "organization",
+    "name": "High Energy Vintage",
+    "lat": 42.3820527,
+    "lon": -71.1017845,
+    "address": {
+      "street": "429 Somerville Avenue",
+      "city": null,
+      "state": null,
+      "postcode": null
+    },
+    "contact": {
+      "phone": null,
+      "email": null,
+      "website": "http://www.discovisionvintage.com/",
+      "social": null
+    },
+    "circular_activities": [
+      "resell",
+      "reuse"
+    ],
+    "material_categories": [
+      "clothing"
+    ],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": "Wiley",
+    "osm_id": 6117499350,
+    "last_verified": "2025-06-16"
+  },
+  {
+    "source_id": "osm-node-6124523715",
+    "source_type": "organization",
+    "name": "Retrospect",
+    "lat": 42.3686037,
+    "lon": -71.1095757,
+    "address": {
+      "street": null,
+      "city": null,
+      "state": null,
+      "postcode": null
+    },
+    "contact": {
+      "phone": null,
+      "email": null,
+      "website": null,
+      "social": null
+    },
+    "circular_activities": [
+      "resell",
+      "reuse"
+    ],
+    "material_categories": [],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "limited"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 6124523715,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-6124523725",
+    "source_type": "organization",
+    "name": "Aroush's Tailoring",
+    "lat": 42.3675429,
+    "lon": -71.107429,
+    "address": {
+      "street": "Massachusetts Avenue",
+      "city": "Cambridge",
+      "state": "MA",
+      "postcode": "02139"
+    },
+    "contact": {
+      "phone": null,
+      "email": null,
+      "website": null,
+      "social": null
+    },
+    "circular_activities": [
+      "alter",
+      "repair"
+    ],
+    "material_categories": [
+      "clothing"
+    ],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 6124523725,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-7533863119",
+    "source_type": "organization",
+    "name": "All Fit Tailoring",
+    "lat": 42.3508689,
+    "lon": -71.0769398,
+    "address": {
+      "street": "138 Newbury Street",
+      "city": "Boston",
+      "state": "MA",
+      "postcode": "02116"
+    },
+    "contact": {
+      "phone": "+1-617-236-1984",
+      "email": "allfittailoring@yahoo.com",
+      "website": "https://www.allfittailoring.com/",
+      "social": null
+    },
+    "circular_activities": [
+      "alter",
+      "repair"
+    ],
+    "material_categories": [
+      "clothing"
+    ],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 7533863119,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-7731913264",
+    "source_type": "organization",
+    "name": "Back Bay Tailors",
+    "lat": 42.3512868,
+    "lon": -71.0787907,
+    "address": {
+      "street": "160A Commonwealth Avenue",
+      "city": "Boston",
+      "state": "MA",
+      "postcode": "02116"
+    },
+    "contact": {
+      "phone": "+1-617-670-0912",
+      "email": "BackBayTailors@gmail.com",
+      "website": "http://backbaytailors.com/",
+      "social": null
+    },
+    "circular_activities": [
+      "alter",
+      "repair"
+    ],
+    "material_categories": [
+      "clothing"
+    ],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 7731913264,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-7774760074",
+    "source_type": "organization",
+    "name": "Jordan The Tailor",
+    "lat": 42.3495389,
+    "lon": -71.0836596,
+    "address": {
+      "street": "271 Newbury Street",
+      "city": "Boston",
+      "state": "MA",
+      "postcode": "02116"
+    },
+    "contact": {
+      "phone": "+1-617-536-2929",
+      "email": "jordanthetailor@yahoo.com",
+      "website": null,
+      "social": {
+        "facebook": "https://www.facebook.com/Jordan-The-Tailor-191765987539159/"
+      }
+    },
+    "circular_activities": [
+      "alter",
+      "repair"
+    ],
+    "material_categories": [
+      "clothing"
+    ],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 7774760074,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-7830837827",
+    "source_type": "organization",
+    "name": "Covet",
+    "lat": 42.3592907,
+    "lon": -71.0705264,
+    "address": {
+      "street": "109 Charles Street",
+      "city": "Boston",
+      "state": "MA",
+      "postcode": "02114"
+    },
+    "contact": {
+      "phone": "+1-617-530-1111",
+      "email": "info@covetboston.com",
+      "website": "https://covetboston.com/",
+      "social": {
+        "facebook": "https://www.facebook.com/CovetBoston/",
+        "instagram": "https://www.instagram.com/covetboston/"
+      }
+    },
+    "circular_activities": [
+      "resell",
+      "reuse"
+    ],
+    "material_categories": [],
+    "availability": {
+      "opening_hours": "Mo-Sa 10:00-19:00; Su 10:00-18:00",
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "yes"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 7830837827,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-7830837830",
+    "source_type": "organization",
+    "name": "Thrive Exchange",
+    "lat": 42.3484036,
+    "lon": -71.0863774,
+    "address": {
+      "street": "332 Newbury Street",
+      "city": "Boston",
+      "state": "MA",
+      "postcode": "02115"
+    },
+    "contact": {
+      "phone": null,
+      "email": "info@thriveexchange.net",
+      "website": "https://thriveexchange.net/",
+      "social": null
+    },
+    "circular_activities": [
+      "resell",
+      "reuse"
+    ],
+    "material_categories": [],
+    "availability": {
+      "opening_hours": "Mo-Sa 12:00-20:00; Su 12:00-17:00",
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 7830837830,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-7863253940",
+    "source_type": "organization",
+    "name": "M3 Tailored Menswear",
+    "lat": 42.3443769,
+    "lon": -71.0826159,
+    "address": {
+      "street": "150 Huntington Avenue",
+      "city": "Boston",
+      "state": "MA",
+      "postcode": "02115"
+    },
+    "contact": {
+      "phone": "+1-617-266-3330",
+      "email": null,
+      "website": null,
+      "social": null
+    },
+    "circular_activities": [
+      "alter",
+      "repair"
+    ],
+    "material_categories": [
+      "clothing"
+    ],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 7863253940,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-8143950915",
+    "source_type": "organization",
+    "name": "Oak Hill Cleaners & Tailors",
+    "lat": 42.2915615,
+    "lon": -71.1860741,
+    "address": {
+      "street": "663 Saw Mill Brook Parkway",
+      "city": "Newton",
+      "state": "MA",
+      "postcode": "02459"
+    },
+    "contact": {
+      "phone": "+1 617-527-9857",
+      "email": null,
+      "website": null,
+      "social": null
+    },
+    "circular_activities": [
+      "alter",
+      "repair"
+    ],
+    "material_categories": [
+      "clothing"
+    ],
+    "availability": {
+      "opening_hours": "07:00-18:30",
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 8143950915,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-9007063613",
+    "source_type": "organization",
+    "name": "Westwood Tailor Shop",
+    "lat": 42.220131,
+    "lon": -71.1876731,
+    "address": {
+      "street": "250 Washington Street",
+      "city": null,
+      "state": null,
+      "postcode": null
+    },
+    "contact": {
+      "phone": null,
+      "email": null,
+      "website": null,
+      "social": null
+    },
+    "circular_activities": [
+      "alter",
+      "repair"
+    ],
+    "material_categories": [
+      "clothing"
+    ],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 9007063613,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-9175191760",
+    "source_type": "organization",
+    "name": "Diversity Consignment",
+    "lat": 42.3113487,
+    "lon": -71.1146906,
+    "address": {
+      "street": "713-715 Centre Street",
+      "city": "Jamaica Plain",
+      "state": "MA",
+      "postcode": "02130"
+    },
+    "contact": {
+      "phone": "+1 617-942-2672",
+      "email": null,
+      "website": "https://www.diversityconsign.com/",
+      "social": null
+    },
+    "circular_activities": [
+      "resell",
+      "reuse"
+    ],
+    "material_categories": [
+      "clothing"
+    ],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 9175191760,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-9659819117",
+    "source_type": "organization",
+    "name": "The Computer Loft",
+    "lat": 42.3519623,
+    "lon": -71.1276676,
+    "address": {
+      "street": "6 Fordham Road",
+      "city": "Allston",
+      "state": "MA",
+      "postcode": "02134"
+    },
+    "contact": {
+      "phone": "+1-617-782-9997",
+      "email": "service@computerloft.com",
+      "website": "https://www.computerloft.com/",
+      "social": {
+        "facebook": "https://www.facebook.com/p/The-Computer-Loft-100063792390864/"
+      }
+    },
+    "circular_activities": [
+      "repair",
+      "resell",
+      "reuse"
+    ],
+    "material_categories": [
+      "electronics"
+    ],
+    "availability": {
+      "opening_hours": "Mo-Fr 10:00-18:00; Sa,Su off",
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": "Apple",
+    "operator": "Craig Marin",
+    "osm_id": 9659819117,
+    "last_verified": "2025-02-03"
+  },
+  {
+    "source_id": "osm-node-9681496791",
+    "source_type": "organization",
+    "name": "Guangdong Tailor",
+    "lat": 42.2741954,
+    "lon": -71.0243608,
+    "address": {
+      "street": "66 Billings Road",
+      "city": "Quincy",
+      "state": "MA",
+      "postcode": "02171"
+    },
+    "contact": {
+      "phone": "+1 339-205-0369",
+      "email": null,
+      "website": null,
+      "social": null
+    },
+    "circular_activities": [
+      "alter",
+      "repair"
+    ],
+    "material_categories": [
+      "clothing"
+    ],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": "Lily",
+    "osm_id": 9681496791,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-9683283046",
+    "source_type": "organization",
+    "name": "Goodwill",
+    "lat": 42.2522661,
+    "lon": -70.9893479,
+    "address": {
+      "street": "625 Southern Artery",
+      "city": "Quincy",
+      "state": "MA",
+      "postcode": "02169"
+    },
+    "contact": {
+      "phone": "+1 617-745-4144",
+      "email": null,
+      "website": "https://www.goodwillmass.org/",
+      "social": null
+    },
+    "circular_activities": [
+      "donate",
+      "resell",
+      "reuse"
+    ],
+    "material_categories": [
+      "clothing"
+    ],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": "Goodwill",
+    "operator": "Morgan Memorial Goodwill Industries",
+    "osm_id": 9683283046,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-9738720979",
+    "source_type": "organization",
+    "name": "Bright Cleaners",
+    "lat": 42.2628359,
+    "lon": -71.0123538,
+    "address": {
+      "street": null,
+      "city": null,
+      "state": null,
+      "postcode": null
+    },
+    "contact": {
+      "phone": null,
+      "email": null,
+      "website": null,
+      "social": null
+    },
+    "circular_activities": [
+      "alter",
+      "repair"
+    ],
+    "material_categories": [
+      "clothing"
+    ],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 9738720979,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-10891754771",
+    "source_type": "organization",
+    "name": "Gabary House of Alterations",
+    "lat": 42.3644068,
+    "lon": -71.1024387,
+    "address": {
+      "street": "550 Massachusetts Avenue",
+      "city": "Cambridge",
+      "state": "MA",
+      "postcode": "02139"
+    },
+    "contact": {
+      "phone": "+1 617 714 3920",
+      "email": "contact@gabaryalterations.com",
+      "website": "https://gabaryalterations.com/",
+      "social": null
+    },
+    "circular_activities": [
+      "alter",
+      "repair"
+    ],
+    "material_categories": [
+      "clothing"
+    ],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 10891754771,
+    "last_verified": "2025-10-23"
+  },
+  {
+    "source_id": "osm-node-10963939383",
+    "source_type": "organization",
+    "name": "Raymond Personal Tailor",
+    "lat": 42.3541543,
+    "lon": -71.0560808,
+    "address": {
+      "street": null,
+      "city": null,
+      "state": null,
+      "postcode": null
+    },
+    "contact": {
+      "phone": null,
+      "email": null,
+      "website": null,
+      "social": null
+    },
+    "circular_activities": [
+      "alter",
+      "repair"
+    ],
+    "material_categories": [
+      "clothing"
+    ],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 10963939383,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-11012642312",
+    "source_type": "organization",
+    "name": "Hidden Treasures",
+    "lat": 42.3788591,
+    "lon": -71.0279757,
+    "address": {
+      "street": null,
+      "city": null,
+      "state": null,
+      "postcode": null
+    },
+    "contact": {
+      "phone": null,
+      "email": null,
+      "website": null,
+      "social": null
+    },
+    "circular_activities": [
+      "resell",
+      "reuse"
+    ],
+    "material_categories": [],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 11012642312,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-11052959205",
+    "source_type": "organization",
+    "name": "Trinity Church Thrift Shop",
+    "lat": 42.4594578,
+    "lon": -71.0688161,
+    "address": {
+      "street": null,
+      "city": null,
+      "state": null,
+      "postcode": "02176"
+    },
+    "contact": {
+      "phone": null,
+      "email": null,
+      "website": "https://trinitymelrose.org/thrift-shop/",
+      "social": null
+    },
+    "circular_activities": [
+      "resell",
+      "reuse"
+    ],
+    "material_categories": [],
+    "availability": {
+      "opening_hours": "Tu, Th 10:00-12:00; Mo 06:30-20:00; Sa 09:00-11:30",
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 11052959205,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-11151935994",
+    "source_type": "organization",
+    "name": "Rosa's Customized Tailoring",
+    "lat": 42.3606198,
+    "lon": -71.1856719,
+    "address": {
+      "street": "129 Galen Street",
+      "city": null,
+      "state": null,
+      "postcode": null
+    },
+    "contact": {
+      "phone": "+1 617 926 2424",
+      "email": null,
+      "website": null,
+      "social": null
+    },
+    "circular_activities": [
+      "alter",
+      "repair"
+    ],
+    "material_categories": [
+      "clothing"
+    ],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 11151935994,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-11161916061",
+    "source_type": "organization",
+    "name": "Goodwill",
+    "lat": 42.262071,
+    "lon": -71.1085238,
+    "address": {
+      "street": "892 River Street",
+      "city": null,
+      "state": null,
+      "postcode": null
+    },
+    "contact": {
+      "phone": "+1617-752-8500",
+      "email": null,
+      "website": "https://www.goodwillmass.org/store-hours-locations/",
+      "social": null
+    },
+    "circular_activities": [
+      "donate",
+      "resell"
+    ],
+    "material_categories": [],
+    "availability": {
+      "opening_hours": "Mo-We 9:00-18:00; Th-Sa 9:00-19:00; Su 12:00-18:00",
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": "Goodwill",
+    "operator": "Morgan Memorial Goodwill Industries",
+    "osm_id": 11161916061,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-11163984431",
+    "source_type": "organization",
+    "name": "The Finer Consigner",
+    "lat": 42.3301899,
+    "lon": -71.1919595,
+    "address": {
+      "street": null,
+      "city": null,
+      "state": null,
+      "postcode": null
+    },
+    "contact": {
+      "phone": null,
+      "email": null,
+      "website": null,
+      "social": null
+    },
+    "circular_activities": [
+      "resell",
+      "reuse"
+    ],
+    "material_categories": [],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 11163984431,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-11168751394",
+    "source_type": "organization",
+    "name": "Union Square Tailoring",
+    "lat": 42.3801,
+    "lon": -71.0971414,
+    "address": {
+      "street": null,
+      "city": null,
+      "state": null,
+      "postcode": null
+    },
+    "contact": {
+      "phone": "+1-617-776-5699",
+      "email": null,
+      "website": null,
+      "social": null
+    },
+    "circular_activities": [
+      "alter",
+      "repair"
+    ],
+    "material_categories": [
+      "clothing"
+    ],
+    "availability": {
+      "opening_hours": "Mo-Fr 09:00-18:00, Sa 09:00-17:00",
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "no"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 11168751394,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-11170906437",
+    "source_type": "organization",
+    "name": "Make & Mend",
+    "lat": 42.3796776,
+    "lon": -71.0981297,
+    "address": {
+      "street": "21 Hawkins Street",
+      "city": null,
+      "state": null,
+      "postcode": "02143"
+    },
+    "contact": {
+      "phone": null,
+      "email": null,
+      "website": "https://makeandmendshop.com/",
+      "social": null
+    },
+    "circular_activities": [
+      "resell",
+      "reuse"
+    ],
+    "material_categories": [
+      "art_supplies"
+    ],
+    "availability": {
+      "opening_hours": "Mo-Th 11:00-18:00; Fr-Sa 11:00-19:00",
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 11170906437,
+    "last_verified": "2025-10-31"
+  },
+  {
+    "source_id": "osm-node-11476490185",
+    "source_type": "organization",
+    "name": "Savers",
+    "lat": 42.4592577,
+    "lon": -71.0224512,
+    "address": {
+      "street": null,
+      "city": null,
+      "state": null,
+      "postcode": null
+    },
+    "contact": {
+      "phone": null,
+      "email": null,
+      "website": null,
+      "social": null
+    },
+    "circular_activities": [
+      "resell",
+      "reuse"
+    ],
+    "material_categories": [],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": "Savers",
+    "operator": null,
+    "osm_id": 11476490185,
+    "last_verified": "2020-10-14"
+  },
+  {
+    "source_id": "osm-node-12073829464",
+    "source_type": "organization",
+    "name": "Urban Renewals",
+    "lat": 42.2847231,
+    "lon": -71.1101617,
+    "address": {
+      "street": "606 American Legion Highway",
+      "city": "Boston",
+      "state": "MA",
+      "postcode": "02131"
+    },
+    "contact": {
+      "phone": null,
+      "email": null,
+      "website": "https://familythrift.com",
+      "social": null
+    },
+    "circular_activities": [
+      "resell",
+      "reuse"
+    ],
+    "material_categories": [],
+    "availability": {
+      "opening_hours": "Mo-Sa 09:00-18:00; Su 12:00-17:00",
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 12073829464,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-12096267843",
+    "source_type": "organization",
+    "name": "Arrow",
+    "lat": 42.3708639,
+    "lon": -71.1141901,
+    "address": {
+      "street": "1134 Massachusetts Avenue",
+      "city": "Cambridge",
+      "state": "MA",
+      "postcode": "02318"
+    },
+    "contact": {
+      "phone": null,
+      "email": null,
+      "website": null,
+      "social": null
+    },
+    "circular_activities": [
+      "alter",
+      "repair"
+    ],
+    "material_categories": [
+      "clothing"
+    ],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 12096267843,
+    "last_verified": "2025-09-06"
+  },
+  {
+    "source_id": "osm-node-12119285201",
+    "source_type": "organization",
+    "name": "Groovy Thrifty",
+    "lat": 42.3523687,
+    "lon": -71.128288,
+    "address": {
+      "street": null,
+      "city": null,
+      "state": null,
+      "postcode": "02134"
+    },
+    "contact": {
+      "phone": null,
+      "email": null,
+      "website": "https://groovythrifty.com/",
+      "social": {
+        "facebook": "groovythrifty",
+        "instagram": "groovythrifty"
+      }
+    },
+    "circular_activities": [
+      "resell",
+      "reuse"
+    ],
+    "material_categories": [],
+    "availability": {
+      "opening_hours": "We-Fr 12:00-18:00; Sa 11:00-16:00; Su 11:00-15:00",
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 12119285201,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-12663972120",
+    "source_type": "organization",
+    "name": "Newbury Tailor Co",
+    "lat": 42.3515579,
+    "lon": -71.0759317,
+    "address": {
+      "street": "234 Clarendon Street",
+      "city": "Boston",
+      "state": "MA",
+      "postcode": "02116"
+    },
+    "contact": {
+      "phone": null,
+      "email": null,
+      "website": null,
+      "social": null
+    },
+    "circular_activities": [
+      "alter",
+      "repair"
+    ],
+    "material_categories": [
+      "clothing"
+    ],
+    "availability": {
+      "opening_hours": "Mo-Su 10:00-22:00",
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 12663972120,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-12881578600",
+    "source_type": "organization",
+    "name": "2nd STREET",
+    "lat": 42.3431171,
+    "lon": -71.122543,
+    "address": {
+      "street": null,
+      "city": null,
+      "state": null,
+      "postcode": null
+    },
+    "contact": {
+      "phone": null,
+      "email": null,
+      "website": null,
+      "social": null
+    },
+    "circular_activities": [
+      "resell",
+      "reuse"
+    ],
+    "material_categories": [],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": "2nd STREET",
+    "operator": null,
+    "osm_id": 12881578600,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-13121899899",
+    "source_type": "organization",
+    "name": "Zipper Hospital",
+    "lat": 42.3430306,
+    "lon": -71.1237436,
+    "address": {
+      "street": "318 Harvard Street",
+      "city": "Brookline",
+      "state": "MA",
+      "postcode": "02446"
+    },
+    "contact": {
+      "phone": null,
+      "email": null,
+      "website": "zipperhospital.com",
+      "social": null
+    },
+    "circular_activities": [
+      "alter",
+      "repair"
+    ],
+    "material_categories": [
+      "clothing"
+    ],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 13121899899,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-13147907195",
+    "source_type": "organization",
+    "name": "The Portal Vintage",
+    "lat": 42.3895781,
+    "lon": -71.1167659,
+    "address": {
+      "street": "95 Elm Street",
+      "city": null,
+      "state": null,
+      "postcode": null
+    },
+    "contact": {
+      "phone": null,
+      "email": null,
+      "website": null,
+      "social": null
+    },
+    "circular_activities": [
+      "resell",
+      "reuse"
+    ],
+    "material_categories": [
+      "clothing"
+    ],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 13147907195,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-13157319481",
+    "source_type": "organization",
+    "name": "Maria's Experienced Alterations",
+    "lat": 42.3431882,
+    "lon": -71.1236067,
+    "address": {
+      "street": "318 Harvard Street",
+      "city": "Brookline",
+      "state": "MA",
+      "postcode": "02446"
+    },
+    "contact": {
+      "phone": "+16172771534",
+      "email": null,
+      "website": null,
+      "social": null
+    },
+    "circular_activities": [
+      "alter",
+      "repair"
+    ],
+    "material_categories": [
+      "clothing"
+    ],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 13157319481,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-13191532924",
+    "source_type": "organization",
+    "name": "Goodwill",
+    "lat": 42.4595252,
+    "lon": -71.16139,
+    "address": {
+      "street": null,
+      "city": null,
+      "state": null,
+      "postcode": null
+    },
+    "contact": {
+      "phone": null,
+      "email": null,
+      "website": "https://www.goodwillmass.org/donation-center-hours-locations/",
+      "social": null
+    },
+    "circular_activities": [
+      "donate",
+      "resell"
+    ],
+    "material_categories": [],
+    "availability": {
+      "opening_hours": "Mo-Su 8:00-16:00",
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": "Goodwill",
+    "operator": "Morgan Memorial Goodwill Industries",
+    "osm_id": 13191532924,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-13235228050",
+    "source_type": "organization",
+    "name": "HK Tailoring",
+    "lat": 42.4215228,
+    "lon": -71.1342243,
+    "address": {
+      "street": null,
+      "city": null,
+      "state": null,
+      "postcode": null
+    },
+    "contact": {
+      "phone": null,
+      "email": null,
+      "website": null,
+      "social": null
+    },
+    "circular_activities": [
+      "alter",
+      "repair"
+    ],
+    "material_categories": [
+      "clothing"
+    ],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 13235228050,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-13440649742",
+    "source_type": "organization",
+    "name": "Hemmingway Tailoring - Alterations",
+    "lat": 42.3772055,
+    "lon": -71.1635815,
+    "address": {
+      "street": null,
+      "city": null,
+      "state": null,
+      "postcode": null
+    },
+    "contact": {
+      "phone": null,
+      "email": null,
+      "website": null,
+      "social": null
+    },
+    "circular_activities": [
+      "alter",
+      "repair"
+    ],
+    "material_categories": [
+      "clothing"
+    ],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 13440649742,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-node-13530066942",
+    "source_type": "organization",
+    "name": "Nearly New Thrift Store",
+    "lat": 42.3487031,
+    "lon": -71.1552671,
+    "address": {
+      "street": "404 Washington Street",
+      "city": "Brighton",
+      "state": "MA",
+      "postcode": "02135"
+    },
+    "contact": {
+      "phone": null,
+      "email": null,
+      "website": "https://www.brightonallstonucc.org/thrift-store",
+      "social": null
+    },
+    "circular_activities": [
+      "resell",
+      "reuse"
+    ],
+    "material_categories": [],
+    "availability": {
+      "opening_hours": "We 14:00-18:00, Fr 10:00-13:30, Sa 10:00-13:30",
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": "Brighton-Allston Congregational Church",
+    "osm_id": 13530066942,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-way-29764369",
+    "source_type": "organization",
+    "name": null,
+    "lat": 42.3874246,
+    "lon": -71.0064254,
+    "address": {
+      "street": "9 Breed Street",
+      "city": null,
+      "state": null,
+      "postcode": null
+    },
+    "contact": {
+      "phone": null,
+      "email": null,
+      "website": null,
+      "social": null
+    },
+    "circular_activities": [
+      "alter",
+      "repair"
+    ],
+    "material_categories": [
+      "clothing"
+    ],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 29764369,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-way-196453017",
+    "source_type": "organization",
+    "name": "Bruce's Tire & Services Inc",
+    "lat": 42.4203054,
+    "lon": -71.1666562,
+    "address": {
+      "street": "36 Dudley Street",
+      "city": "Arlington",
+      "state": "MA",
+      "postcode": "02476"
+    },
+    "contact": {
+      "phone": null,
+      "email": null,
+      "website": null,
+      "social": null
+    },
+    "circular_activities": [
+      "repair"
+    ],
+    "material_categories": [
+      "tires"
+    ],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 196453017,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-way-674356526",
+    "source_type": "organization",
+    "name": "The Salvation Army",
+    "lat": 42.4626283,
+    "lon": -70.9473823,
+    "address": {
+      "street": "10 Munroe Street",
+      "city": "Lynn",
+      "state": "MA",
+      "postcode": "01901"
+    },
+    "contact": {
+      "phone": "+18007287825",
+      "email": null,
+      "website": "https://satruck.org/",
+      "social": null
+    },
+    "circular_activities": [
+      "donate",
+      "resell"
+    ],
+    "material_categories": [],
+    "availability": {
+      "opening_hours": "Mo-Sa 10:00-17:00",
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": "The Salvation Army",
+    "operator": null,
+    "osm_id": 674356526,
+    "last_verified": null
+  },
+  {
+    "source_id": "osm-way-1195624141",
+    "source_type": "organization",
+    "name": "City Pump & Motor Service Inc.",
+    "lat": 42.3694871,
+    "lon": -71.1524133,
+    "address": {
+      "street": "79 Grove Street",
+      "city": null,
+      "state": null,
+      "postcode": null
+    },
+    "contact": {
+      "phone": null,
+      "email": null,
+      "website": null,
+      "social": null
+    },
+    "circular_activities": [
+      "repair"
+    ],
+    "material_categories": [],
+    "availability": {
+      "opening_hours": null,
+      "is_persistent": true
+    },
+    "accessibility": {
+      "wheelchair": "unknown"
+    },
+    "brand": null,
+    "operator": null,
+    "osm_id": 1195624141,
+    "last_verified": null
+  },
+  {
+    "source_id": "mock-individual-jordan-001",
+    "source_type": "individual",
+    "name": "Jordan",
+    "lat": 42.3495389,
+    "lon": -71.0836596,
+    "address": {
+      "street": "271 Newbury Street",
+      "city": "Boston",
+      "state": "MA",
+      "postcode": "02116"
+    },
+    "contact": {
+      "phone": "+1-617-536-2929",
+      "email": "jordanthelady@yahoo.com",
+      "website": null,
+      "social": {
+        "facebook": "https://www.facebook.com/Jordan-the-lady-191765987539159/"
+      }
+    }
+  }
+]
