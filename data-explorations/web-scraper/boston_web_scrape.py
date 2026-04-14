@@ -29,7 +29,6 @@ for neighborhood in neighborhoods:
     # GET the page
     r = session.get(url)
     soup = BeautifulSoup(r.text, "html.parser")
-    r = session.get(url)
     print(f"Searching: {neighborhood}")  # confirm the URL is correct
     print("results found" if "File Number" in r.text else "NO RESULTS in GET response")
     
