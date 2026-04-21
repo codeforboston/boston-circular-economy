@@ -3,13 +3,15 @@ from enum import Enum
 
 from pydantic import BaseModel
 
-# DTOs for the location pipeline.
-#
-# The two pipeline boundaries are:
-#   - RawLocation: querier → normalizer
-#   - NormalizedLocation: normalizer → ingester
-#
-# Everything else in this file is a supporting type for NormalizedLocation.
+"""
+DTOs for the location pipeline.
+
+The two pipeline boundaries are:
+  - RawLocation: querier → normalizer
+  - NormalizedLocation: normalizer → ingester
+
+Everything else in this file is a supporting type for NormalizedLocation.
+"""
 
 
 # RawLocation is the boundary between the querier and the normalizer.
