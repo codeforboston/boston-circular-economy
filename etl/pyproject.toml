@@ -1,7 +1,7 @@
 [project]
 name = "etl"
 version = "0.1.0"
-description = "Add your description here"
+description = "ETL pipeline for collecting and normalizing circular economy location data"
 requires-python = ">=3.14"
 dependencies = [
     "pydantic>=2.13.3",
