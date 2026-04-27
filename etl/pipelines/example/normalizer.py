@@ -7,7 +7,6 @@ from dtos import (
     Service,
     Activity,
     ItemCategory,
-    Direction,
     Availability,
 )
 
@@ -23,7 +22,6 @@ class ExampleNormalizer(BaseNormalizer):
                 services.append(Service(
                     activity=Activity(raw_service["activity"]),
                     item_category=ItemCategory(raw_service["item_category"]),
-                    direction=Direction(raw_service["direction"]),
                 ))
             normalized_locations.append(NormalizedLocation(
                 data_source_id=raw.data_source_id,

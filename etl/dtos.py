@@ -36,12 +36,18 @@ class Contact(BaseModel):
     social: str | None = None
 
 
+# Activities describe what you can do at a location, from the visitor's perspective.
 class Activity(str, Enum):
-    REPAIR = "repair"
-    DONATION = "donation"
-    RESALE = "resale"
-    REFILL = "refill"
-    LENDING = "lending"
+    REPAIR_FREE   = "repair_free"   # repair your items here for free (e.g. repair cafes)
+    REPAIR_PAID   = "repair_paid"   # repair your items here for a fee
+    DONATION_DROP = "donation_drop" # drop off items you no longer need
+    DONATION_PICK = "donation_pick" # pick up free items (e.g. free stores, give-away shops)
+    RESALE_BUY    = "resale_buy"    # buy secondhand items here
+    RESALE_SELL   = "resale_sell"   # sell or consign your items here
+    REFILL        = "refill"        # refill your own container here
+    BORROWING     = "borrowing"     # borrow items here for free (e.g. tool libraries)
+    RENTING       = "renting"       # rent items here for a fee
+    LENDING       = "lending"       # lend your items out through this location
 
 
 class ItemCategory(str, Enum):
@@ -50,17 +56,12 @@ class ItemCategory(str, Enum):
     CLOTHING = "clothing"
     BOOKS = "books"
     FURNITURE = "furniture"
-
-
-class Direction(str, Enum):
-    SOURCE = "source"
-    DESTINATION = "destination"
+    TOOLS = "tools"
 
 
 class Service(BaseModel):
     activity: Activity
     item_category: ItemCategory
-    direction: Direction
 
 
 class Availability(BaseModel):

@@ -21,14 +21,12 @@ MOCK_DATA = [
         "opening_hours": "Sa 10:00-14:00",
         "services": [
             {
-                "activity": "repair",
+                "activity": "repair_free",
                 "item_category": "electronics",
-                "direction": "destination",
             },
             {
-                "activity": "repair",
+                "activity": "repair_free",
                 "item_category": "clothing",
-                "direction": "destination",
             },
         ],
     },
@@ -48,9 +46,8 @@ MOCK_DATA = [
         "opening_hours": "We 17:00-20:00; Sa 10:00-13:00",
         "services": [
             {
-                "activity": "lending",
+                "activity": "borrowing",
                 "item_category": "furniture",
-                "direction": "source",
             },
         ],
     },
