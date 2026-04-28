@@ -1,0 +1,16 @@
+[project]
+name = "etl"
+version = "0.1.0"
+description = "ETL pipeline for collecting and normalizing circular economy location data"
+requires-python = ">=3.14"
+dependencies = [
+    "pydantic>=2.13.3",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
