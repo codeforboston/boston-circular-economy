@@ -6,6 +6,8 @@ import json
 src_key = 'source'
 loc_key = 'locations'
 data_dir = Path(__file__).parent / "data"
+snapshots_dir = data_dir / "snapshots"
+output_dir = data_dir / "output"
 
 # Reads and writes normalized locations to a local file.
 class LocalDataStore(BaseDataStore):
@@ -15,17 +17,14 @@ class LocalDataStore(BaseDataStore):
         source: DataSource,
         normalized_locations: list[NormalizedLocation],
     ) -> None:
-        file_path = self._get_file_path(source)
-        locations_serialized = [location.model_dump(mode="json") for location in normalized_locations]
-        snapshot = json.dumps({ src_key: source.value, loc_key: locations_serialized }, indent=2)
-        with open(file_path, "w") as file:
-            file.write(snapshot)
+        file_path = self._get_snapshot_path(source)
+        self._write_locations(file_path, normalized_locations, source=source)
 
     def read_source_snapshot(
         self,
         source: DataSource,
     ) -> list[NormalizedLocation]:
-        file_path = self._get_file_path(source)
+        file_path = self._get_snapshot_path(source)
         if not file_path.exists():
             raise FileNotFoundError(file_path)
 
@@ -42,8 +41,23 @@ class LocalDataStore(BaseDataStore):
         self,
         output_locations: list[NormalizedLocation],
     ) -> None:
-        pass
+        file_path = output_dir / "locations.json"
+        self._write_locations(file_path, output_locations)
 
-    def _get_file_path(self, source: DataSource) -> Path:
-        data_dir.mkdir(exist_ok=True)
-        return data_dir / f"{source.value}_snapshot.json"
+    def _write_locations(
+        self,
+        file_path: Path,
+        locations: list[NormalizedLocation],
+        source: DataSource | None = None,
+    ) -> None:
+        locations_serialized = [location.model_dump(mode="json") for location in locations]
+        payload: dict = { loc_key: locations_serialized }
+        if source is not None:
+            payload[src_key] = source.value
+
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(file_path, "w") as file:
+            file.write(json.dumps(payload, indent=2))
+
+    def _get_snapshot_path(self, source: DataSource) -> Path:
+        return snapshots_dir / f"{source.value}_snapshot.json"
