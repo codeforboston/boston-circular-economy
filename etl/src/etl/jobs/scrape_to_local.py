@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+
 from etl.dtos import DataSource
 from etl.local_data_store import LocalDataStore
 from etl.sources.google_places.normalizer import GooglePlacesNormalizer
@@ -11,7 +14,10 @@ openstreetmap_query_args: list[dict[str, str]] = []
 
 def main() -> None:
     # reads and writes normalized locations to the local output file
-    store = LocalDataStore()
+    # Write data to the directory specified by the ETL_DATA_DIR env var, defaulting
+    # to "data" under the current working directory if the env var is not set
+    data_dir = Path(os.environ.get("ETL_DATA_DIR", "data"))
+    store = LocalDataStore(data_dir)
 
     for args in google_places_query_args:
         # queries the Google Places API

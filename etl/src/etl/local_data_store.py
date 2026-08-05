@@ -4,12 +4,14 @@ from pathlib import Path
 import json
 
 loc_key = 'locations'
-data_dir = Path(__file__).parent / "data"
-snapshots_dir = data_dir / "snapshots"
-output_dir = data_dir / "output"
 
 # Reads and writes normalized locations to a local file.
 class LocalDataStore(BaseDataStore):
+
+    def __init__(self, data_dir: Path) -> None:
+        self.data_dir = data_dir
+        self.snapshots_dir = data_dir / "snapshots"
+        self.output_dir = data_dir / "output"
 
     def write_source_snapshot(
         self,
@@ -36,7 +38,7 @@ class LocalDataStore(BaseDataStore):
         self,
         output_locations: list[NormalizedLocation],
     ) -> None:
-        file_path = output_dir / "locations.json"
+        file_path = self.output_dir / "locations.json"
         self._write_locations(file_path, output_locations)
 
     def _write_locations(
@@ -52,4 +54,4 @@ class LocalDataStore(BaseDataStore):
             file.write(json.dumps(payload, indent=2))
 
     def _get_snapshot_path(self, source: DataSource) -> Path:
-        return snapshots_dir / f"{source.value}_snapshot.json"
+        return self.snapshots_dir / f"{source.value}_snapshot.json"
