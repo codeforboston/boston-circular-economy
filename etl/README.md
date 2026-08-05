@@ -21,16 +21,16 @@ Each pipeline has a **Querier** that fetches raw data from a source and a **Norm
 
 ## Adding a pipeline
 
-1. Create a new directory under [`pipelines/`](pipelines/) for your source (e.g. `pipelines/openstreetmap/`)
-2. Implement [`BaseQuerier`](base/querier.py) in `querier.py` — `fetch()` should return a `list[RawLocation]`, handling pagination internally
-3. Implement [`BaseNormalizer`](base/normalizer.py) in `normalizer.py` — `normalize()` should map each [`RawLocation`](dtos.py) payload to a [`NormalizedLocation`](dtos.py)
+1. Create a new directory under [`src/etl/sources/`](src/etl/sources/) for your source (e.g. `src/etl/sources/openstreetmap/`)
+2. Implement [`BaseQuerier`](src/etl/base/querier.py) in `querier.py` — `fetch()` should return a `list[RawLocation]`, handling pagination internally
+3. Implement [`BaseNormalizer`](src/etl/base/normalizer.py) in `normalizer.py` — `normalize()` should map each [`RawLocation`](src/etl/dtos.py) payload to a [`NormalizedLocation`](src/etl/dtos.py)
 4. Add a `test_pipeline.py` alongside them
 
-See [`pipelines/example/`](pipelines/example/) for a reference implementation.
+See [`src/etl/sources/google_places/`](src/etl/sources/google_places/) for a reference implementation.
 
 ## Querier
 
-The [`BaseQuerier`](base/querier.py) is implemented once per pipeline and fetches raw data from a single source. You implement it per source.
+The [`BaseQuerier`](src/etl/base/querier.py) is implemented once per pipeline and fetches raw data from a single source. You implement it per source.
 
 Key behaviors:
 
@@ -38,7 +38,7 @@ Key behaviors:
 
 ## Normalizer
 
-The [`BaseNormalizer`](base/normalizer.py) is implemented once per pipeline and maps source-specific data to the shared schema. You implement it per source.
+The [`BaseNormalizer`](src/etl/base/normalizer.py) is implemented once per pipeline and maps source-specific data to the shared schema. You implement it per source.
 
 Key behaviors:
 
@@ -46,7 +46,7 @@ Key behaviors:
 
 ## DataStore
 
-The [`DataStore`](base/ingester.py) reads and writes data for persistant storage. It is shared across all pipelines — you do not implement it per source.
+The [`DataStore`](src/etl/base/data_store.py) reads and writes data for persistant storage. It is shared across all pipelines — you do not implement it per source.
 
 Key behaviors:
 
