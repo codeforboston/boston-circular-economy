@@ -3,7 +3,6 @@ from etl.dtos import DataSource, NormalizedLocation
 from pathlib import Path
 import json
 
-src_key = 'source'
 loc_key = 'locations'
 data_dir = Path(__file__).parent / "data"
 snapshots_dir = data_dir / "snapshots"
@@ -18,7 +17,7 @@ class LocalDataStore(BaseDataStore):
         normalized_locations: list[NormalizedLocation],
     ) -> None:
         file_path = self._get_snapshot_path(source)
-        self._write_locations(file_path, normalized_locations, source=source)
+        self._write_locations(file_path, normalized_locations)
 
     def read_source_snapshot(
         self,
@@ -30,10 +29,6 @@ class LocalDataStore(BaseDataStore):
 
         with open(file_path, "r") as file:
             snapshot_serialized = json.load(file)
-
-        snapshot_source = snapshot_serialized[src_key]
-        if snapshot_source != source.value:
-            raise ValueError(f"Provided source '{source.value}' does not match file source '{snapshot_source}'")
 
         return [NormalizedLocation.model_validate(location) for location in snapshot_serialized[loc_key]]
 
@@ -48,12 +43,9 @@ class LocalDataStore(BaseDataStore):
         self,
         file_path: Path,
         locations: list[NormalizedLocation],
-        source: DataSource | None = None,
     ) -> None:
         locations_serialized = [location.model_dump(mode="json") for location in locations]
-        payload: dict = { loc_key: locations_serialized }
-        if source is not None:
-            payload[src_key] = source.value
+        payload = { loc_key: locations_serialized }
 
         file_path.parent.mkdir(parents=True, exist_ok=True)
         with open(file_path, "w") as file:
