@@ -1,7 +1,7 @@
 from pipelines.example.querier import ExampleQuerier
 from pipelines.example.normalizer import ExampleNormalizer
 
-
+# NOTE: This test is currently broken and disabled.
 def test_example_pipeline():
     querier = ExampleQuerier()
     normalizer = ExampleNormalizer()
