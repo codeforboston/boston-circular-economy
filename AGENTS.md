@@ -29,6 +29,18 @@ Use ASD-STE100-aligned Simplified Technical English. Prefer active voice, compac
 sentences, defined terms, and one stable term for each concept. Do not claim formal
 ASD-STE100 compliance without qualified human review.
 
+## Agent routing and token cost
+
+An agent that delegates work must read and apply
+[`route-agent-work`](.agents/skills/route-agent-work/SKILL.md). Use deterministic hooks,
+tests, and CI for exact decisions. Use a lower-cost agent, such as Terra, for a bounded
+task with an objective check. Reserve high-reasoning agents for ambiguous integration,
+conflicting evidence, or cross-subsystem decisions.
+
+Give a subordinate agent one objective and only the required context. Define its output,
+validation, and stop condition. Do not duplicate exploration across agents. A human
+retains product intent, risk acceptance, approval, and merge authority.
+
 ## Setup and checks
 
 Use locked dependencies. Do not claim a check passed unless you ran it.

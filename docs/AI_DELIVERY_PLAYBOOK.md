@@ -47,6 +47,12 @@ Every agent applies the repository
 skill. The skill uses Toulmin reasoning to test claims. It uses ASD-STE100-aligned
 Simplified Technical English to communicate the result.
 
+An orchestrating agent also applies
+[`route-agent-work`](../.agents/skills/route-agent-work/SKILL.md). It sends deterministic
+checks to hooks and tools. It sends bounded tasks with objective checks to a lower-cost
+agent, such as Terra. It reserves high-reasoning agents for ambiguous integration and
+conflicting evidence.
+
 | Role | Owns | Does not own |
 |---|---|---|
 | Product shaper | User outcome, priority, acceptance criteria | Implementation details |
@@ -57,6 +63,21 @@ Simplified Technical English to communicate the result.
 | Challenge agent | Counterexamples, failure tests, review evidence | Inventing findings or blocking without evidence |
 | Maintainer | Final review, rules, merge, incident response | Treating AI output as proof by itself |
 | CI/CD | Repeatable checks and tested deployment | Product judgment |
+
+### Cost-aware routing
+
+Route work in this order:
+
+1. Use a compiler, linter, test, validator, or CI hook for an exact decision.
+2. Use a versioned skill or template for a repeated project method.
+3. Use a lower-cost agent for a bounded and reversible task with an objective check.
+4. Use a high-reasoning agent for cross-subsystem synthesis or unresolved conflict.
+5. Use a specialist and a human for high-impact risk and accountable decisions.
+
+Give a subordinate agent one objective, the minimum required context, an output limit,
+and a validation command. The orchestrating agent inspects the evidence and integrates
+the result. This policy reduces repeated context transfer and avoids model work for
+decisions that deterministic automation can make.
 
 ## 1. Shape ready work
 

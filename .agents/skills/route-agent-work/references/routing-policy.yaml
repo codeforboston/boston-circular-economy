@@ -1,0 +1,38 @@
+policy_name: Cost-aware agent work routing
+policy_schema_version: 1
+selection_order:
+  - deterministic hook script compiler linter test validator or CI job
+  - versioned skill or template
+  - lower-cost general agent
+  - high-reasoning integration agent
+  - relevant specialist
+  - accountable human
+lower_cost_agent_conditions:
+  - one bounded objective
+  - limited input context
+  - reversible or read-only work
+  - objective acceptance check
+  - low cost of correction
+high_reasoning_agent_conditions:
+  - ambiguous requirements
+  - conflicting evidence
+  - cross-subsystem synthesis
+  - difficult final integration
+human_decisions:
+  - product intent and priority
+  - scope expansion
+  - value judgments
+  - risk acceptance
+  - approval and merge
+context_rules:
+  - provide only required files issues and evidence
+  - prefer stable paths and links to pasted history
+  - avoid duplicate exploration
+  - set concise output limits
+  - define completion and escalation conditions
+verification_rules:
+  - inspect subordinate evidence
+  - run applicable deterministic checks
+  - resolve conflicting findings
+  - report remaining uncertainty
+  - do not treat an agent success message as proof

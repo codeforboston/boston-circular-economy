@@ -1,0 +1,4 @@
+interface:
+  display_name: "Route Agent Work"
+  short_description: "Choose hooks, lower-cost agents, or specialist reasoning"
+  default_prompt: "Use $route-agent-work to split this work and route each part to the least costly reliable executor."
