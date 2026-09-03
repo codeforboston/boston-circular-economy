@@ -1,0 +1,4 @@
+interface:
+  display_name: "Evidence-Based Technical Case"
+  short_description: "Use Toulmin reasoning and clear technical English"
+  default_prompt: "Use $make-evidence-based-technical-case to build or review this technical case with Toulmin reasoning and ASD-STE100-aligned wording."

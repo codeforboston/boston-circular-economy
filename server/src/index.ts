@@ -1,5 +1,5 @@
 import express from 'express'
-import db from './db/index.ts'
+import './db/index.js'
 
 const app = express()
 const port = process.env['PORT'] ?? 3000

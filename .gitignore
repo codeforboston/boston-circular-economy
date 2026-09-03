@@ -33,3 +33,6 @@ __pycache__/
 
 # ETL local data store
 etl/src/etl/data/
+
+# Server local data store
+server/*.db*

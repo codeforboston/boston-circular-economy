@@ -26,8 +26,12 @@ def test_read_missing_snapshot_raises_file_not_found(store):
 
 
 def test_snapshots_are_isolated_per_source(store, make_location):
-    google_locations = [make_location(data_source_id="g1", data_source=DataSource.GOOGLE_PLACES)]
-    osm_locations = [make_location(data_source_id="o1", data_source=DataSource.OPENSTREETMAP)]
+    google_locations = [
+        make_location(data_source_id="g1", data_source=DataSource.GOOGLE_PLACES)
+    ]
+    osm_locations = [
+        make_location(data_source_id="o1", data_source=DataSource.OPENSTREETMAP)
+    ]
 
     store.write_source_snapshot(DataSource.GOOGLE_PLACES, google_locations)
     store.write_source_snapshot(DataSource.OPENSTREETMAP, osm_locations)
@@ -37,7 +41,9 @@ def test_snapshots_are_isolated_per_source(store, make_location):
 
 
 def test_write_source_snapshot_overwrites_existing(store, make_location):
-    store.write_source_snapshot(DataSource.GOOGLE_PLACES, [make_location(data_source_id="stale")])
+    store.write_source_snapshot(
+        DataSource.GOOGLE_PLACES, [make_location(data_source_id="stale")]
+    )
 
     fresh_locations = [make_location(data_source_id="fresh")]
     store.write_source_snapshot(DataSource.GOOGLE_PLACES, fresh_locations)

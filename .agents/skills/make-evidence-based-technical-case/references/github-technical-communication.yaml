@@ -1,0 +1,41 @@
+policy_name: Toulmin GitHub technical communication
+policy_schema_version: 1
+objective: Make evidence-based technical cases in precise plain English
+applies_to:
+  - issue comments and work-unit proposals
+  - implementation plans and mentor guidance
+  - pull request summaries and reviews
+  - commit messages and GitHub Actions status text
+toulmin_elements:
+  claim: decision or supported observable result
+  grounds: implementation tests measurements logs observations or accepted decisions
+  warrant: reasoning that connects the grounds to the claim
+  backing: invariant standard research source or project decision that supports the warrant
+  qualifier: scope confidence conditions and named guarantee boundary
+  rebuttal: strongest relevant counterexample failure condition or disconfirming result
+compact_order:
+  - failure risk or conflict
+  - mechanical action or fix
+  - supported state at the named boundary
+required_evidence:
+  - file and line
+  - test or command result
+  - measurement with baseline
+  - log or reproducible behavior
+  - linked project decision or authoritative source
+semantic_rules:
+  - separate observed facts from inference
+  - do not invent evidence
+  - do not treat agent output as evidence
+  - state only results that the evidence supports
+  - name uncertainty and evidence that would change the decision
+  - escalate product security privacy accessibility and architecture trade-offs to a human
+language_rules:
+  descriptive_sentence_max_words: 25
+  procedural_sentence_max_words: 20
+  permit_contractions_in_prose: false
+  permit_semicolon_in_prose: false
+  prefer_active_voice: true
+  require_stable_term_meaning: true
+source: Adapted from the Library of Context write-timeless-technical-prose skill
+

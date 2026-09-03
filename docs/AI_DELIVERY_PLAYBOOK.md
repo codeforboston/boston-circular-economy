@@ -1,0 +1,236 @@
+# AI-Assisted Delivery Playbook
+
+Status: **Proposed pilot**  
+Owner: Circular Economy engineering team  
+Review cadence: after the first three merged pilot work units
+
+## Outcome
+
+This pilot gives volunteer developers a reliable path from a useful idea to a deployed, reviewed change. AI agents reduce setup, planning, and review effort. Human contributors and mentors retain product judgment, accountability, approval, and merge authority.
+
+The first release addresses three observed project constraints:
+
+1. Pull requests do not currently run continuous integration (CI), while `main` deploys to the public GitHub Pages site.
+2. Contributors have asked how to request review and have reported that they cannot assign issues or reviewers.
+3. Product leaders are translating research into prioritized GitHub work, while several contributors need work that can be completed asynchronously.
+
+This is a small pilot, not a commitment to a specific AI vendor or an autonomous coding bot.
+
+## Delivery loop
+
+```mermaid
+flowchart LR
+    A[Shape a ready work unit] --> B[Developer selects and claims it]
+    B --> C[Agent-assisted plan]
+    C --> D{Mentor checkpoint needed?}
+    D -->|Yes| E[Human decision]
+    D -->|No| F[Implement and test]
+    E --> F
+    F --> G[Agent challenge and evidence]
+    G --> H[Draft pull request]
+    H --> I[Deterministic CI]
+    I --> J[Human review]
+    J --> K[Squash merge]
+    K --> L[Deploy tested commit]
+    L --> M[Observe and record lessons]
+    M --> A
+```
+
+The agent may help at every step, but it cannot silently change the issue's intent, approve its own work, or merge a pull request.
+
+## Roles
+
+One person may hold several human roles. One AI product may perform several agent roles, but use a fresh review context when practical.
+
+Every agent applies the repository
+[`make-evidence-based-technical-case`](../.agents/skills/make-evidence-based-technical-case/SKILL.md)
+skill. The skill uses Toulmin reasoning to test claims. It uses ASD-STE100-aligned
+Simplified Technical English to communicate the result.
+
+| Role | Owns | Does not own |
+|---|---|---|
+| Product shaper | User outcome, priority, acceptance criteria | Implementation details |
+| Mentor | Scoping help, decision checkpoints, teaching | Writing every line for the contributor |
+| Contributor | Plan, implementation, evidence, PR | Unstated product decisions |
+| Planning agent | Repo exploration, issue split, plan, risk questions | Priority or scope expansion |
+| Build agent | Focused code and test changes | Approval or merge |
+| Challenge agent | Counterexamples, failure tests, review evidence | Inventing findings or blocking without evidence |
+| Maintainer | Final review, rules, merge, incident response | Treating AI output as proof by itself |
+| CI/CD | Repeatable checks and tested deployment | Product judgment |
+
+## 1. Shape ready work
+
+Use the **Ready work unit** issue form. A work unit is ready when another contributor can understand it without private context.
+
+Required fields are:
+
+- an observable outcome for a named user or system.
+- links to the product requirement, research, parent issue, or design.
+- testable acceptance criteria.
+- in-scope and out-of-scope boundaries.
+- dependencies and unresolved decisions.
+- an expected size of one to four focused sessions.
+- a risk lane and expected evidence.
+- the point where mentoring would help.
+
+Large epics remain useful containers. They are not implementation units. The planning agent should propose vertical slices that each produce an observable result, rather than layers that cannot be tested alone.
+
+### Suggested backlog states
+
+Use GitHub Project fields when a project administrator is available:
+
+`Idea → Needs shaping → Ready → Claimed → In progress → In review → Done`
+
+Do not require contributors to change project fields they lack permission to edit. A comment in the issue and the project Slack channel is a valid claim until permissions improve.
+
+## 2. Select and claim work
+
+A contributor should select the smallest Ready item that matches their interest and available time. Before starting, they should:
+
+1. Comment on the issue with their intended start and next check-in.
+2. Share the issue in `#circular-economy` when coordination is needed.
+3. Ask a maintainer to assign the issue if self-assignment is unavailable.
+4. Create a focused branch from current `main`.
+
+The mentor should favor an end-to-end but narrow outcome. For a first contribution, avoid unresolved authentication, schema migration, or cross-service design work.
+
+## 3. Plan with an agent
+
+Ask the planning agent to read `AGENTS.md`, the issue, relevant READMEs, code, and tests. The plan should contain:
+
+- the behavioral claim.
+- the grounds, warrant, and applicable backing for that claim.
+- the qualifier, strongest rebuttal, and evidence that would change the recommendation.
+- files and boundaries likely to change.
+- invariants that must remain true.
+- expected, boundary, failure, and regression cases.
+- exact validation commands.
+- decisions that require a person.
+- a proposed split if the unit is too large.
+
+The contributor reviews the plan before implementation. A plausible plan is not evidence that the repository behaves as expected.
+
+## 4. Use risk-based mentor checkpoints
+
+| Lane | Typical work | Required human checkpoint |
+|---|---|---|
+| Green | Docs, prototype, isolated style, safe refactor | Review at PR |
+| Yellow | User behavior, API, data transformation, business logic | Confirm important contract or test approach before the change becomes expensive |
+| Red | Auth, privacy, destructive action, migration, critical accessibility | Approve design, threat/failure cases, and recovery plan before implementation |
+
+Use Yellow when uncertain. The lane changes review depth, not whether deterministic CI runs.
+
+## 5. Implement and challenge
+
+The build agent makes the smallest complete change that satisfies the issue. The contributor reads the diff and can explain it.
+
+Before opening a PR, use a challenge pass with a fresh context when practical. Ask it to find counterexamples in four categories:
+
+- expected behavior.
+- boundary values and empty states.
+- dependency failure or misuse.
+- known regressions.
+
+Every finding must include reproducible evidence. “No actionable finding” is a valid result. Do not reward agents for producing issue or PR volume.
+
+Each finding must explain why its evidence supports the claim. It must limit the claim
+to the evidence boundary. It must state a relevant exception or remaining uncertainty.
+
+## 6. Open an evidence-backed pull request
+
+Use the repository pull request template. A reviewable PR includes:
+
+- one linked work unit.
+- one behavioral claim.
+- visible grounds, warrant, qualifier, and strongest relevant rebuttal.
+- the risk lane and scope boundaries.
+- checks that ran and checks that did not run.
+- screenshots or recordings for visible UI changes.
+- substantial AI-assistance disclosure.
+- the most important review question and remaining uncertainty.
+
+Open a draft PR early for Yellow and Red work. This creates a stable place for async mentoring without implying that the work is ready to merge.
+
+## 7. Deterministic CI and deployment
+
+The `CI` workflow runs three independent checks on every pull request to `main` and every push to `main`:
+
+| Check | Evidence |
+|---|---|
+| `CI / Frontend` | Client lint and production build |
+| `CI / Server` | Production dependency audit, server lint, and TypeScript build |
+| `CI / ETL` | Locked Python environment, Ruff lint/format checks, and pytest suite |
+
+The deployment workflow listens for a successful CI run caused by a push to `main`. It checks out the exact tested commit SHA, rebuilds the client with the lockfile, and deploys that artifact to GitHub Pages. Pull-request runs cannot deploy.
+
+All third-party GitHub Actions are pinned to full commit SHAs. Workflow tokens receive read-only repository access unless the deployment job needs Pages and identity-token permissions.
+
+### Maintainer activation step
+
+After this pilot PR merges, all three checks must complete successfully on `main`.
+A repository administrator should then add these checks to the **Protect Main Branch** ruleset:
+
+- `Frontend`
+- `Server`
+- `ETL`
+
+Keep the current requirements for one approval, last-push approval, resolved threads, squash merge, deletion protection, and non-fast-forward protection. Required checks cannot be selected safely until GitHub has observed their names.
+
+## 8. Human review
+
+Review the claim and evidence before style. CI owns repeatable lint and build feedback. A human reviewer should focus on:
+
+1. Does the change satisfy the user or system outcome?
+2. Did the contributor preserve the important contracts and data assumptions?
+3. Do the tests prove the risky behavior rather than only mirror the implementation?
+4. Can failure be detected and recovered from?
+5. Is the code understandable to the next rotating volunteer?
+
+Cap advisory AI review at three to five high-confidence findings. Each finding should explain impact, evidence, and a concrete next step. The maintainer decides whether a finding blocks merge.
+
+## 9. Learn and improve
+
+After deployment, record production defects, stale-data signals, failed user journeys, and repeated review findings. Put durable knowledge in tests, `AGENTS.md`, a README, or a decision record.
+
+Review this pilot after three merged work units using:
+
+- time from Ready to first PR.
+- time from review request to first human response.
+- first-run CI pass rate.
+- number of PRs reopened or reverted.
+- repeated review findings.
+- contributor-reported confidence and mentoring usefulness.
+- number of ready, unclaimed units suitable for async work.
+
+The goal is safer learning and lower reviewer load, not more AI-generated code.
+
+## Pilot agenda for a hack night
+
+1. Walk through one existing issue using the Ready work unit form.
+2. Ask a newcomer and a maintainer to independently identify missing context.
+3. Run the planning prompt and compare its questions with the humans' questions.
+4. Agree on the risk lane and mentor checkpoint.
+5. Open a draft PR and observe the three CI jobs.
+6. Run one challenge pass and reject any finding without evidence.
+7. Capture confusing steps as changes to this playbook.
+
+## Open team decisions
+
+The team should decide these during the pilot rather than encode them prematurely:
+
+- whether substantial AI assistance disclosure remains required or becomes optional.
+- who rotates as the weekly mentor and review router.
+- the expected response time for Yellow and Red review requests.
+- which production signals will gate future backend and ETL deployments.
+- whether to install a hosted AI review app after the manual process proves useful.
+
+## Project evidence used for this pilot
+
+- [Team proposal for human-owned, AI-assisted review](https://cfb-public.slack.com/archives/C0AFA66CE2W/p1784830048882729)
+- [Contributor question about how to request review](https://cfb-public.slack.com/archives/C0AFA66CE2W/p1785267759352939)
+- [Contributor request for asynchronous work](https://cfb-public.slack.com/archives/C0AFA66CE2W/p1788296095242299)
+- [Feature-prioritization work unit](https://github.com/codeforboston/boston-circular-economy/issues/45)
+- [Current deployment workflow history](https://github.com/codeforboston/boston-circular-economy/actions)
+- [Existing main-branch ruleset](https://github.com/codeforboston/boston-circular-economy/rules/12887631)
+
+Implementation references: [GitHub Actions secure-use guidance](https://docs.github.com/en/actions/reference/security/secure-use), [uv in GitHub Actions](https://docs.astral.sh/uv/guides/integration/github/), and [GitHub issue-form syntax](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-issue-forms).

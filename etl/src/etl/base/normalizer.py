@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from etl.dtos import RawLocation, NormalizedLocation
+from etl.dtos import NormalizedLocation, RawLocation
 
 
 class BaseNormalizer(ABC):

@@ -2,7 +2,6 @@ from etl.dtos import DataSource, MatchGroup, NormalizedLocation
 
 
 class MergeProcessor:
-
     def process(
         self,
         locations_by_source: dict[DataSource, list[NormalizedLocation]],

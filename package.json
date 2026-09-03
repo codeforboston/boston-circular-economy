@@ -6,6 +6,8 @@
     "server"
   ],
   "scripts": {
-    "dev": "npm run dev -w client & npm run dev -w server"
+    "build": "npm run build --workspaces --if-present",
+    "dev": "npm run dev -w client & npm run dev -w server",
+    "lint": "npm run lint --workspaces --if-present"
   }
 }
