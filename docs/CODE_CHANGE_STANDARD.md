@@ -120,6 +120,11 @@ The pull request remains the evidence record for the implemented change.
 
 ## Review standard
 
+Use the repository
+[`review-code-change`](../.agents/skills/review-code-change/SKILL.md) skill for an AI
+or agent review. The managed GitHub reviewer consumes the applicable
+`## Code Review Rules` sections from `AGENTS.md`. Its findings remain advisory.
+
 The reviewer compares the claim, mechanism, diff, tests, and rejected alternative. The
 reviewer should ask for revision when:
 

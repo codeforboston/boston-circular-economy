@@ -23,7 +23,7 @@ uv run ruff format --check .
 uv run pytest
 
 cd ..
-python -B .agents/skills/make-evidence-based-technical-case/scripts/check_prose.py .
+python3 -B .agents/skills/make-evidence-based-technical-case/scripts/check_prose.py .
 ```
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) to select and claim a work unit. Follow the
@@ -32,4 +32,5 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) to select and claim a work unit. Follow
 Contributors using an AI coding assistant should read [`AGENTS.md`](AGENTS.md) and the
 proposed [`AI-assisted delivery playbook`](docs/AI_DELIVERY_PLAYBOOK.md). The
 [`CI/CD architecture`](docs/CI_CD_AGENT_ARCHITECTURE.md) defines hooks, routing, checks,
-and deployment.
+and deployment. The [`review skill`](.agents/skills/review-code-change/SKILL.md)
+defines the independent code-change review method.

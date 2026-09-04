@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review Code Change"
+  short_description: "Review a diff against the project standard"
+  default_prompt: "Use $review-code-change to review this branch against its base."

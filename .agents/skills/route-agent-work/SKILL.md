@@ -46,7 +46,7 @@ The names are reviewed policy values. They are not permanent capability claims.
 Inspect the selected route before delegation:
 
 ```bash
-python -B .agents/skills/route-agent-work/scripts/route_work.py \
+python3 -B .agents/skills/route-agent-work/scripts/route_work.py \
   recommend --task-type bounded --risk yellow
 ```
 
@@ -89,7 +89,7 @@ trusted tool can enforce.
 The same policy selects local and CI checks. Classify an explicit file set with:
 
 ```bash
-python -B .agents/skills/route-agent-work/scripts/route_work.py \
+python3 -B .agents/skills/route-agent-work/scripts/route_work.py \
   classify client/src/App.tsx
 ```
 

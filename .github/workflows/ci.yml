@@ -75,6 +75,11 @@ jobs:
           python -B -m unittest discover
           -s .agents/skills/make-evidence-based-technical-case/scripts
           -p 'test_*.py' -v
+      - name: Test code review policy
+        run: >-
+          python -B -m unittest discover
+          -s .agents/skills/review-code-change/scripts
+          -p 'test_*.py' -v
       - name: Check pull request submission record
         if: github.event_name == 'pull_request'
         run: >-

@@ -35,7 +35,7 @@ uv run ruff format --check .
 uv run pytest
 
 cd ..
-python -B .agents/skills/make-evidence-based-technical-case/scripts/check_prose.py .
+python3 -B .agents/skills/make-evidence-based-technical-case/scripts/check_prose.py .
 ```
 
 Open a focused pull request that closes its issue. Use the pull request template to report evidence, missing checks, risk, and review questions. All CI checks and the required human review must pass before merge.
@@ -48,6 +48,26 @@ The prose check enforces sentence rules in Markdown. It detects high-signal edit
 violations in source and configuration files. These violations include contractions,
 vague claims, process narration, and formulaic AI wording. Follow the linked skill when
 correcting a finding. Do not remove technical conditions or evidence to satisfy it.
+
+## Review a change before handoff
+
+Codex users can run an independent, read-only review against the base branch:
+
+```bash
+python3 -B .agents/skills/review-code-change/scripts/run_local_review.py \
+  --risk yellow --base origin/main
+```
+
+Use the risk lane from the work unit. Add `--dry-run` to inspect the model route without
+spending tokens. The review skill limits findings to discrete, evidence-backed defects.
+Commit the branch changes before using the default scope. Add `--scope uncommitted` to
+review staged, unstaged, and untracked work.
+
+When the pull request is ready, the managed Codex hook applies the repository
+`## Code Review Rules`. A maintainer can request a new pass after a material update by
+commenting `@codex review`. Automatic review requires a team-enabled Codex repository.
+Use the comment command when automatic review is unavailable. AI review is advisory
+and does not replace human approval.
 
 ## Prototyping
 

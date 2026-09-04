@@ -36,7 +36,7 @@ the mechanism, evidence, condition, and consequence.
 Run the repository prose checker before submitting reader-facing text:
 
 ```bash
-python -B .agents/skills/make-evidence-based-technical-case/scripts/check_prose.py .
+python3 -B .agents/skills/make-evidence-based-technical-case/scripts/check_prose.py .
 ```
 
 The checker applies sentence and paragraph rules to Markdown. It checks prose-bearing
@@ -59,7 +59,7 @@ retains product intent, risk acceptance, approval, and merge authority.
 Inspect the machine-readable route before delegating bounded work:
 
 ```bash
-python -B .agents/skills/route-agent-work/scripts/route_work.py \
+python3 -B .agents/skills/route-agent-work/scripts/route_work.py \
   recommend --task-type bounded --risk yellow
 ```
 
@@ -86,7 +86,7 @@ uv run pytest
 
 # Repository prose
 cd ..
-python -B .agents/skills/make-evidence-based-technical-case/scripts/check_prose.py .
+python3 -B .agents/skills/make-evidence-based-technical-case/scripts/check_prose.py .
 ```
 
 Run the smallest relevant check while iterating. Run every applicable check before opening or updating a pull request. CI is the merge evidence of record.
@@ -153,6 +153,11 @@ Use Yellow when the lane is unclear. A file under `client/src/pages/dev/` may mo
 
 Use `.github/pull_request_template.md`. Link the issue, state the risk lane, list checks that ran and did not run, and disclose substantial AI assistance. The disclosure is about review context, not authorship.
 
+Every agent that reviews a code change must read and apply
+[`review-code-change`](.agents/skills/review-code-change/SKILL.md). Keep the review
+independent from implementation. Route local reviews through the repository model
+policy, and leave exact checks to hooks and CI.
+
 An AI review is advisory. It must cite a file, line, failing command, or reproducible behavior. It should return no finding when evidence does not support a finding. It must not approve or merge its own work.
 
 A review finding must state its claim, grounds, warrant, qualifier, and relevant
@@ -162,3 +167,25 @@ full structure would obscure a routine finding.
 Human reviewers own intent, tradeoffs, and the merge decision. Resolve all review threads and keep the required CI checks green. Add durable lessons to this file, a subsystem README, or a decision record instead of leaving them only in chat.
 
 See `docs/AI_DELIVERY_PLAYBOOK.md` for issue selection, mentoring checkpoints, and the complete delivery loop.
+
+## Code Review Rules
+
+### Contract and claim
+
+- Flag code that contradicts the pull request claim, scope, qualifier, or a documented
+  public contract. Cite the conflicting behavior and its shortest useful location.
+  Safe path: align the implementation and behavior test, or obtain a human-approved
+  scope change.
+
+### Failure and recovery
+
+- Flag a changed dependency or side effect that can fail without a signal,
+  containment, or supported recovery. State the realistic failure condition and user
+  or operator effect. Safe path: make the failure observable and preserve a supported
+  retry, rollback, or fallback.
+
+### Behavioral evidence
+
+- Flag a changed branch, parser, routing rule, or data rule that lacks a behavior test
+  for a plausible boundary or failure case. Do not report formatting, lint, or another
+  exact CI result. Safe path: add the smallest test that observes the contract.

@@ -17,6 +17,9 @@ PROSE_CHECKER = (
     / "scripts"
     / "check_prose.py"
 )
+REVIEW_CHECKER_DIRECTORY = (
+    REPOSITORY_ROOT / ".agents" / "skills" / "review-code-change" / "scripts"
+)
 
 
 def run(command: list[str], *, cwd: Path = REPOSITORY_ROOT) -> None:
@@ -62,6 +65,20 @@ def main(argv: list[str] | None = None) -> int:
             "discover",
             "-s",
             str(Path(__file__).parent),
+            "-p",
+            "test_*.py",
+            "-v",
+        ]
+    )
+    run(
+        [
+            sys.executable,
+            "-B",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            str(REVIEW_CHECKER_DIRECTORY),
             "-p",
             "test_*.py",
             "-v",

@@ -29,11 +29,12 @@ flowchart LR
     F --> G[Agent challenge and evidence]
     G --> H[Draft pull request]
     H --> I[Deterministic CI]
-    I --> J[Human review]
-    J --> K[Squash merge]
-    K --> L[Deploy tested commit]
-    L --> M[Observe and record lessons]
-    M --> A
+    I --> J[Advisory change review]
+    J --> K[Human review]
+    K --> L[Squash merge]
+    L --> M[Deploy tested commit]
+    M --> N[Observe and record lessons]
+    N --> A
 ```
 
 The agent may help at every step, but it cannot silently change the issue's intent, approve its own work, or merge a pull request.
@@ -160,6 +161,11 @@ Every finding must include reproducible evidence. “No actionable finding” is
 Each finding must explain why its evidence supports the claim. It must limit the claim
 to the evidence boundary. It must state a relevant exception or remaining uncertainty.
 
+Use the repository [`review-code-change`](../.agents/skills/review-code-change/SKILL.md)
+skill for this pass. A bounded Green review routes to Luna. A bounded Yellow review
+routes to Terra. Cross-subsystem review routes to Sol only when integration judgment
+is necessary.
+
 ## 6. Open an evidence-backed pull request
 
 Use the repository pull request template. A reviewable PR includes:
@@ -218,6 +224,25 @@ ruleset:
 
 Keep the current requirements for one approval, last-push approval, resolved threads, squash merge, deletion protection, and non-fast-forward protection. Required checks cannot be selected safely until GitHub has observed their names.
 
+After branch protection is active, connect the repository in Codex settings. Enable
+managed Code Review. Automatic review also requires a team-enabled Codex repository.
+Use one automatic review when a pull request becomes ready. Do not run automatic review
+on every push during the pilot.
+
+The managed reviewer reads each applicable `## Code Review Rules` section in
+`AGENTS.md`. It posts advisory GitHub findings. A maintainer can request another pass
+after a material update by commenting `@codex review`.
+
+Use `@codex review` as the required hook when automatic review is unavailable. Human
+review remains available when the managed integration is unavailable.
+
+Red changes require the repository specialist and human checkpoints. When Codex
+Security Review is available, `@codex security review` can add evidence. It does not
+replace the specialist or human decision.
+
+See [`0001-pr-review-hooks.md`](decisions/0001-pr-review-hooks.md) for the selected
+boundary and the custom GitHub Action alternative.
+
 ## 8. Human review
 
 Review the claim and evidence before style. CI owns repeatable lint and build feedback. A human reviewer should focus on:
@@ -229,6 +254,20 @@ Review the claim and evidence before style. CI owns repeatable lint and build fe
 5. Is the code understandable to the next rotating volunteer?
 
 Cap advisory AI review at three to five high-confidence findings. Each finding should explain impact, evidence, and a concrete next step. The maintainer decides whether a finding blocks merge.
+
+For a local review before the pull request becomes ready, run:
+
+```bash
+python3 -B .agents/skills/review-code-change/scripts/run_local_review.py \
+  --risk yellow --base origin/main
+```
+
+Use `--dry-run` to inspect the selected model without spending tokens. Use
+`--task-type integration` only when the review crosses subsystem boundaries. The
+runner rejects Red work and names the required escalation.
+
+The default scope reviews committed branch changes. Add `--scope uncommitted` to review
+staged, unstaged, and untracked work.
 
 The `Prose` job enforces deterministic language rules in repository files. It applies
 sentence rules to Markdown and high-signal editorial checks to prose-bearing files.

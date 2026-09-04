@@ -18,11 +18,12 @@ flowchart LR
     D --> E[Pull request submission check]
     E --> F[Changed-file router]
     F --> G[Selected subsystem checks]
-    G --> H[Human review]
-    H --> I[Protected merge]
-    I --> J[Full main-branch CI]
-    J --> K[Tested client artifact]
-    K --> L[Pages deployment]
+    G --> H[Managed advisory review]
+    H --> I[Human review]
+    I --> J[Protected merge]
+    J --> K[Full main-branch CI]
+    K --> L[Tested client artifact]
+    L --> M[Pages deployment]
 ```
 
 ## Deterministic boundary
@@ -54,7 +55,7 @@ path filters because a filtered required workflow can remain pending.
 | Job | Selection | Result |
 |---|---|---|
 | `Route changes` | Always | Tests the policy and classifies the diff. |
-| `Prose` | Always | Checks repository prose and the pull request submission record. |
+| `Prose` | Always | Checks prose, the submission record, and review policy. |
 | `Frontend` | Routed | Installs locked npm dependencies, then lints and builds the client. |
 | `Server` | Routed | Installs locked npm dependencies, then lints and builds the server. |
 | `ETL` | Routed | Installs the locked uv environment, then runs Ruff and pytest. |
@@ -78,6 +79,9 @@ The pre-commit framework installs two hook stages from `.pre-commit-config.yaml`
 
 The commit stage checks prose-bearing changed files. It also runs routing tests when a
 routing, hook, or CI file changes.
+
+The commit stage also tests the local review runner when review rules, review skills,
+or model routes change. The tests inspect routing without invoking a model.
 
 The push stage compares the branch with `origin/main`. It runs the full prose scan,
 routing tests, and applicable application checks.
@@ -117,6 +121,34 @@ integration.
 
 Model output never becomes a required status check. A deterministic tool or human review
 must verify every consequential agent claim.
+
+## Advisory review boundary
+
+Managed Codex Code Review is the selected pull request event hook. It reads the root
+and nearest `## Code Review Rules` sections. It posts a standard GitHub review when the
+integration is enabled.
+
+The pilot runs one automatic review when a pull request becomes ready. Automatic review
+requires a team-enabled Codex repository. A maintainer requests another review after a
+material update with `@codex review`. This policy avoids the token and feedback cost of
+a review after every push.
+
+Use `@codex review` as the required managed hook when automatic review is unavailable.
+Use human review when the repository cannot use the managed integration.
+
+The managed service selects its own model. The repository model routes apply to local
+and delegated review. The local runner uses Luna for bounded Green changes, Terra for
+bounded Yellow changes, and Sol for cross-subsystem review.
+
+The managed reviewer does not receive a repository API secret through GitHub Actions.
+The repository does not check out contributor code inside a privileged review workflow.
+This boundary removes the fork-secret and untrusted-execution paths from repository CI.
+
+The closest alternative is `openai/codex-action` with an organization API key. The
+team can revisit that option when it needs structured findings, an automated gate, and
+an owner for secret, budget, and prompt-injection controls.
+
+See `docs/decisions/0001-pr-review-hooks.md` for the complete decision and limits.
 
 ## Submission and explainability
 
@@ -159,6 +191,9 @@ or incident in a runbook when production recovery requires more than a new deplo
 After merge, confirm one successful `CI` run on `main`. Configure `Prose`, `Frontend`,
 `Server`, and `ETL` as required checks in the protected-main ruleset.
 
+Connect the repository in Codex settings. Confirm that it is team-enabled before you
+enable automatic review. Otherwise, use `@codex review` on each representative change.
+
 Keep the approval, last-push approval, resolved-thread, squash-merge, deletion, and
 non-fast-forward protections. Add the `merge_group` event before enabling a merge queue.
 
@@ -170,4 +205,7 @@ the first three merged work units.
 - [GitHub workflow filters and required checks](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow)
 - [GitHub job conditions](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-jobs-with-conditions)
 - [GitHub required-check troubleshooting](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/troubleshooting-required-status-checks)
+- [Codex GitHub review](https://developers.openai.com/codex/integrations/github)
+- [Codex local code review](https://learn.chatgpt.com/codex/code-review)
+- [GitHub Actions security](https://docs.github.com/en/actions/reference/security/secure-use)
 - [OpenAI model selection](https://developers.openai.com/api/docs/models)
