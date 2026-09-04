@@ -11,9 +11,11 @@ Use managed Codex Code Review as the pull request review hook during this pilot.
 CI deterministic, keep AI findings advisory, and use repository `AGENTS.md` files to
 apply the Code Change Standard.
 
-Run one automatic review when a pull request becomes ready and the repository is
-team-enabled. Request another review only after a material change. Use `@codex review`
-when automatic review is unavailable. Use the local runner for an earlier challenge.
+Configure `Review all PRs` with the experimental `Smart detect` trigger when the
+repository is team-enabled. Keep exhaustive review and personal credit overrun disabled
+during the pilot. Request another review after a material change when smart detection
+does not start one. Use `@codex review` when automatic review is unavailable. Use the
+local runner for an earlier challenge.
 
 ## Grounds
 
@@ -66,9 +68,10 @@ Automatic review also requires a team-enabled Codex repository.
 The repository cannot select Terra, Luna, or Sol for the managed reviewer. The local
 runner applies those model routes. The managed service selects its review model.
 
-One automatic review can miss a defect introduced by a later push. A maintainer should
-request `@codex review` again after a material change. Running on every push would
-reduce this gap but would spend more review credits and create repeated feedback.
+Smart detection can miss a defect introduced by a later push. A maintainer should
+request `@codex review` again after a material change when no review starts. Running on
+every push would reduce this gap but would spend more review credits and create repeated
+feedback. The team should select that trigger if missed changes prove more costly.
 
 Managed GitHub review emphasizes P0 and P1 issues. Local review, CI, and human review
 still own normal defects, maintainability, decision quality, and product intent. Red

@@ -230,9 +230,20 @@ ruleset:
 Keep the current requirements for one approval, last-push approval, resolved threads, squash merge, deletion protection, and non-fast-forward protection. Required checks cannot be selected safely until GitHub has observed their names.
 
 After branch protection is active, connect the repository in Codex settings. Enable
-managed Code Review. Automatic review also requires a team-enabled Codex repository.
-Use one automatic review when a pull request becomes ready. Do not run automatic review
-on every push during the pilot.
+managed Code Review for all pull requests. Automatic review also requires a
+team-enabled Codex repository.
+
+Use these repository settings during the pilot:
+
+- Auto review: `Review all PRs`.
+- Trigger: `Smart detect (Experimental)`.
+- Exhaustive: `Disabled`.
+- Credit use: keep the personal credit-overrun option disabled.
+
+Smart detection limits repeated reviews while preserving a review after a material
+change. A maintainer requests another pass with `@codex review` when a material update
+does not receive one. Change the trigger to `On every push` if the pilot shows missed
+updates are more costly than repeated reviews.
 
 The managed reviewer reads each applicable `## Code Review Rules` section in
 `AGENTS.md`. It posts advisory GitHub findings. A maintainer can request another pass

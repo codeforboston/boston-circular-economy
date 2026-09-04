@@ -136,10 +136,15 @@ Managed Codex Code Review is the selected pull request event hook. It reads the 
 and nearest `## Code Review Rules` sections. It posts a standard GitHub review when the
 integration is enabled.
 
-The pilot runs one automatic review when a pull request becomes ready. Automatic review
-requires a team-enabled Codex repository. A maintainer requests another review after a
-material update with `@codex review`. This policy avoids the token and feedback cost of
-a review after every push.
+The pilot configures `Review all PRs`, uses the experimental `Smart detect` trigger,
+and disables exhaustive review. Personal credit overrun stays disabled. A maintainer
+requests another review after a material update with `@codex review` when smart
+detection does not start one. This policy limits repeated review cost without leaving
+review responsibility only with the pull request author.
+
+The team should change the trigger to `On every push` if the pilot shows that smart
+detection misses material changes. It should enable exhaustive review only when the
+added findings justify the extra review cost.
 
 Use `@codex review` as the required managed hook when automatic review is unavailable.
 Use human review when the repository cannot use the managed integration.
