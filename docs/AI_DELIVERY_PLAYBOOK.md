@@ -174,13 +174,14 @@ Open a draft PR early for Yellow and Red work. This creates a stable place for a
 
 ## 7. Deterministic CI and deployment
 
-The `CI` workflow runs three independent checks on every pull request to `main` and every push to `main`:
+The `CI` workflow runs four independent checks on every pull request to `main` and every push to `main`:
 
 | Check | Evidence |
 |---|---|
+| `CI / Prose` | Selected ASD-STE100 language rules, editorial-present patterns, and high-signal AI cliché checks |
 | `CI / Frontend` | Client lint and production build |
 | `CI / Server` | Production dependency audit, server lint, and TypeScript build |
-| `CI / ETL` | Locked Python environment, Ruff lint/format checks, and pytest suite |
+| `CI / ETL` | Locked Python environment, Ruff lint and format checks, and pytest suite |
 
 The deployment workflow listens for a successful CI run caused by a push to `main`. It checks out the exact tested commit SHA, rebuilds the client with the lockfile, and deploys that artifact to GitHub Pages. Pull-request runs cannot deploy.
 
@@ -188,9 +189,11 @@ All third-party GitHub Actions are pinned to full commit SHAs. Workflow tokens r
 
 ### Maintainer activation step
 
-After this pilot PR merges, all three checks must complete successfully on `main`.
-A repository administrator should then add these checks to the **Protect Main Branch** ruleset:
+After this pilot PR merges, all four checks must complete successfully on `main`.
+A repository administrator should then add these checks to the **Protect Main Branch**
+ruleset:
 
+- `Prose`
 - `Frontend`
 - `Server`
 - `ETL`
@@ -208,6 +211,14 @@ Review the claim and evidence before style. CI owns repeatable lint and build fe
 5. Is the code understandable to the next rotating volunteer?
 
 Cap advisory AI review at three to five high-confidence findings. Each finding should explain impact, evidence, and a concrete next step. The maintainer decides whether a finding blocks merge.
+
+The `Prose` job enforces deterministic language rules in repository files. It applies
+sentence rules to Markdown and high-signal editorial checks to prose-bearing files.
+Human review assesses accuracy, active voice, term meaning, cadence, Toulmin structure,
+and rhetorical fairness.
+
+Do not rewrite a valid technical term or remove a necessary condition only to satisfy
+the checker. Correct a false-positive rule through normal code review.
 
 ## 9. Learn and improve
 

@@ -21,6 +21,9 @@ uv sync --locked --dev
 uv run ruff check .
 uv run ruff format --check .
 uv run pytest
+
+cd ..
+python -B .agents/skills/make-evidence-based-technical-case/scripts/check_prose.py .
 ```
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) to select and claim a work unit. Contributors using an AI coding assistant should also read [`AGENTS.md`](AGENTS.md) and the proposed [`AI-assisted delivery playbook`](docs/AI_DELIVERY_PLAYBOOK.md).

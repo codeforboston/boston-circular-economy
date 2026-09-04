@@ -3,7 +3,9 @@
 This skill adapts the `write-timeless-technical-prose` skill from the
 [Library of Context](https://github.com/hwillGIT/library-of-context) repository.
 The source skill supplied the ASD-STE100 software profile and the compact GitHub
-risk, fix, and guaranteed-state sequence.
+risk, fix, and guaranteed-state sequence. The source repository also supplied the
+editorial-present rules, anti-cliché patterns, technical-language checker design, and
+continuous-integration pattern.
 
 Source revision: `4f2eb3ab7c58918779941654d486240d1090d80a1`
 

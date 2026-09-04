@@ -29,6 +29,21 @@ Use ASD-STE100-aligned Simplified Technical English. Prefer active voice, compac
 sentences, defined terms, and one stable term for each concept. Do not claim formal
 ASD-STE100 compliance without qualified human review.
 
+Write each artifact in one editorial present. Remove prompt narration, edit history,
+empty transitions, promotional claims, and formulaic AI phrases. Use cadence to expose
+the mechanism, evidence, condition, and consequence.
+
+Run the repository prose checker before submitting reader-facing text:
+
+```bash
+python -B .agents/skills/make-evidence-based-technical-case/scripts/check_prose.py .
+```
+
+The checker applies sentence and paragraph rules to Markdown. It checks prose-bearing
+source and configuration files for high-signal editorial violations. Human review
+remains responsible for accuracy, active voice, term meaning, cadence, and rhetorical
+fairness.
+
 ## Agent routing and token cost
 
 An agent that delegates work must read and apply
@@ -57,6 +72,10 @@ uv sync --locked --dev
 uv run ruff check .
 uv run ruff format --check .
 uv run pytest
+
+# Repository prose
+cd ..
+python -B .agents/skills/make-evidence-based-technical-case/scripts/check_prose.py .
 ```
 
 Run the smallest relevant check while iterating. Run every applicable check before opening or updating a pull request. CI is the merge evidence of record.

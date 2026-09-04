@@ -35,6 +35,7 @@ Describe how you tried to prove the change wrong. Include normal, boundary, fail
 | Client lint and build | N/A | |
 | Server lint and build | N/A | |
 | ETL tests | N/A | |
+| Technical prose and editorial style | N/A | |
 | Manual user journey | N/A | |
 | Accessibility / responsive | N/A | |
 | Security / privacy / recovery | N/A | |

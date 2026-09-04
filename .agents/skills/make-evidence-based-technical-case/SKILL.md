@@ -1,6 +1,6 @@
 ---
 name: make-evidence-based-technical-case
-description: Build, edit, or review technical proposals, issue comments, plans, pull request summaries, review notes, decision records, mentor guidance, and status reports with Toulmin argument structure and ASD-STE100-aligned Simplified Technical English. Use when an agent must make a case, explain why evidence supports a claim, challenge a recommendation, communicate risk, or turn dense engineering language into precise plain English.
+description: Build, edit, or review technical proposals, documentation, interface text, code comments, issue comments, plans, pull request summaries, review notes, decision records, mentor guidance, and status reports. Use Toulmin argument structure, ASD-STE100-aligned Simplified Technical English, direct editorial cadence, and non-promotional language. Apply when an agent must make a case, explain why evidence supports a claim, challenge a recommendation, communicate risk, or remove formulaic AI wording from technical prose.
 ---
 
 # Make an Evidence-Based Technical Case
@@ -21,6 +21,10 @@ Read [toulmin-technical-case.md](references/toulmin-technical-case.md) for a ful
 Read [asd-ste100-software.yaml](references/asd-ste100-software.yaml) before drafting any
 mode. Read [github-technical-communication.yaml](references/github-technical-communication.yaml)
 for GitHub text.
+
+Read [editorial-voice.md](references/editorial-voice.md) before creating or reviewing
+documentation, interface text, comments, docstrings, or another reader-facing artifact.
+Run `scripts/check_prose.py` before submitting repository prose.
 
 ## Ground the case
 
@@ -130,6 +134,31 @@ transaction. Do not call a transaction a lock.
 - Preserve code identifiers, commands, protocol names, version identifiers, quoted
   interface text, and citations.
 
+## Use direct editorial cadence
+
+Lead with the subject, mechanism, decision, or instruction. Follow it with evidence,
+conditions, or consequences. Remove introductory throat-clearing and empty transitions.
+
+Vary sentence length only to support comprehension. Use a short sentence for an
+important contract. Use a longer sentence for a necessary condition or consequence.
+Do not use fragments or repeated three-part lists only to create rhythm.
+
+Write with authority only when evidence supports the claim. Do not use promotion,
+false urgency, generic inspiration, or formulaic AI transitions as substitutes for
+reasoning.
+
+## Keep one editorial present
+
+Describe the complete system contract. Do not narrate the prompt, author process,
+editing sequence, or the time when explanatory content entered the repository.
+
+Put completed history in a changelog. Put capability state in a status document. Put
+planned sequence in a roadmap. Put version transitions in migration or compatibility
+notes.
+
+Preserve time words when they describe runtime order, dated evidence, or an actual
+project state.
+
 Do not claim formal ASD-STE100 compliance. A qualified human must review the controlled
 dictionary, approved technical terms, and intended meanings.
 
@@ -144,4 +173,13 @@ Confirm that:
 - facts and inferences remain distinct.
 - a reviewer can reproduce or inspect the cited evidence.
 - the wording follows the language rules without removing technical meaning.
+- the cadence emphasizes mechanisms and evidence instead of performance.
+- no phrase exposes prompt history, editing history, or formulaic AI narration.
 - the next human decision is explicit.
+
+The checker enforces sentence and paragraph limits in Markdown. It rejects contractions,
+semicolons, vague promotional terms, process narration, and high-signal AI clichés.
+
+Automation cannot judge active voice, approved word meaning, stable terminology,
+cadence, Toulmin completeness, technical accuracy, or rhetorical fairness. A human
+reviewer must assess those properties.

@@ -31,7 +31,9 @@ preserve_technical_semantics:
   - timeout interruption and failure behavior
   - queue memory worker time and retry limits
 prohibited_vague_terms:
+  - amazing
   - cutting-edge
+  - exciting
   - game-changing
   - leverage
   - next-generation
@@ -40,4 +42,3 @@ prohibited_vague_terms:
   - scalable
   - seamless
   - world-class
-
