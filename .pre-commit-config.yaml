@@ -43,7 +43,6 @@ repos:
         entry: >-
           python3 -B
           .agents/skills/route-agent-work/scripts/run_local_checks.py
-          --base origin/main --head HEAD
         language: system
         stages: [pre-push]
         always_run: true

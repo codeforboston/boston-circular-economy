@@ -31,6 +31,11 @@ Use the risk lane and change boundary to select the review route:
 - Use Sol with high reasoning when the change crosses subsystems or evidence conflicts.
 - Use a qualified specialist and the accountable human for Red judgment.
 
+The command requires a declared risk lane. It also reads the versioned path rules in
+`references/review-risk.json` and raises the effective lane when changed paths have a
+higher minimum. Path inference is a conservative floor, not proof that the declared
+lane is correct. A human must confirm the lane before consequential work or merge.
+
 The managed GitHub reviewer selects its own model. Repository model routes apply to
 local and delegated reviews. They do not claim control over the managed service.
 

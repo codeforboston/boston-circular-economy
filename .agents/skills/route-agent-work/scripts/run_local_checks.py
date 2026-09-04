@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -22,23 +23,84 @@ REVIEW_CHECKER_DIRECTORY = (
 )
 
 
+def default_diff_context(environ: dict[str, str]) -> tuple[str, str, bool]:
+    """Use pre-push refs or preserve pre-commit's all-files request."""
+
+    from_ref = environ.get("PRE_COMMIT_FROM_REF") or environ.get(
+        "PRE_COMMIT_ORIGIN"
+    )
+    to_ref = environ.get("PRE_COMMIT_TO_REF") or environ.get("PRE_COMMIT_SOURCE")
+    if bool(from_ref) != bool(to_ref):
+        raise ValueError(
+            "PRE_COMMIT_FROM_REF and PRE_COMMIT_TO_REF must be set together"
+        )
+    if from_ref and to_ref:
+        return from_ref, to_ref, False
+    return "origin/main", "HEAD", environ.get("PRE_COMMIT") == "1"
+
+
+def require_checked_out_commit(target: str, checked_out: str) -> None:
+    """Fail instead of testing a worktree that differs from the pushed commit."""
+
+    if target != checked_out:
+        raise ValueError(
+            "local checks require the pushed commit to be checked out; "
+            "push one checked-out branch at a time"
+        )
+
+
+def resolve_commit(revision: str) -> str:
+    completed = subprocess.run(
+        ["git", "rev-parse", "--verify", f"{revision}^{{commit}}"],
+        cwd=REPOSITORY_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return completed.stdout.strip()
+
+
+def files_for_run(
+    force_all: bool,
+    base: str,
+    head: str,
+) -> list[str]:
+    """Skip range discovery when the caller already requires every check."""
+
+    if force_all:
+        return []
+    return route_work.changed_files(base, head)
+
+
 def run(command: list[str], *, cwd: Path = REPOSITORY_ROOT) -> None:
     print(f"+ {' '.join(command)}", flush=True)
     subprocess.run(command, cwd=cwd, check=True)
 
 
 def main(argv: list[str] | None = None) -> int:
+    default_base, default_head, hook_force_all = default_diff_context(
+        dict(os.environ)
+    )
     parser = argparse.ArgumentParser(
         description="Run local checks selected by the repository routing policy."
     )
-    parser.add_argument("--base", default="origin/main")
-    parser.add_argument("--head", default="HEAD")
+    parser.add_argument("--base", default=default_base)
+    parser.add_argument("--head", default=default_head)
     parser.add_argument("--all", action="store_true", dest="force_all")
     arguments = parser.parse_args(argv)
 
+    require_checked_out_commit(
+        resolve_commit(arguments.head),
+        resolve_commit("HEAD"),
+    )
     policy = route_work.load_policy()
-    files = route_work.changed_files(arguments.base, arguments.head)
-    route = route_work.classify_files(files, policy, force_all=arguments.force_all)
+    force_all = arguments.force_all or hook_force_all
+    files = files_for_run(force_all, arguments.base, arguments.head)
+    route = route_work.classify_files(
+        files,
+        policy,
+        force_all=force_all,
+    )
     print(json.dumps(route.as_dict(), indent=2, sort_keys=True))
 
     run([sys.executable, "-B", str(PROSE_CHECKER), "."])

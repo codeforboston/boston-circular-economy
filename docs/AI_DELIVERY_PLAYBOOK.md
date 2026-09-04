@@ -271,6 +271,11 @@ Use `--dry-run` to inspect the selected model without spending tokens. Use
 `--task-type integration` only when the review crosses subsystem boundaries. The
 runner rejects Red work and names the required escalation.
 
+The runner treats `--risk` as the contributor's declared lane. Versioned path rules
+raise the effective lane for clear Yellow or Red surfaces. This floor catches obvious
+under-routing but does not prove the lane is correct. A mentor or maintainer confirms
+the lane for consequential work.
+
 The default scope reviews the current tracked state against the base. Add
 `--scope uncommitted` to review staged, unstaged, and untracked work without branch
 history. The runner forces a read-only Codex sandbox.

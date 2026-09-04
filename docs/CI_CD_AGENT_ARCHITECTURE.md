@@ -83,8 +83,16 @@ routing, hook, or CI file changes.
 The commit stage also tests the local review runner when review rules, review skills,
 or model routes change. The tests inspect routing without invoking a model.
 
-The push stage compares the branch with `origin/main`. It runs the full prose scan,
-routing tests, and applicable application checks.
+The push stage uses the source and destination commit IDs supplied by pre-commit for
+the push. It runs the full prose scan, routing tests, and applicable application checks.
+Manual execution compares `HEAD` with `origin/main` unless the caller supplies another
+range. When pre-commit requests all files without a commit range, the runner preserves
+that request and runs every application check.
+
+The checks execute in the current worktree. The runner stops when the pushed commit is
+not checked out because a successful build of another commit would be false evidence.
+Push one checked-out branch at a time for exact local validation. CI validates the pull
+request head and remains the merge evidence of record.
 
 The local hook does not run `npm ci` because that command replaces the local dependency
 tree. Contributors install locked dependencies before the hook runs. CI creates clean
@@ -139,6 +147,11 @@ Use human review when the repository cannot use the managed integration.
 The managed service selects its own model. The repository model routes apply to local
 and delegated review. The local runner uses Luna for bounded Green changes, Terra for
 bounded Yellow changes, and Sol for cross-subsystem review.
+
+The local runner requires a declared risk lane. Versioned path rules can raise that
+lane but cannot lower it. This check catches clear under-routing, such as authentication
+or migration code declared Green. It does not replace a human risk decision, and a
+client-side hook cannot enforce policy against `--no-verify`.
 
 The managed reviewer does not receive a repository API secret through GitHub Actions.
 The repository does not check out contributor code inside a privileged review workflow.

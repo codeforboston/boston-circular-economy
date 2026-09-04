@@ -6,6 +6,13 @@ import sys
 import unittest
 from pathlib import Path
 
+from run_local_review import (
+    effective_risk,
+    infer_minimum_risk,
+    load_risk_policy,
+    path_matches,
+)
+
 ROOT = Path(__file__).resolve().parents[4]
 SCRIPT = Path(__file__).with_name("run_local_review.py")
 
@@ -45,6 +52,42 @@ class LocalReviewRunnerTests(unittest.TestCase):
         self.assertIsInstance(route, dict)
         self.assertEqual(route["model"], "gpt-5.6-terra")
         self.assertEqual(route["reasoning_effort"], "medium")
+
+    def test_production_path_raises_green_review_to_yellow(self) -> None:
+        assessment = infer_minimum_risk(
+            ["server/src/routes/locations.ts"], load_risk_policy()
+        )
+
+        self.assertEqual("yellow", assessment["risk"])
+        self.assertEqual("yellow", effective_risk("green", str(assessment["risk"])))
+
+    def test_authentication_path_requires_red_review(self) -> None:
+        assessment = infer_minimum_risk(
+            ["client/src/lib/auth.tsx"], load_risk_policy()
+        )
+
+        self.assertEqual("red", assessment["risk"])
+        self.assertEqual("red", effective_risk("green", str(assessment["risk"])))
+
+    def test_migration_path_requires_red_review(self) -> None:
+        assessment = infer_minimum_risk(
+            ["server/src/db/migrations/add-column.ts"], load_risk_policy()
+        )
+
+        self.assertEqual("red", assessment["risk"])
+
+    def test_globstar_matches_zero_or_more_directories(self) -> None:
+        self.assertTrue(path_matches("client/src/auth.ts", "client/src/**/auth.*"))
+        self.assertTrue(
+            path_matches("client/src/lib/auth.tsx", "client/src/**/auth.*")
+        )
+
+    def test_documentation_path_keeps_green_review(self) -> None:
+        assessment = infer_minimum_risk(
+            ["docs/operator-guide.md"], load_risk_policy()
+        )
+
+        self.assertEqual("green", assessment["risk"])
 
     def test_integration_review_uses_sol(self) -> None:
         result = self.dry_run("--risk", "yellow", "--task-type", "integration")
