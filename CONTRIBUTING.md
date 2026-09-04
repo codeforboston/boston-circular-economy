@@ -60,8 +60,9 @@ python3 -B .agents/skills/review-code-change/scripts/run_local_review.py \
 
 Use the risk lane from the work unit. Add `--dry-run` to inspect the model route without
 spending tokens. The review skill limits findings to discrete, evidence-backed defects.
-Commit the branch changes before using the default scope. Add `--scope uncommitted` to
-review staged, unstaged, and untracked work.
+The default scope compares the current tracked state with the base. Add
+`--scope uncommitted` to review staged, unstaged, and untracked work without branch
+history. The runner forces a read-only Codex sandbox.
 
 When the pull request is ready, the managed Codex hook applies the repository
 `## Code Review Rules`. A maintainer can request a new pass after a material update by

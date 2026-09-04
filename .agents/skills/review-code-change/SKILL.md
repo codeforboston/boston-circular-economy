@@ -43,10 +43,12 @@ python3 -B .agents/skills/review-code-change/scripts/run_local_review.py \
 
 Add `--task-type integration` only for a cross-subsystem change. Add `--dry-run` to
 inspect the route without spending model tokens. The runner refuses Red review because
-that lane requires a specialist and a human checkpoint.
+that lane requires a specialist and a human checkpoint. The runner forces the Codex
+review process into a read-only sandbox.
 
-The default `branch` scope reviews committed changes against the base. Add
-`--scope uncommitted` to review staged, unstaged, and untracked work before a commit.
+The default `branch` scope reviews the current tracked state against the base. Add
+`--scope uncommitted` to review staged, unstaged, and untracked work without branch
+history.
 
 ## Inspect the case and the mechanism
 

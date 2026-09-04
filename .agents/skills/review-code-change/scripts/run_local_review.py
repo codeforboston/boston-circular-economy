@@ -9,7 +9,6 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[4]
 ROUTER = ROOT / ".agents/skills/route-agent-work/scripts/route_work.py"
-PROMPT = Path(__file__).resolve().parents[1] / "references/local-review-prompt.md"
 
 
 class ReviewNeedsEscalationError(RuntimeError):
@@ -53,6 +52,8 @@ def build_codex_command(
         f'model="{model}"',
         "-c",
         f'model_reasoning_effort="{effort}"',
+        "-c",
+        'sandbox_mode="read-only"',
     ]
     if scope == "branch":
         command.extend(["--base", base])
@@ -60,7 +61,6 @@ def build_codex_command(
         command.append("--uncommitted")
     else:
         raise ValueError(f"unsupported review scope: {scope}")
-    command.append("-")
     return command
 
 
@@ -104,7 +104,11 @@ def main(argv: list[str] | None = None) -> int:
                 {
                     "base": arguments.base,
                     "command": command,
-                    "prompt": str(PROMPT.relative_to(ROOT)),
+                    "review_guidance": [
+                        "AGENTS.md",
+                        ".agents/skills/review-code-change/SKILL.md",
+                        "docs/CODE_CHANGE_STANDARD.md",
+                    ],
                     "route": route,
                     "scope": arguments.scope,
                 },
@@ -117,7 +121,6 @@ def main(argv: list[str] | None = None) -> int:
     completed = subprocess.run(
         command,
         cwd=ROOT,
-        input=PROMPT.read_text(encoding="utf-8"),
         text=True,
         check=False,
     )

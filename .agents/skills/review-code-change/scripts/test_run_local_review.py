@@ -35,7 +35,9 @@ class LocalReviewRunnerTests(unittest.TestCase):
         self.assertIsInstance(route, dict)
         self.assertEqual(route["model"], "gpt-5.6-luna")
         self.assertEqual(route["reasoning_effort"], "low")
-        self.assertEqual(result["command"][-1], "-")
+        self.assertEqual(result["command"][-2:], ["--base", "HEAD"])
+        self.assertNotIn("-", result["command"])
+        self.assertIn('sandbox_mode="read-only"', result["command"])
 
     def test_yellow_review_uses_terra_without_invoking_codex(self) -> None:
         result = self.dry_run("--risk", "yellow")
@@ -57,6 +59,7 @@ class LocalReviewRunnerTests(unittest.TestCase):
         self.assertIsInstance(command, list)
         self.assertIn("--uncommitted", command)
         self.assertNotIn("--base", command)
+        self.assertNotIn("-", command)
 
     def test_red_review_requires_escalation(self) -> None:
         completed = subprocess.run(
@@ -77,6 +80,18 @@ class LocalReviewRunnerTests(unittest.TestCase):
         )
         self.assertEqual(completed.returncode, 2)
         self.assertIn("specialist and human checkpoint", completed.stderr)
+
+    def test_repository_guidance_keeps_review_rules_near_the_change(self) -> None:
+        root_guidance = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
+        workflow_guidance = (ROOT / ".github/AGENTS.md").read_text(encoding="utf-8")
+
+        self.assertIn("review-code-change", root_guidance)
+        self.assertIn("## Code Review Rules", root_guidance)
+        self.assertIn("### Contract and claim", root_guidance)
+        self.assertIn("## Code Review Rules", workflow_guidance)
+        self.assertIn("### Untrusted pull request code", workflow_guidance)
+        self.assertIn("### Tested deployment identity", workflow_guidance)
+        self.assertIn("### Required check continuity", workflow_guidance)
 
 
 if __name__ == "__main__":

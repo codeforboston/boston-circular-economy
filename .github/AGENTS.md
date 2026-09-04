@@ -16,7 +16,9 @@ This file adds review rules for workflows and repository automation. Apply the r
 
 - Flag a deployment that rebuilds, refetches mutable source, or selects an artifact
   without binding it to the successful `main` CI run. Safe path: deploy the exact
-  artifact from the successful workflow run and verify its expected entry point.
+  artifact from the successful workflow run and verify its expected entry point. Trace
+  event triggers, route conditions, and upstream job results before reporting a missing
+  artifact.
 
 ### Required check continuity
 

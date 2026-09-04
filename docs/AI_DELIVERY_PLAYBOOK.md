@@ -266,8 +266,9 @@ Use `--dry-run` to inspect the selected model without spending tokens. Use
 `--task-type integration` only when the review crosses subsystem boundaries. The
 runner rejects Red work and names the required escalation.
 
-The default scope reviews committed branch changes. Add `--scope uncommitted` to review
-staged, unstaged, and untracked work.
+The default scope reviews the current tracked state against the base. Add
+`--scope uncommitted` to review staged, unstaged, and untracked work without branch
+history. The runner forces a read-only Codex sandbox.
 
 The `Prose` job enforces deterministic language rules in repository files. It applies
 sentence rules to Markdown and high-signal editorial checks to prose-bearing files.
