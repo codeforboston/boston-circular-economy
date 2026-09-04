@@ -1,0 +1,40 @@
+repos:
+  - repo: local
+    hooks:
+      - id: technical-prose
+        name: Check technical prose
+        entry: >-
+          python -B
+          .agents/skills/make-evidence-based-technical-case/scripts/check_prose.py
+        language: system
+        files: '\.(cjs|js|jsx|md|mjs|py|toml|ts|tsx|yaml|yml)$'
+      - id: routing-policy
+        name: Test delivery routing policy
+        entry: >-
+          python -B -m unittest discover
+          -s .agents/skills/route-agent-work/scripts
+          -p test_*.py -v
+        language: system
+        files: >-
+          ^(\.agents/skills/route-agent-work/|\.github/workflows/|\.pre-commit-config\.yaml$)
+        pass_filenames: false
+      - id: communication-policy
+        name: Test communication and submission policy
+        entry: >-
+          python -B -m unittest discover
+          -s .agents/skills/make-evidence-based-technical-case/scripts
+          -p test_*.py -v
+        language: system
+        files: >-
+          ^(\.agents/skills/make-evidence-based-technical-case/|\.github/pull_request_template\.md$|\.github/workflows/ci\.yml$|docs/CODE_CHANGE_STANDARD\.md$)
+        pass_filenames: false
+      - id: routed-quality
+        name: Run checks selected for this branch
+        entry: >-
+          python -B
+          .agents/skills/route-agent-work/scripts/run_local_checks.py
+          --base origin/main --head HEAD
+        language: system
+        stages: [pre-push]
+        always_run: true
+        pass_filenames: false

@@ -39,6 +39,22 @@ Use the lower-cost models that the active environment provides. A model such as 
 is suitable when the task is bounded and its result has an objective check. Model names,
 availability, and prices can change. Route by capability and evidence, not by name.
 
+Read `references/delivery-routing.json` for the repository defaults. The defaults use
+Luna for Green bounded work, Terra for Yellow bounded work, and Sol for integration.
+The names are reviewed policy values. They are not permanent capability claims.
+
+Inspect the selected route before delegation:
+
+```bash
+python -B .agents/skills/route-agent-work/scripts/route_work.py \
+  recommend --task-type bounded --risk yellow
+```
+
+Use `mechanical` for an exact tool decision and `repeated_method` for a skill. Use
+`integration`, `specialist`, or `intent` only when the task meets that boundary.
+A Red lane keeps exact mechanical work on its tool and adds a pre-implementation human
+checkpoint. Red judgment requires a specialist and the accountable human.
+
 ## Make a bounded delegation packet
 
 Give a subordinate agent only the context it needs:
@@ -69,6 +85,16 @@ Place repeatable decisions near the state transition that needs them:
 Keep policy in versioned skills, templates, and `AGENTS.md`. Keep executable assertions
 in tests and workflows. Do not spend model tokens re-evaluating an exact rule that a
 trusted tool can enforce.
+
+The same policy selects local and CI checks. Classify an explicit file set with:
+
+```bash
+python -B .agents/skills/route-agent-work/scripts/route_work.py \
+  classify client/src/App.tsx
+```
+
+Unknown paths run every application check. A routing policy or CI change also runs
+every application check. This failure mode favors evidence over compute savings.
 
 ## Escalate deliberately
 

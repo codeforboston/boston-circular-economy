@@ -102,6 +102,20 @@ This sequence is a compact presentation, not a replacement for Toulmin reasoning
 - the named boundary is the qualifier.
 - the remaining uncertainty is the rebuttal.
 
+## Explain a code change
+
+Follow the repository
+[`Code Change Standard`](../../../docs/CODE_CHANGE_STANDARD.md) for a pull request or
+decision record. State why the selected mechanism supports the claim. Compare it fairly
+with the closest credible alternative.
+
+State why the alternative loses under the named conditions. Name the trade-off that the
+selected design accepts and the evidence that should reopen the choice.
+
+Explain module ownership, contract effects, failure signals, recovery, and complexity.
+Use names, types, interfaces, and tests for ordinary behavior. Reserve comments for
+non-obvious reasons, invariants, policy constraints, and failure behavior.
+
 ## Translate dense technical text
 
 Use exactly these sections when a reader requests a translation:

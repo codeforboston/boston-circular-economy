@@ -50,8 +50,8 @@ Simplified Technical English to communicate the result.
 An orchestrating agent also applies
 [`route-agent-work`](../.agents/skills/route-agent-work/SKILL.md). It sends deterministic
 checks to hooks and tools. It sends bounded tasks with objective checks to a lower-cost
-agent, such as Terra. It reserves high-reasoning agents for ambiguous integration and
-conflicting evidence.
+agent. The default policy uses Luna for Green work and Terra for Yellow work. It uses
+Sol for ambiguous integration and conflicting evidence.
 
 | Role | Owns | Does not own |
 |---|---|---|
@@ -78,6 +78,9 @@ Give a subordinate agent one objective, the minimum required context, an output 
 and a validation command. The orchestrating agent inspects the evidence and integrates
 the result. This policy reduces repeated context transfer and avoids model work for
 decisions that deterministic automation can make.
+
+The machine-readable defaults are in `delivery-routing.json`. Inspect a proposed route
+before delegation. Model output remains advisory and never controls a CI result.
 
 ## 1. Shape ready work
 
@@ -164,6 +167,8 @@ Use the repository pull request template. A reviewable PR includes:
 - one linked work unit.
 - one behavioral claim.
 - visible grounds, warrant, qualifier, and strongest relevant rebuttal.
+- why the design works and why the closest credible alternative was not selected.
+- ownership, failure, recovery, and complexity effects.
 - the risk lane and scope boundaries.
 - checks that ran and checks that did not run.
 - screenshots or recordings for visible UI changes.
@@ -172,20 +177,33 @@ Use the repository pull request template. A reviewable PR includes:
 
 Open a draft PR early for Yellow and Red work. This creates a stable place for async mentoring without implying that the work is ready to merge.
 
+Follow [`CODE_CHANGE_STANDARD.md`](CODE_CHANGE_STANDARD.md). Use a decision record for
+a durable cross-system contract, dependency, external service, or high-impact risk.
+
 ## 7. Deterministic CI and deployment
 
-The `CI` workflow runs four independent checks on every pull request to `main` and every push to `main`:
+The `CI` workflow starts for every pull request to `main` and every push to `main`.
+The changed-file router selects applicable application checks from one versioned policy.
 
 | Check | Evidence |
 |---|---|
-| `CI / Prose` | Selected ASD-STE100 language rules, editorial-present patterns, and high-signal AI cliché checks |
+| `CI / Prose` | Submission structure, selected language rules, editorial patterns, and high-signal AI cliché checks |
 | `CI / Frontend` | Client lint and production build |
-| `CI / Server` | Production dependency audit, server lint, and TypeScript build |
+| `CI / Server` | Server lint and TypeScript build |
 | `CI / ETL` | Locked Python environment, Ruff lint and format checks, and pytest suite |
 
-The deployment workflow listens for a successful CI run caused by a push to `main`. It checks out the exact tested commit SHA, rebuilds the client with the lockfile, and deploys that artifact to GitHub Pages. Pull-request runs cannot deploy.
+The router runs all application checks for unknown paths, policy changes, and main-branch
+pushes. Unaffected pull-request jobs report a successful skip under job conditions.
+
+The deployment workflow listens for successful CI caused by a push to `main`. It
+downloads the tested client artifact from that CI run and deploys it to GitHub Pages.
+Pull-request runs cannot deploy.
 
 All third-party GitHub Actions are pinned to full commit SHAs. Workflow tokens receive read-only repository access unless the deployment job needs Pages and identity-token permissions.
+
+Dependency advisory data changes independently from the commit. Dependabot monitors it
+outside the deterministic build gate. See [`CI_CD_AGENT_ARCHITECTURE.md`](CI_CD_AGENT_ARCHITECTURE.md)
+for event, failure, hook, routing, and deployment contracts.
 
 ### Maintainer activation step
 
@@ -242,7 +260,7 @@ The goal is safer learning and lower reviewer load, not more AI-generated code.
 2. Ask a newcomer and a maintainer to independently identify missing context.
 3. Run the planning prompt and compare its questions with the humans' questions.
 4. Agree on the risk lane and mentor checkpoint.
-5. Open a draft PR and observe the three CI jobs.
+5. Open a draft PR and observe the routing job and four required checks.
 6. Run one challenge pass and reject any finding without evidence.
 7. Capture confusing steps as changes to this playbook.
 

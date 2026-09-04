@@ -11,6 +11,16 @@ change.
 
 ## Local quality checks
 
+Install the repository hooks once:
+
+```bash
+uv tool install pre-commit
+pre-commit install --hook-type pre-commit --hook-type pre-push
+```
+
+The commit hook checks changed prose and routing policy changes. The push hook selects
+subsystem checks from the same path policy that CI uses.
+
 Install locked dependencies and run every applicable check before requesting review:
 
 ```bash
@@ -29,6 +39,10 @@ python -B .agents/skills/make-evidence-based-technical-case/scripts/check_prose.
 ```
 
 Open a focused pull request that closes its issue. Use the pull request template to report evidence, missing checks, risk, and review questions. All CI checks and the required human review must pass before merge.
+
+Follow [`docs/CODE_CHANGE_STANDARD.md`](docs/CODE_CHANGE_STANDARD.md). Explain why the
+design supports the claim and why the closest credible alternative was not selected.
+State module ownership, failure, recovery, and complexity effects.
 
 The prose check enforces sentence rules in Markdown. It detects high-signal editorial
 violations in source and configuration files. These violations include contractions,

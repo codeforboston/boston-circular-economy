@@ -56,6 +56,17 @@ Give a subordinate agent one objective and only the required context. Define its
 validation, and stop condition. Do not duplicate exploration across agents. A human
 retains product intent, risk acceptance, approval, and merge authority.
 
+Inspect the machine-readable route before delegating bounded work:
+
+```bash
+python -B .agents/skills/route-agent-work/scripts/route_work.py \
+  recommend --task-type bounded --risk yellow
+```
+
+The routing file selects Luna for bounded Green work and Terra for bounded Yellow work.
+Sol handles ambiguous integration. Exact Red work stays on deterministic tools and adds
+a human checkpoint. Red judgment requires a specialist and the accountable human.
+
 ## Setup and checks
 
 Use locked dependencies. Do not claim a check passed unless you ran it.
@@ -80,6 +91,16 @@ python -B .agents/skills/make-evidence-based-technical-case/scripts/check_prose.
 
 Run the smallest relevant check while iterating. Run every applicable check before opening or updating a pull request. CI is the merge evidence of record.
 
+Install the repository hooks once in each clone:
+
+```bash
+uv tool install pre-commit
+pre-commit install --hook-type pre-commit --hook-type pre-push
+```
+
+The commit hook checks changed prose and tests routing policy changes. The push hook
+uses the same file policy as CI to run applicable subsystem checks.
+
 ## Work-unit protocol
 
 Start from one GitHub issue that has:
@@ -102,6 +123,10 @@ Then identify the affected subsystem, invariants, failure cases, validation comm
 State why the available grounds support the claim. Name the strongest condition that
 could defeat it.
 
+Follow [`docs/CODE_CHANGE_STANDARD.md`](docs/CODE_CHANGE_STANDARD.md). Explain why the
+selected mechanism supports the claim and why the closest credible alternative loses.
+State ownership, failure, recovery, and complexity effects in the pull request.
+
 ## Risk lanes
 
 - **Green:** documentation, prototypes, isolated styling, and behavior-preserving refactors. Use focused checks and a quick human review.
@@ -118,6 +143,9 @@ Use Yellow when the lane is unclear. A file under `client/src/pages/dev/` may mo
 - Exercise expected, boundary, dependency-failure, and historical regression cases that apply.
 - Keep provider-specific data behind ETL source boundaries.
 - Keep generated files generated. Do not hand-edit `client/src/routeTree.gen.ts` unless the router workflow requires it.
+- Use names, types, interfaces, and tests to explain behavior. Add comments for
+  non-obvious reasons, invariants, compatibility boundaries, or failure behavior.
+- Do not add a comment that only restates the next line of code.
 - Never call paid or rate-limited external APIs in the default test suite.
 - Never commit API keys, credentials, local databases, or personally identifiable information. Never paste them into an AI prompt.
 
