@@ -49,19 +49,31 @@ deterministic build gate. A maintainer evaluates each advisory and proposed upda
 
 ## Pull request checks
 
-The `CI` workflow always starts for pull requests to `main`. It does not use workflow
-path filters because a filtered required workflow can remain pending.
+The `CI` workflow starts for each code revision to a pull request against `main`. The
+`Submission` workflow also starts when the pull request description changes. Neither
+workflow uses path filters because a filtered required workflow can remain pending.
 
 | Job | Selection | Result |
 |---|---|---|
 | `Route changes` | Always | Tests the policy and classifies the diff. |
-| `Prose` | Always | Checks prose, the submission record, and review policy. |
+| `Submission record` | Always | Checks the current pull request record without changing application contexts. |
+| `Prose` | Always | Checks repository prose and review policy. |
 | `Frontend` | Routed | Installs locked npm dependencies, then lints and builds the client. |
 | `Server` | Routed | Installs locked npm dependencies, then lints and builds the server. |
 | `ETL` | Routed | Installs the locked uv environment, then runs Ruff and pytest. |
 
-The required check names remain `Prose`, `Frontend`, `Server`, and `ETL`. A job-level
-condition reports a successful skip when its subsystem is not affected.
+The required check names are `Submission record`, `Prose`, `Frontend`, `Server`, and
+`ETL`. A job-level condition reports a successful skip when its subsystem is not
+affected.
+
+The submission workflow has a separate pull-request concurrency group. A description
+edit cancels only an older submission check. It cannot cancel code CI or publish
+replacement application contexts. The read-only `pull_request_target` workflow runs
+from the default branch and checks out only the base revision. It treats pull request
+metadata as data and never executes pull request code.
+
+The merge queue receives a stable `Submission record` context. Each constituent pull
+request supplies the validated record before it enters that queue.
 
 The router fails closed:
 
@@ -174,9 +186,9 @@ Every pull request follows `docs/CODE_CHANGE_STANDARD.md`. The record includes t
 evidence, reasoning, selected design, rejected alternative, and limits. It also includes
 the comprehension path, refactor boundary, and review question.
 
-The `Prose` job enforces the structure and selected language rules. An edited pull
-request description reruns this job without repeating the application builds. Human
-review decides whether the stated why and why-not match the code and evidence.
+The `Submission record` job enforces the required structure after a code revision or
+description edit. The `Prose` job enforces selected language rules in repository files.
+Human review decides whether the stated why and why-not match the code and evidence.
 
 Comments explain non-obvious reasons and invariants. Names, types, interfaces, and tests
 explain ordinary behavior. This rule avoids comments that repeat implementation syntax.
@@ -208,8 +220,9 @@ or incident in a runbook when production recovery requires more than a new deplo
 
 ## Maintainer activation
 
-After merge, confirm one successful `CI` run on `main`. Configure `Prose`, `Frontend`,
-`Server`, and `ETL` as required checks in the protected-main ruleset.
+After merge, confirm one successful `CI` run on `main`. Configure `Submission record`,
+`Prose`, `Frontend`, `Server`, and `ETL` as required checks in the protected-main
+ruleset.
 
 Connect the repository in Codex settings. Confirm that it is team-enabled before you
 enable automatic review. Otherwise, use `@codex review` on each representative change.

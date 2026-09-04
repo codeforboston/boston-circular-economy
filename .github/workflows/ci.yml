@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
     branches: [main]
-    types: [opened, reopened, synchronize, edited]
+    types: [opened, reopened, synchronize]
   push:
     branches: [main]
   merge_group:
@@ -81,19 +81,11 @@ jobs:
           python -B -m unittest discover
           -s .agents/skills/review-code-change/scripts
           -p 'test_*.py' -v
-      - name: Check pull request submission record
-        if: github.event_name == 'pull_request'
-        run: >-
-          python -B
-          .agents/skills/make-evidence-based-technical-case/scripts/check_submission.py
-          --event "$GITHUB_EVENT_PATH"
-
   frontend:
     name: Frontend
     needs: changes
     if: >-
       always() &&
-      github.event.action != 'edited' &&
       (needs.changes.result != 'success' || needs.changes.outputs.frontend == 'true')
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -128,7 +120,6 @@ jobs:
     needs: changes
     if: >-
       always() &&
-      github.event.action != 'edited' &&
       (needs.changes.result != 'success' || needs.changes.outputs.server == 'true')
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -155,7 +146,6 @@ jobs:
     needs: changes
     if: >-
       always() &&
-      github.event.action != 'edited' &&
       (needs.changes.result != 'success' || needs.changes.outputs.etl == 'true')
     runs-on: ubuntu-24.04
     timeout-minutes: 10

@@ -44,9 +44,12 @@ class RouteWorkTests(unittest.TestCase):
             route.checks, {"frontend": False, "server": False, "etl": True}
         )
 
-    def test_ci_change_runs_all_checks(self) -> None:
-        route = route_work.classify_files([".github/workflows/ci.yml"], self.policy)
+    def test_workflow_change_runs_all_checks(self) -> None:
+        route = route_work.classify_files(
+            [".github/workflows/submission.yml"], self.policy
+        )
         self.assertTrue(all(route.checks.values()))
+        self.assertEqual(route.unknown_files, ())
 
     def test_routing_skill_change_runs_all_checks(self) -> None:
         route = route_work.classify_files(

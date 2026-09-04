@@ -193,14 +193,15 @@ a durable cross-system contract, dependency, external service, or high-impact ri
 
 ## 7. Deterministic CI and deployment
 
-The `CI` workflow starts for every pull request to `main` and every push to `main`.
-The changed-file router selects applicable application checks from one versioned policy.
-An edited pull request description reruns the submission record check without repeating
-the application builds.
+The `CI` workflow starts for every code revision to a pull request against `main` and
+every push to `main`. The changed-file router selects applicable application checks
+from one versioned policy. The `Submission` workflow validates the pull request record
+on code revisions and description edits. Its concurrency group cannot cancel code CI.
 
 | Check | Evidence |
 |---|---|
-| `CI / Prose` | Submission structure, selected language rules, editorial patterns, and high-signal AI cliché checks |
+| `Submission / Submission record` | Current pull request structure, reasoning fields, evidence, and accountability |
+| `CI / Prose` | Selected language rules, editorial patterns, and high-signal AI cliché checks |
 | `CI / Frontend` | Client lint and production build |
 | `CI / Server` | Server lint and TypeScript build |
 | `CI / ETL` | Locked Python environment, Ruff lint and format checks, and pytest suite |
@@ -220,10 +221,11 @@ for event, failure, hook, routing, and deployment contracts.
 
 ### Maintainer activation step
 
-After this pilot PR merges, all four checks must complete successfully on `main`.
+After this pilot PR merges, the five checks must complete successfully.
 A repository administrator should then add these checks to the **Protect Main Branch**
 ruleset:
 
+- `Submission record`
 - `Prose`
 - `Frontend`
 - `Server`
@@ -293,6 +295,12 @@ The default scope reviews the current tracked state against the base. Add
 `--scope uncommitted` to review staged, unstaged, and untracked work without branch
 history. The runner forces a read-only Codex sandbox.
 
+The `Submission record` job enforces the pull request evidence structure. Its read-only
+`pull_request_target` workflow runs from the default branch and checks out only the base
+revision. It treats the pull request description as untrusted data and never runs pull
+request code. The workflow becomes active for subsequent pull requests after this pilot
+enters `main`.
+
 The `Prose` job enforces deterministic language rules in repository files. It applies
 sentence rules to Markdown and high-signal editorial checks to prose-bearing files.
 Human review assesses accuracy, active voice, term meaning, cadence, Toulmin structure,
@@ -323,7 +331,7 @@ The goal is safer learning and lower reviewer load, not more AI-generated code.
 2. Ask a newcomer and a maintainer to independently identify missing context.
 3. Run the planning prompt and compare its questions with the humans' questions.
 4. Agree on the risk lane and mentor checkpoint.
-5. Open a draft PR and observe the routing job and four required checks.
+5. Open a draft PR and observe the routing job and five required checks.
 6. Run one challenge pass and reject any finding without evidence.
 7. Capture confusing steps as changes to this playbook.
 

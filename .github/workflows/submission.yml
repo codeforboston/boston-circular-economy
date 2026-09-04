@@ -1,0 +1,42 @@
+name: Submission
+
+on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, reopened, synchronize, edited]
+  merge_group:
+    types: [checks_requested]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: submission-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  record:
+    name: Submission record
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository history
+        if: github.event_name == 'pull_request_target'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+      - name: Set up Python
+        if: github.event_name == 'pull_request_target'
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.14.3'
+      - name: Check pull request submission record
+        if: github.event_name == 'pull_request_target'
+        run: >-
+          python -B
+          .agents/skills/make-evidence-based-technical-case/scripts/check_submission.py
+          --event "$GITHUB_EVENT_PATH"
+      - name: Preserve the required merge queue check
+        if: github.event_name == 'merge_group'
+        run: echo "Each pull request supplied its submission record before entering the merge queue."

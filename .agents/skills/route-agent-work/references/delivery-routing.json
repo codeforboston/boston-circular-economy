@@ -23,8 +23,7 @@
     }
   },
   "all_checks_paths": [
-    ".github/workflows/ci.yml",
-    ".github/workflows/deploy.yml",
+    ".github/workflows/**",
     ".pre-commit-config.yaml",
     ".node-version",
     ".agents/skills/route-agent-work/**"

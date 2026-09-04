@@ -27,8 +27,9 @@ The submission record must contain:
 11. Code ownership, failure behavior, recovery, and complexity effects.
 12. Reproducible checks, including a reason for each check that did not run.
 
-The `Prose` CI job checks the required sections, labels, risk lane, issue reference,
-AI disclosure, and submitter attestation. It also checks selected language rules.
+The `Submission record` job checks the required sections, labels, risk lane, issue
+reference, AI disclosure, and submitter attestation. The `Prose` CI job checks selected
+language rules in repository files.
 
 CI cannot decide whether the stated rationale is true or complete. The contributor and
 human reviewer must compare the explanation with the implementation and evidence.

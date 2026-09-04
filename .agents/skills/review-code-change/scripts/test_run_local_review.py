@@ -137,14 +137,30 @@ class LocalReviewRunnerTests(unittest.TestCase):
         self.assertIn("### Tested deployment identity", workflow_guidance)
         self.assertIn("### Required check continuity", workflow_guidance)
 
-    def test_pr_body_edits_recheck_submission_without_application_builds(self) -> None:
-        workflow = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+    def test_pr_body_edits_use_an_independent_required_check(self) -> None:
+        ci_workflow = (ROOT / ".github/workflows/ci.yml").read_text(
+            encoding="utf-8"
+        )
+        submission_workflow = (ROOT / ".github/workflows/submission.yml").read_text(
+            encoding="utf-8"
+        )
 
+        self.assertNotIn("edited", ci_workflow)
+        self.assertNotIn("github.event.action != 'edited'", ci_workflow)
         self.assertIn(
             "types: [opened, reopened, synchronize, edited]",
-            workflow,
+            submission_workflow,
         )
-        self.assertEqual(3, workflow.count("github.event.action != 'edited'"))
+        self.assertIn("name: Submission record", submission_workflow)
+        self.assertIn("merge_group:", submission_workflow)
+        self.assertIn("group: submission-", submission_workflow)
+        self.assertIn("pull_request_target:", submission_workflow)
+        self.assertNotIn("\n  pull_request:\n", submission_workflow)
+        self.assertIn(
+            "ref: ${{ github.event.pull_request.base.sha }}",
+            submission_workflow,
+        )
+        self.assertIn("persist-credentials: false", submission_workflow)
 
 
 if __name__ == "__main__":
