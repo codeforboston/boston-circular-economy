@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import unittest
+from unittest import mock
 
 from run_local_checks import (
     default_diff_context,
     files_for_run,
     is_zero_oid,
+    main,
     require_checked_out_commit,
 )
 
@@ -60,6 +62,15 @@ class LocalCheckRunnerTests(unittest.TestCase):
         self.assertTrue(is_zero_oid("0" * 40))
         self.assertFalse(is_zero_oid("0000001"))
         self.assertFalse(is_zero_oid(""))
+
+    @mock.patch("run_local_checks.resolve_commit")
+    def test_deleted_ref_exits_before_commit_resolution(
+        self, resolve_commit: mock.Mock
+    ) -> None:
+        result = main(["--base", "1" * 40, "--head", "0" * 40])
+
+        self.assertEqual(0, result)
+        resolve_commit.assert_not_called()
 
     def test_rejects_partial_hook_context(self) -> None:
         with self.assertRaisesRegex(ValueError, "must be set together"):

@@ -91,6 +91,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--all", action="store_true", dest="force_all")
     arguments = parser.parse_args(argv)
 
+    if is_zero_oid(arguments.head):
+        print("Skipping checks for a deleted Git ref.")
+        return 0
+
     require_checked_out_commit(
         resolve_commit(arguments.head),
         resolve_commit("HEAD"),
