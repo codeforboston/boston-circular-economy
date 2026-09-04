@@ -24,7 +24,7 @@ subsystem checks from the same path policy that CI uses.
 Install locked dependencies and run every applicable check before requesting review:
 
 ```bash
-npm ci
+npm ci --no-audit --no-fund
 npm run lint
 npm run build
 

@@ -86,6 +86,9 @@ The local hook does not run `npm ci` because that command replaces the local dep
 tree. Contributors install locked dependencies before the hook runs. CI creates clean
 environments and remains the merge evidence of record.
 
+CI disables npm audit and funding requests during installation. Dependabot owns advisory
+monitoring, so the required install step does not depend on changing advisory data.
+
 ## Model routing
 
 The agent router is advisory. It selects the least costly executor that can produce

@@ -73,7 +73,7 @@ Use locked dependencies. Do not claim a check passed unless you ran it.
 
 ```bash
 # JavaScript and TypeScript workspaces
-npm ci
+npm ci --no-audit --no-fund
 npm run lint
 npm run build
 

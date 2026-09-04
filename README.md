@@ -12,7 +12,7 @@ Boston Circular Economy helps Greater Boston residents discover repair, reuse, d
 ## Development
 
 ```bash
-npm ci
+npm ci --no-audit --no-fund
 npm run lint
 npm run build
 

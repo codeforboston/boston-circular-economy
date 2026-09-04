@@ -102,7 +102,7 @@ jobs:
           node-version-file: .node-version
           cache: npm
       - name: Install locked dependencies
-        run: npm ci
+        run: npm ci --no-audit --no-fund
       - name: Lint client
         run: npm run lint -w client
       - name: Build client
@@ -136,7 +136,7 @@ jobs:
           node-version-file: .node-version
           cache: npm
       - name: Install locked dependencies
-        run: npm ci
+        run: npm ci --no-audit --no-fund
       - name: Lint server
         run: npm run lint -w server
       - name: Build server
