@@ -34,4 +34,5 @@ This file adds review rules for workflows and repository automation. Apply the r
   repository reads.
 - Flag a status writer when an older run can overwrite a newer pull request result.
   Safe path: compare the live head and body with the triggering event before
-  publication. Cancel older runs and publish no final status after a mismatch.
+  publication. Serialize status writers, do not cancel an active writer, and suppress
+  publication from a manually canceled run.

@@ -306,9 +306,10 @@ workflow becomes active for subsequent pull requests after this pilot enters `ma
 
 The workflow fetches the live pull request before validation and immediately before it
 publishes a result. It compares the head commit and description with the triggering
-event. A stale run publishes no final status, so the newer run owns the fixed context.
-Keep merge queues disabled while this metadata status is required. A merge-group event
-does not contain enough information to revalidate every constituent pull request body.
+event. Its concurrency group serializes status writers without canceling an active
+writer. A manually canceled or stale run publishes no final status. Keep merge queues
+disabled while this metadata status is required. A merge-group event cannot revalidate
+every constituent pull request body.
 
 The `Prose` job enforces deterministic language rules in repository files. It applies
 sentence rules to Markdown and high-signal editorial checks to prose-bearing files.

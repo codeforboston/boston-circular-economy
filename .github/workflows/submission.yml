@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: submission-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   record:
@@ -64,7 +64,9 @@ jobs:
             .agents/skills/make-evidence-based-technical-case/scripts/check_submission.py \
             --event "$RUNNER_TEMP/submission-event.json"
       - name: Publish the pull request record result
-        if: always() && github.event_name == 'pull_request_target'
+        if: >-
+          always() && !cancelled() &&
+          github.event_name == 'pull_request_target'
         id: publish
         continue-on-error: true
         env:

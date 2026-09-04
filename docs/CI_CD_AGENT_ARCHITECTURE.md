@@ -77,9 +77,10 @@ contents. The workflow publishes a fixed `Submission record` context on the pull
 request head commit.
 
 Before the workflow checks or publishes a result, it fetches the live pull request. It
-compares the live head and body with the event that started the run. A stale run does
-not publish a final status. The per-pull-request concurrency group also cancels older
-runs when GitHub delivers a new code or description event.
+compares the live head and body with the event that started the run. The concurrency
+group serializes status writers and does not cancel an active writer. A newer event waits
+for that writer, then publishes the current result. A manually canceled run does not
+publish.
 
 This status gate is not merge-queue compatible. GitHub attaches a merge-queue check to
 the temporary merge-group commit, but that event does not provide each current pull

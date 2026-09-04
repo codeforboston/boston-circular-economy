@@ -233,6 +233,30 @@ class CheckSubmissionTests(unittest.TestCase):
                     ],
                 )
 
+    def test_fenced_template_cannot_satisfy_submission(self) -> None:
+        body = f"```markdown\n{VALID_BODY}```\n"
+
+        rules = [finding.rule for finding in check_submission.check_submission(body)]
+
+        self.assertIn("missing-section", rules)
+        self.assertIn("accountability", rules)
+
+    def test_fenced_example_does_not_duplicate_valid_sections(self) -> None:
+        body = f"{VALID_BODY}\n```markdown\n## Risk and scope\n```\n"
+
+        self.assertEqual(check_submission.check_submission(body), [])
+
+    def test_indented_code_cannot_satisfy_submission_fields(self) -> None:
+        body = "\n".join(
+            line if line.startswith("## ") or not line else f"    {line}"
+            for line in VALID_BODY.splitlines()
+        )
+
+        rules = [finding.rule for finding in check_submission.check_submission(body)]
+
+        self.assertIn("missing-label", rules)
+        self.assertIn("accountability", rules)
+
     def test_issue_exception_is_accepted(self) -> None:
         body = VALID_BODY.replace(
             "Closes #123", "Issue exception: This maintenance work predates the form."

@@ -90,6 +90,9 @@ class LocalReviewRunnerTests(unittest.TestCase):
             "etl/src/migration.py",
             "etl/src/etl/migrations/0001_initial.py",
             "server/src/db/migrations/add-column.ts",
+            "server/migration.sql",
+            "server/migrations/0001.sql",
+            "server/db/migrations/0002.sql",
         )
         policy = load_risk_policy()
 
@@ -97,6 +100,28 @@ class LocalReviewRunnerTests(unittest.TestCase):
             with self.subTest(path=path):
                 assessment = infer_minimum_risk([path], policy)
                 self.assertEqual("red", assessment["risk"])
+
+    def test_critical_accessibility_path_requires_red_review(self) -> None:
+        paths = (
+            "client/src/accessibility/focus-trap.tsx",
+            "client/src/a11y/keyboard-navigation.tsx",
+            "client/src/components/aria-live-region.tsx",
+            "client/src/components/dialog-focus-trap.tsx",
+            "client/src/components/keyboard-navigation.tsx",
+        )
+        policy = load_risk_policy()
+
+        for path in paths:
+            with self.subTest(path=path):
+                assessment = infer_minimum_risk([path], policy)
+                self.assertEqual("red", assessment["risk"])
+
+    def test_ordinary_styling_does_not_require_red_review(self) -> None:
+        assessment = infer_minimum_risk(
+            ["client/src/styles/focus-ring.css"], load_risk_policy()
+        )
+
+        self.assertEqual("yellow", assessment["risk"])
 
     def test_destructive_operation_path_requires_red_review(self) -> None:
         paths = (
@@ -222,6 +247,8 @@ class LocalReviewRunnerTests(unittest.TestCase):
         self.assertIn("--slurpfile expected", submission_workflow)
         self.assertIn("pull_request.body", submission_workflow)
         self.assertIn("$RUNNER_TEMP/latest-pr.json", submission_workflow)
+        self.assertIn("!cancelled()", submission_workflow)
+        self.assertIn("cancel-in-progress: false", submission_workflow)
         self.assertIn("-f state=pending", submission_workflow)
         first_live_read = submission_workflow.index(
             'gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER"'

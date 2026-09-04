@@ -67,6 +67,8 @@ REQUIRED_EVIDENCE_CHECKS = (
 ALLOWED_EVIDENCE_RESULTS = {"pass", "fail", "not run", "not affected"}
 SECTION_HEADING = re.compile(r"(?m)^##\s+(.+?)\s*$")
 TRAILING_HEADING_MARKS = re.compile(r"[ \t]+#+[ \t]*$")
+FENCE_START = re.compile(r"^[ ]{0,3}(`{3,}|~{3,})[^\r\n]*$")
+INDENTED_CODE = re.compile(r"^(?: {4}|\t)")
 
 
 @dataclass(frozen=True, slots=True)
@@ -82,6 +84,35 @@ def normalize_section_name(name: str) -> str:
     without_comments = PLACEHOLDER.sub("", name)
     without_marks = TRAILING_HEADING_MARKS.sub("", without_comments)
     return " ".join(without_marks.split()).casefold()
+
+
+def mask_markdown_code_blocks(body: str) -> str:
+    """Hide Markdown code blocks so examples cannot satisfy record fields."""
+
+    output: list[str] = []
+    fence_character: str | None = None
+    fence_length = 0
+    for line in body.splitlines(keepends=True):
+        content = line.rstrip("\r\n")
+        if fence_character is None:
+            if INDENTED_CODE.match(content):
+                output.append("".join("\n" if value == "\n" else " " for value in line))
+                continue
+            match = FENCE_START.match(content)
+            if match is None:
+                output.append(line)
+                continue
+            marker = match.group(1)
+            fence_character = marker[0]
+            fence_length = len(marker)
+        elif re.fullmatch(
+            rf"[ ]{{0,3}}{re.escape(fence_character)}{{{fence_length},}}[ \t]*",
+            content,
+        ):
+            fence_character = None
+            fence_length = 0
+        output.append("".join("\n" if value == "\n" else " " for value in line))
+    return "".join(output)
 
 
 def section_map(body: str) -> dict[str, str]:
@@ -150,10 +181,11 @@ def evidence_findings(content: str) -> list[SubmissionFinding]:
 
 def check_submission(body: str) -> list[SubmissionFinding]:
     findings: list[SubmissionFinding] = []
-    sections = section_map(body)
+    record = mask_markdown_code_blocks(body)
+    sections = section_map(record)
     section_names = [
         normalize_section_name(match.group(1))
-        for match in SECTION_HEADING.finditer(body)
+        for match in SECTION_HEADING.finditer(record)
     ]
 
     for name in REQUIRED_SECTIONS:
@@ -179,11 +211,11 @@ def check_submission(body: str) -> list[SubmissionFinding]:
                     SubmissionFinding("empty-label", f"{section_name}: {label}")
                 )
 
-    if PLACEHOLDER.search(body):
+    if PLACEHOLDER.search(record):
         findings.append(
             SubmissionFinding("template-placeholder", "remove all HTML placeholders")
         )
-    if not ISSUE_REFERENCE.search(body) and not ISSUE_EXCEPTION.search(body):
+    if not ISSUE_REFERENCE.search(record) and not ISSUE_EXCEPTION.search(record):
         findings.append(
             SubmissionFinding(
                 "issue-reference",
@@ -206,7 +238,7 @@ def check_submission(body: str) -> list[SubmissionFinding]:
     evidence_key = normalize_section_name("Evidence")
     if evidence_key in sections:
         findings.extend(evidence_findings(sections[evidence_key]))
-    if ACCOUNTABILITY not in body:
+    if ACCOUNTABILITY not in record:
         findings.append(
             SubmissionFinding("accountability", "include the submitter attestation")
         )
