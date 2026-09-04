@@ -34,8 +34,18 @@
     "client/src/**/*privacy*",
     "client/src/**/*secret*",
     "client/src/**/*session*",
+    "client/src/**/delete*",
+    "client/src/**/purge*",
+    "client/src/**/reset*data*",
+    "client/src/**/reset*database*",
+    "client/src/**/reset*tenant*",
     "etl/**/migration*",
     "etl/**/migrations/**",
+    "etl/src/**/delete*",
+    "etl/src/**/purge*",
+    "etl/src/**/reset*data*",
+    "etl/src/**/reset*database*",
+    "etl/src/**/reset*tenant*",
     "server/src/**/auth.*",
     "server/src/**/auth/**",
     "server/src/**/*authentication*",
@@ -48,6 +58,11 @@
     "server/src/**/*permission*",
     "server/src/**/*privacy*",
     "server/src/**/*secret*",
-    "server/src/**/*session*"
+    "server/src/**/*session*",
+    "server/src/**/delete*",
+    "server/src/**/purge*",
+    "server/src/**/reset*data*",
+    "server/src/**/reset*database*",
+    "server/src/**/reset*tenant*"
   ]
 }

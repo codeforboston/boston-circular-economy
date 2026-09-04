@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import argparse
+import io
 import re
 import sys
+import tokenize
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -340,11 +342,11 @@ def editorial_findings(path: Path) -> list[Finding]:
         return []
     findings: list[Finding] = []
     source_text = path.read_text(encoding="utf-8")
-    text = (
-        mask_markdown_code(source_text)
-        if path.suffix.casefold() == ".md"
-        else source_text
-    )
+    suffix = path.suffix.casefold()
+    if suffix == ".md":
+        text = mask_markdown_code(source_text)
+    else:
+        text = mask_source_code(suffix, source_text)
     for name, pattern in EDITORIAL_PATTERNS.items():
         if name in TEMPORAL_PATTERN_NAMES and path.name in TEMPORAL_EXEMPT_NAMES:
             continue
@@ -354,6 +356,499 @@ def editorial_findings(path: Path) -> list[Finding]:
             line = text.count("\n", 0, match.start()) + 1
             findings.append(Finding(path, line, name, match.group(0)))
     return findings
+
+
+def blank_like(text: str) -> str:
+    """Replace non-newline characters so source offsets remain stable."""
+
+    return "".join("\n" if character == "\n" else " " for character in text)
+
+
+def line_offsets(text: str) -> list[int]:
+    offsets = [0]
+    for index, character in enumerate(text):
+        if character == "\n":
+            offsets.append(index + 1)
+    return offsets
+
+
+def copy_span(output: list[str], source: str, start: int, end: int) -> None:
+    output[start:end] = source[start:end]
+
+
+def mask_span(output: list[str], source: str, start: int, end: int) -> None:
+    output[start:end] = blank_like(source[start:end])
+
+
+def position_offset(offsets: list[int], position: tuple[int, int]) -> int:
+    line, column = position
+    return offsets[line - 1] + column
+
+
+PYTHON_STRING_START = re.compile(r"(?i:([rubf]*))(\"\"\"|'''|\"|')")
+
+
+def python_fstring_expression_end(text: str, start: int, end: int) -> int | None:
+    """Find the matching brace for one replacement field."""
+
+    pairs = {"(": ")", "[": "]", "{": "}"}
+    containers: list[str] = []
+    index = start
+    while index < end:
+        if text.startswith(('"""', "'''"), index):
+            delimiter = text[index : index + 3]
+            closing = text.find(delimiter, index + 3, end)
+            if closing == -1:
+                return None
+            index = closing + 3
+            continue
+        character = text[index]
+        if character in "'\"":
+            quote = character
+            index += 1
+            while index < end:
+                if text[index] == "\\":
+                    index += 2
+                    continue
+                if text[index] == quote:
+                    index += 1
+                    break
+                index += 1
+            continue
+        if character == "#":
+            newline = text.find("\n", index, end)
+            index = end if newline == -1 else newline + 1
+            continue
+        if character in pairs:
+            containers.append(pairs[character])
+        elif containers and character == containers[-1]:
+            containers.pop()
+        elif character == "}" and not containers:
+            return index
+        index += 1
+    return None
+
+
+def copy_python_string(text: str, output: list[str], start: int, end: int) -> None:
+    """Copy string text while hiding replacement fields in legacy f-string tokens."""
+
+    value = text[start:end]
+    match = PYTHON_STRING_START.match(value)
+    if match is None or "f" not in match.group(1).casefold():
+        copy_span(output, text, start, end)
+        return
+
+    delimiter = match.group(2)
+    content_start = start + match.end()
+    content_end = end - len(delimiter) if value.endswith(delimiter) else end
+    copy_span(output, text, start, content_start)
+    index = content_start
+    literal_start = content_start
+    while index < content_end:
+        if text[index] == "\\":
+            index += 2
+            continue
+        if text.startswith(("{{", "}}"), index):
+            index += 2
+            continue
+        if text[index] != "{":
+            index += 1
+            continue
+        copy_span(output, text, literal_start, index + 1)
+        expression_end = python_fstring_expression_end(text, index + 1, content_end)
+        if expression_end is None:
+            copy_span(output, text, index + 1, content_end)
+            literal_start = content_end
+            break
+        copy_span(output, text, expression_end, expression_end + 1)
+        index = expression_end + 1
+        literal_start = index
+    copy_span(output, text, literal_start, content_end)
+    copy_span(output, text, content_end, end)
+
+
+def mask_python_code(text: str) -> str:
+    """Keep Python comments and string text, but hide executable identifiers."""
+
+    output = list(blank_like(text))
+    offsets = line_offsets(text)
+    fstring_start = getattr(tokenize, "FSTRING_START", None)
+    fstring_middle = getattr(tokenize, "FSTRING_MIDDLE", None)
+    fstring_end = getattr(tokenize, "FSTRING_END", None)
+    fstring_depth = 0
+    try:
+        for token in tokenize.generate_tokens(io.StringIO(text).readline):
+            start = position_offset(offsets, token.start)
+            end = position_offset(offsets, token.end)
+            if fstring_start is not None and token.type == fstring_start:
+                fstring_depth += 1
+                if fstring_depth == 1:
+                    copy_span(output, text, start, end)
+            elif fstring_middle is not None and token.type == fstring_middle:
+                if fstring_depth == 1:
+                    copy_span(output, text, start, end)
+            elif fstring_end is not None and token.type == fstring_end:
+                if fstring_depth == 1:
+                    copy_span(output, text, start, end)
+                fstring_depth -= 1
+            elif token.type == tokenize.STRING and fstring_depth == 0:
+                copy_python_string(text, output, start, end)
+            elif token.type == tokenize.COMMENT and fstring_depth == 0:
+                copy_span(output, text, start, end)
+    except (IndentationError, tokenize.TokenError):
+        # Preserve recognized reader text without falling back to raw identifiers.
+        pass
+    return "".join(output)
+
+
+def copy_js_string(text: str, output: list[str], start: int, quote: str) -> int:
+    """Copy one quoted JavaScript string and return the next source position."""
+
+    index = start + 1
+    while index < len(text):
+        if text[index] == "\\":
+            index += 2
+            continue
+        if text[index] == quote:
+            index += 1
+            break
+        if quote != "`" and text[index] in "\r\n":
+            break
+        index += 1
+    copy_span(output, text, start, min(index, len(text)))
+    return min(index, len(text))
+
+
+def mask_js_template(text: str, output: list[str], start: int) -> int:
+    """Copy template literal text while hiding interpolation expressions."""
+
+    index = start + 1
+    literal_start = start
+    while index < len(text):
+        if text[index] == "\\":
+            index += 2
+            continue
+        if text.startswith("${", index):
+            copy_span(output, text, literal_start, index + 2)
+            index = mask_javascript_code(text, output, index + 2, stop_at_brace=True)
+            if index < len(text) and text[index] == "}":
+                copy_span(output, text, index, index + 1)
+                index += 1
+            literal_start = index
+            continue
+        if text[index] == "`":
+            index += 1
+            copy_span(output, text, literal_start, index)
+            return index
+        index += 1
+    copy_span(output, text, literal_start, len(text))
+    return len(text)
+
+
+def javascript_expression_start(text: str, index: int) -> bool:
+    prefix = text[:index].rstrip()
+    return bool(
+        not prefix
+        or re.search(r"(?:\breturn|\bexport\s+default|=>|[=([{,:?])$", prefix)
+    )
+
+
+def jsx_tag_end(text: str, start: int) -> int | None:
+    """Find a JSX tag end without mistaking quoted or braced content for markup."""
+
+    index = start + 1
+    if text.startswith(">", index):
+        return index
+    if index >= len(text) or not (text[index].isalpha() or text[index] == "/"):
+        return None
+    braces = 0
+    quote: str | None = None
+    while index < len(text):
+        character = text[index]
+        if quote:
+            if character == "\\":
+                index += 2
+                continue
+            if character == quote:
+                quote = None
+            index += 1
+            continue
+        if character in "'\"`":
+            quote = character
+        elif character == "{":
+            braces += 1
+        elif character == "}" and braces:
+            braces -= 1
+        elif character == ">" and not braces:
+            return index
+        elif character in ",;" and not braces:
+            return None
+        index += 1
+    return None
+
+
+def copy_jsx_tag_literals(text: str, output: list[str], start: int, end: int) -> None:
+    """Keep quoted JSX attribute text while leaving tag names and props hidden."""
+
+    index = start
+    while index < end:
+        if text[index] in "'\"":
+            next_index = copy_js_string(text, output, index, text[index])
+            index = min(next_index, end)
+        elif text[index] == "`":
+            next_index = mask_js_template(text, output, index)
+            index = min(next_index, end)
+        else:
+            index += 1
+
+
+def mask_jsx_children(text: str, output: list[str], start: int) -> int:
+    """Copy JSX text nodes and hide tags and JavaScript expressions."""
+
+    index = start
+    depth = 1
+    while index < len(text):
+        if text[index] == "{":
+            index = mask_javascript_code(text, output, index + 1, stop_at_brace=True)
+            if index < len(text) and text[index] == "}":
+                index += 1
+            continue
+        if text[index] == "<":
+            end = jsx_tag_end(text, index)
+            if end is None:
+                copy_span(output, text, index, index + 1)
+                index += 1
+                continue
+            copy_jsx_tag_literals(text, output, index, end + 1)
+            stripped = text[index + 1 : end].strip()
+            if stripped.startswith("/"):
+                depth -= 1
+                index = end + 1
+                if depth == 0:
+                    return index
+                continue
+            if not stripped.endswith("/"):
+                depth += 1
+            index = end + 1
+            continue
+        copy_span(output, text, index, index + 1)
+        index += 1
+    return index
+
+
+def mask_javascript_code(
+    text: str, output: list[str], start: int = 0, *, stop_at_brace: bool = False
+) -> int:
+    """Mask JavaScript code while keeping comments, strings, templates, and JSX text."""
+
+    index = start
+    brace_depth = 0
+    while index < len(text):
+        if text.startswith("//", index):
+            end = text.find("\n", index)
+            end = len(text) if end == -1 else end
+            copy_span(output, text, index, end)
+            index = end
+            continue
+        if text.startswith("/*", index):
+            end = text.find("*/", index + 2)
+            end = len(text) if end == -1 else end + 2
+            copy_span(output, text, index, end)
+            index = end
+            continue
+        character = text[index]
+        if character in "'\"":
+            index = copy_js_string(text, output, index, character)
+            continue
+        if character == "`":
+            index = mask_js_template(text, output, index)
+            continue
+        if character == "<" and javascript_expression_start(text, index):
+            end = jsx_tag_end(text, index)
+            if end is not None:
+                copy_jsx_tag_literals(text, output, index, end + 1)
+                stripped = text[index + 1 : end].strip()
+                if not stripped.startswith("/") and not stripped.endswith("/"):
+                    index = mask_jsx_children(text, output, end + 1)
+                    continue
+        if stop_at_brace and character == "{":
+            brace_depth += 1
+        elif stop_at_brace and character == "}":
+            if brace_depth == 0:
+                return index
+            brace_depth -= 1
+        index += 1
+    return index
+
+
+def unquoted_index(text: str, target: str) -> int | None:
+    """Find a delimiter outside single and double quoted scalar text."""
+
+    quote: str | None = None
+    index = 0
+    while index < len(text):
+        character = text[index]
+        if quote:
+            if character == "\\":
+                index += 2
+                continue
+            if character == quote:
+                quote = None
+        elif character in "'\"":
+            quote = character
+        elif character == target:
+            return index
+        index += 1
+    return None
+
+
+def split_config_comment(text: str) -> tuple[str, str]:
+    comment = unquoted_index(text, "#")
+    return (text, "") if comment is None else (text[:comment], text[comment:])
+
+
+def mask_inline_mapping_keys(
+    text: str,
+    output: list[str],
+    start: int,
+    end: int,
+    separator: str,
+) -> None:
+    """Hide keys in YAML flow maps and TOML inline tables."""
+
+    pairs = {"(": ")", "[": "]", "{": "}"}
+    containers: list[tuple[str, int | None]] = []
+    index = start
+    while index < end:
+        if text.startswith(('"""', "'''"), index):
+            delimiter = text[index : index + 3]
+            closing = text.find(delimiter, index + 3, end)
+            index = end if closing == -1 else closing + 3
+            continue
+        character = text[index]
+        if character in "'\"":
+            quote = character
+            index += 1
+            while index < end:
+                if text[index] == "\\":
+                    index += 2
+                    continue
+                if text[index] == quote:
+                    index += 1
+                    break
+                index += 1
+            continue
+        if character in pairs:
+            entry_start = index + 1 if character == "{" else None
+            containers.append((pairs[character], entry_start))
+        elif containers and character == containers[-1][0]:
+            containers.pop()
+        elif containers and containers[-1][0] == "}":
+            closing, entry_start = containers[-1]
+            if character == separator and entry_start is not None:
+                mask_span(output, text, entry_start, index)
+                containers[-1] = (closing, None)
+            elif character == "," and entry_start is None:
+                containers[-1] = (closing, index + 1)
+        index += 1
+
+
+def mask_yaml_code(text: str) -> str:
+    """Keep YAML values and comments while hiding mapping identifiers."""
+
+    output = list(blank_like(text))
+    offset = 0
+    block_indent: int | None = None
+    for line in text.splitlines(keepends=True):
+        body = line.rstrip("\r\n")
+        code, comment = split_config_comment(body)
+        indentation = len(code) - len(code.lstrip(" "))
+        if block_indent is not None and code.strip() and indentation <= block_indent:
+            block_indent = None
+        if block_indent is not None and code.strip():
+            copy_span(output, text, offset, offset + len(code))
+        else:
+            separator = unquoted_index(code, ":")
+            if separator is not None:
+                value_start = separator + 1
+                copy_span(output, text, offset + value_start, offset + len(code))
+                mask_inline_mapping_keys(
+                    text,
+                    output,
+                    offset + value_start,
+                    offset + len(code),
+                    ":",
+                )
+                if code[value_start:].lstrip().startswith(("|", ">")):
+                    block_indent = indentation
+            elif code.lstrip().startswith("- "):
+                value_start = code.index("-") + 2
+                copy_span(output, text, offset + value_start, offset + len(code))
+                mask_inline_mapping_keys(
+                    text,
+                    output,
+                    offset + value_start,
+                    offset + len(code),
+                    ":",
+                )
+        if comment:
+            comment_start = len(code)
+            copy_span(output, text, offset + comment_start, offset + len(body))
+        offset += len(line)
+    return "".join(output)
+
+
+def mask_toml_code(text: str) -> str:
+    """Keep TOML values and comments while hiding keys and table identifiers."""
+
+    output = list(blank_like(text))
+    offset = 0
+    multiline_delimiter: str | None = None
+    for line in text.splitlines(keepends=True):
+        body = line.rstrip("\r\n")
+        code, comment = split_config_comment(body)
+        if multiline_delimiter is not None:
+            copy_span(output, text, offset, offset + len(code))
+            if code.count(multiline_delimiter) % 2:
+                multiline_delimiter = None
+        else:
+            separator = unquoted_index(code, "=")
+            if separator is not None:
+                value_start = separator + 1
+                value = code[value_start:]
+                copy_span(output, text, offset + value_start, offset + len(code))
+                mask_inline_mapping_keys(
+                    text,
+                    output,
+                    offset + value_start,
+                    offset + len(code),
+                    "=",
+                )
+                for delimiter in ('"""', "'''"):
+                    if value.count(delimiter) % 2:
+                        multiline_delimiter = delimiter
+                        break
+        if comment:
+            comment_start = len(code)
+            copy_span(output, text, offset + comment_start, offset + len(body))
+        offset += len(line)
+    return "".join(output)
+
+
+def mask_source_code(suffix: str, text: str) -> str:
+    """Return only reader-facing source text with original line positions."""
+
+    if suffix == ".py":
+        return mask_python_code(text)
+    if suffix in {".cjs", ".js", ".jsx", ".mjs", ".ts", ".tsx"}:
+        output = list(blank_like(text))
+        mask_javascript_code(text, output)
+        return "".join(output)
+    if suffix in {".yaml", ".yml"}:
+        return mask_yaml_code(text)
+    if suffix == ".toml":
+        return mask_toml_code(text)
+    return text
 
 
 def mask_markdown_code(text: str) -> str:

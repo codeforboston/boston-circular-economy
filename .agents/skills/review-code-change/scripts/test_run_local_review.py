@@ -98,6 +98,38 @@ class LocalReviewRunnerTests(unittest.TestCase):
                 assessment = infer_minimum_risk([path], policy)
                 self.assertEqual("red", assessment["risk"])
 
+    def test_destructive_operation_path_requires_red_review(self) -> None:
+        paths = (
+            "client/src/pages/settings/delete-account.tsx",
+            "client/src/admin/delete-organization.tsx",
+            "server/src/users/delete-user.ts",
+            "server/src/admin/purge-expired-records.ts",
+            "server/src/maintenance/resetDatabase.ts",
+            "etl/src/jobs/delete-records.py",
+            "etl/src/etl/jobs/reset-data.py",
+            "etl/src/etl/jobs/purge-snapshots.py",
+        )
+        policy = load_risk_policy()
+
+        for path in paths:
+            with self.subTest(path=path):
+                assessment = infer_minimum_risk([path], policy)
+                self.assertEqual("red", assessment["risk"])
+
+    def test_non_destructive_reset_or_fixture_path_keeps_yellow_review(self) -> None:
+        paths = (
+            "client/src/pages/reset-password.tsx",
+            "client/src/pages/account/reset-preferences.tsx",
+            "server/tests/fixtures/purge-response.json",
+            "etl/tests/fixtures/reset-data.json",
+        )
+        policy = load_risk_policy()
+
+        for path in paths:
+            with self.subTest(path=path):
+                assessment = infer_minimum_risk([path], policy)
+                self.assertEqual("yellow", assessment["risk"])
+
     def test_globstar_matches_zero_or_more_directories(self) -> None:
         self.assertTrue(path_matches("client/src/auth.ts", "client/src/**/auth.*"))
         self.assertTrue(path_matches("client/src/lib/auth.tsx", "client/src/**/auth.*"))
