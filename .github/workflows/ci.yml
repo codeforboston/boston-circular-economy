@@ -3,6 +3,7 @@ name: CI
 on:
   pull_request:
     branches: [main]
+    types: [opened, reopened, synchronize, edited]
   push:
     branches: [main]
   merge_group:
@@ -92,6 +93,7 @@ jobs:
     needs: changes
     if: >-
       always() &&
+      github.event.action != 'edited' &&
       (needs.changes.result != 'success' || needs.changes.outputs.frontend == 'true')
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -126,6 +128,7 @@ jobs:
     needs: changes
     if: >-
       always() &&
+      github.event.action != 'edited' &&
       (needs.changes.result != 'success' || needs.changes.outputs.server == 'true')
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -152,6 +155,7 @@ jobs:
     needs: changes
     if: >-
       always() &&
+      github.event.action != 'edited' &&
       (needs.changes.result != 'success' || needs.changes.outputs.etl == 'true')
     runs-on: ubuntu-24.04
     timeout-minutes: 10

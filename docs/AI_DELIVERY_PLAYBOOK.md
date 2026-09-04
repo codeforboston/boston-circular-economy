@@ -195,6 +195,8 @@ a durable cross-system contract, dependency, external service, or high-impact ri
 
 The `CI` workflow starts for every pull request to `main` and every push to `main`.
 The changed-file router selects applicable application checks from one versioned policy.
+An edited pull request description reruns the submission record check without repeating
+the application builds.
 
 | Check | Evidence |
 |---|---|

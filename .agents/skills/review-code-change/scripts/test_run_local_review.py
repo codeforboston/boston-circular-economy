@@ -137,6 +137,15 @@ class LocalReviewRunnerTests(unittest.TestCase):
         self.assertIn("### Tested deployment identity", workflow_guidance)
         self.assertIn("### Required check continuity", workflow_guidance)
 
+    def test_pr_body_edits_recheck_submission_without_application_builds(self) -> None:
+        workflow = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+
+        self.assertIn(
+            "types: [opened, reopened, synchronize, edited]",
+            workflow,
+        )
+        self.assertEqual(3, workflow.count("github.event.action != 'edited'"))
+
 
 if __name__ == "__main__":
     unittest.main()

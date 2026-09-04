@@ -174,8 +174,9 @@ Every pull request follows `docs/CODE_CHANGE_STANDARD.md`. The record includes t
 evidence, reasoning, selected design, rejected alternative, and limits. It also includes
 the comprehension path, refactor boundary, and review question.
 
-The `Prose` job enforces the structure and selected language rules. Human review decides
-whether the stated why and why-not match the code and evidence.
+The `Prose` job enforces the structure and selected language rules. An edited pull
+request description reruns this job without repeating the application builds. Human
+review decides whether the stated why and why-not match the code and evidence.
 
 Comments explain non-obvious reasons and invariants. Names, types, interfaces, and tests
 explain ordinary behavior. This rule avoids comments that repeat implementation syntax.
