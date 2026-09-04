@@ -23,19 +23,23 @@ REVIEW_CHECKER_DIRECTORY = (
 )
 
 
+def is_zero_oid(revision: str) -> bool:
+    """Return whether Git supplied an all-zero object identifier."""
+
+    return bool(revision) and not revision.strip("0")
+
+
 def default_diff_context(environ: dict[str, str]) -> tuple[str, str, bool]:
     """Use pre-push refs or preserve pre-commit's all-files request."""
 
-    from_ref = environ.get("PRE_COMMIT_FROM_REF") or environ.get(
-        "PRE_COMMIT_ORIGIN"
-    )
+    from_ref = environ.get("PRE_COMMIT_FROM_REF") or environ.get("PRE_COMMIT_ORIGIN")
     to_ref = environ.get("PRE_COMMIT_TO_REF") or environ.get("PRE_COMMIT_SOURCE")
     if bool(from_ref) != bool(to_ref):
         raise ValueError(
             "PRE_COMMIT_FROM_REF and PRE_COMMIT_TO_REF must be set together"
         )
     if from_ref and to_ref:
-        return from_ref, to_ref, False
+        return from_ref, to_ref, is_zero_oid(from_ref)
     return "origin/main", "HEAD", environ.get("PRE_COMMIT") == "1"
 
 
@@ -78,9 +82,7 @@ def run(command: list[str], *, cwd: Path = REPOSITORY_ROOT) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    default_base, default_head, hook_force_all = default_diff_context(
-        dict(os.environ)
-    )
+    default_base, default_head, hook_force_all = default_diff_context(dict(os.environ))
     parser = argparse.ArgumentParser(
         description="Run local checks selected by the repository routing policy."
     )

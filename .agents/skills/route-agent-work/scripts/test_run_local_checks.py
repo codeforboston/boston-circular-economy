@@ -5,6 +5,7 @@ import unittest
 from run_local_checks import (
     default_diff_context,
     files_for_run,
+    is_zero_oid,
     require_checked_out_commit,
 )
 
@@ -22,9 +23,7 @@ class LocalCheckRunnerTests(unittest.TestCase):
         self.assertFalse(force_all)
 
     def test_manual_run_uses_main_and_head(self) -> None:
-        self.assertEqual(
-            ("origin/main", "HEAD", False), default_diff_context({})
-        )
+        self.assertEqual(("origin/main", "HEAD", False), default_diff_context({}))
 
     def test_pre_commit_without_refs_preserves_all_files_mode(self) -> None:
         self.assertEqual(
@@ -42,6 +41,25 @@ class LocalCheckRunnerTests(unittest.TestCase):
                 }
             ),
         )
+
+    def test_first_push_runs_all_checks_without_resolving_zero_base(self) -> None:
+        zero_oid = "0" * 40
+
+        base, head, force_all = default_diff_context(
+            {
+                "PRE_COMMIT_FROM_REF": zero_oid,
+                "PRE_COMMIT_TO_REF": "2222222",
+            }
+        )
+
+        self.assertEqual((zero_oid, "2222222"), (base, head))
+        self.assertTrue(force_all)
+        self.assertEqual([], files_for_run(force_all, base, head))
+
+    def test_zero_oid_requires_only_zero_characters(self) -> None:
+        self.assertTrue(is_zero_oid("0" * 40))
+        self.assertFalse(is_zero_oid("0000001"))
+        self.assertFalse(is_zero_oid(""))
 
     def test_rejects_partial_hook_context(self) -> None:
         with self.assertRaisesRegex(ValueError, "must be set together"):

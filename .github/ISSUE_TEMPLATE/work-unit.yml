@@ -98,6 +98,8 @@ body:
         - label: Security, privacy, or recovery check
         - label: Screenshot, recording, log, or data sample
         - label: Documentation-only review
+    validations:
+      required: true
 
   - type: textarea
     id: mentoring

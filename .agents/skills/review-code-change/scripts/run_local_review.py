@@ -10,9 +10,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[4]
 ROUTER = ROOT / ".agents/skills/route-agent-work/scripts/route_work.py"
-RISK_POLICY = (
-    ROOT / ".agents/skills/review-code-change/references/review-risk.json"
-)
+RISK_POLICY = ROOT / ".agents/skills/review-code-change/references/review-risk.json"
 RISK_ORDER = {"green": 0, "yellow": 1, "red": 2}
 
 
@@ -57,9 +55,7 @@ def path_matches(path: str, pattern: str) -> bool:
     )
 
 
-def infer_minimum_risk(
-    files: list[str], policy: dict[str, Any]
-) -> dict[str, object]:
+def infer_minimum_risk(files: list[str], policy: dict[str, Any]) -> dict[str, object]:
     """Infer a review floor from versioned path rules."""
 
     if not files:

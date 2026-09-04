@@ -84,22 +84,26 @@ class LocalReviewRunnerTests(unittest.TestCase):
                 )
 
     def test_migration_path_requires_red_review(self) -> None:
-        assessment = infer_minimum_risk(
-            ["server/src/db/migrations/add-column.ts"], load_risk_policy()
+        paths = (
+            "etl/migration.py",
+            "etl/migrations/0001_initial.py",
+            "etl/src/migration.py",
+            "etl/src/etl/migrations/0001_initial.py",
+            "server/src/db/migrations/add-column.ts",
         )
+        policy = load_risk_policy()
 
-        self.assertEqual("red", assessment["risk"])
+        for path in paths:
+            with self.subTest(path=path):
+                assessment = infer_minimum_risk([path], policy)
+                self.assertEqual("red", assessment["risk"])
 
     def test_globstar_matches_zero_or_more_directories(self) -> None:
         self.assertTrue(path_matches("client/src/auth.ts", "client/src/**/auth.*"))
-        self.assertTrue(
-            path_matches("client/src/lib/auth.tsx", "client/src/**/auth.*")
-        )
+        self.assertTrue(path_matches("client/src/lib/auth.tsx", "client/src/**/auth.*"))
 
     def test_documentation_path_keeps_green_review(self) -> None:
-        assessment = infer_minimum_risk(
-            ["docs/operator-guide.md"], load_risk_policy()
-        )
+        assessment = infer_minimum_risk(["docs/operator-guide.md"], load_risk_policy())
 
         self.assertEqual("green", assessment["risk"])
 
@@ -152,9 +156,7 @@ class LocalReviewRunnerTests(unittest.TestCase):
         self.assertIn("### Required check continuity", workflow_guidance)
 
     def test_pr_body_edits_use_an_independent_required_check(self) -> None:
-        ci_workflow = (ROOT / ".github/workflows/ci.yml").read_text(
-            encoding="utf-8"
-        )
+        ci_workflow = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
         submission_workflow = (ROOT / ".github/workflows/submission.yml").read_text(
             encoding="utf-8"
         )

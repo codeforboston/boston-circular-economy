@@ -15,17 +15,12 @@ check_submission = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = check_submission
 SPEC.loader.exec_module(check_submission)
 
-WHY_NOT = (
-    "- Why not the closest alternative: A second module would duplicate "
-    "the rule."
-)
+WHY_NOT = "- Why not the closest alternative: A second module would duplicate the rule."
 COMPREHENSION_PATH = (
-    "- Comprehension path: The request enters the route and reaches the "
-    "lookup service."
+    "- Comprehension path: The request enters the route and reaches the lookup service."
 )
 REFACTOR_BOUNDARY = (
-    "- Refactor boundary: The lookup service contract contains future "
-    "ordering changes."
+    "- Refactor boundary: The lookup service contract contains future ordering changes."
 )
 ACCOUNTABILITY = (
     "I read and understand the submitted diff. I verified the evidence "
@@ -79,7 +74,13 @@ Closes #123
 
 | Check | Result | Evidence or reason not run |
 |---|---|---|
-| Unit test | Pass | `pytest` |
+| Client lint and build | Pass | Client checks passed. |
+| Server lint and build | Pass | Server checks passed. |
+| ETL tests | Pass | `uv run pytest` |
+| Technical prose and editorial style | Pass | `check_prose.py .` |
+| Manual user journey | Not affected | No user interface changed. |
+| Accessibility / responsive | Not affected | No user interface changed. |
+| Security / privacy / recovery | Not affected | No trust boundary changed. |
 
 ## AI assistance
 
@@ -165,6 +166,73 @@ class CheckSubmissionTests(unittest.TestCase):
         rules = [finding.rule for finding in check_submission.check_submission(body)]
         self.assertIn("risk-lane", rules)
 
+    def test_valid_risk_lane_in_another_section_does_not_override_invalid_lane(
+        self,
+    ) -> None:
+        body = VALID_BODY.replace(
+            "Risk lane: Yellow",
+            "Risk lane: Medium",
+        ).replace(
+            "Residents can find services under the stated data limits.",
+            "Residents can find services under the stated data limits.\n\n"
+            "- Risk lane: Green",
+        )
+
+        rules = [finding.rule for finding in check_submission.check_submission(body)]
+
+        self.assertIn("risk-lane", rules)
+
+    def test_duplicate_scoped_risk_lane_fails(self) -> None:
+        body = VALID_BODY.replace(
+            "- Risk lane: Yellow",
+            "- Risk lane: Yellow\n- Risk lane: Green",
+        )
+
+        rules = [finding.rule for finding in check_submission.check_submission(body)]
+
+        self.assertIn("risk-lane", rules)
+
+    def test_duplicate_required_section_fails(self) -> None:
+        body = VALID_BODY.replace(
+            "## What changed",
+            "## Risk and scope\n\n- Risk lane: Green\n\n## What changed",
+        )
+
+        findings = check_submission.check_submission(body)
+
+        self.assertIn(
+            "Risk and scope",
+            [
+                finding.detail
+                for finding in findings
+                if finding.rule == "duplicate-section"
+            ],
+        )
+
+    def test_markdown_equivalent_duplicate_section_fails(self) -> None:
+        for duplicate_heading in (
+            "## Risk and scope <!-- duplicate -->",
+            "## Risk and scope ##",
+            "## Risk and  scope",
+            "## RISK AND SCOPE",
+        ):
+            with self.subTest(duplicate_heading=duplicate_heading):
+                body = VALID_BODY.replace(
+                    "## What changed",
+                    f"{duplicate_heading}\n\n- Risk lane: Green\n\n## What changed",
+                )
+
+                findings = check_submission.check_submission(body)
+
+                self.assertIn(
+                    "Risk and scope",
+                    [
+                        finding.detail
+                        for finding in findings
+                        if finding.rule == "duplicate-section"
+                    ],
+                )
+
     def test_issue_exception_is_accepted(self) -> None:
         body = VALID_BODY.replace(
             "Closes #123", "Issue exception: This maintenance work predates the form."
@@ -178,15 +246,48 @@ class CheckSubmissionTests(unittest.TestCase):
 
     def test_empty_evidence_cell_fails(self) -> None:
         body = VALID_BODY.replace(
-            "| Unit test | Pass | `pytest` |", "| Unit test | | |"
+            "| ETL tests | Pass | `uv run pytest` |", "| ETL tests | | |"
         )
         rules = [finding.rule for finding in check_submission.check_submission(body)]
         self.assertIn("evidence-table", rules)
 
     def test_na_evidence_result_fails(self) -> None:
-        body = VALID_BODY.replace("| Unit test | Pass |", "| Unit test | N/A |")
+        body = VALID_BODY.replace("| ETL tests | Pass |", "| ETL tests | N/A |")
         rules = [finding.rule for finding in check_submission.check_submission(body)]
         self.assertIn("evidence-result", rules)
+
+    def test_missing_standard_evidence_row_fails(self) -> None:
+        body = VALID_BODY.replace(
+            "| Manual user journey | Not affected | No user interface changed. |\n",
+            "",
+        )
+
+        findings = check_submission.check_submission(body)
+
+        self.assertIn(
+            "add Manual user journey",
+            [
+                finding.detail
+                for finding in findings
+                if finding.rule == "evidence-check"
+            ],
+        )
+
+    def test_reordered_standard_evidence_rows_pass(self) -> None:
+        first = "| Client lint and build | Pass | Client checks passed. |"
+        second = "| Server lint and build | Pass | Server checks passed. |"
+        body = VALID_BODY.replace(f"{first}\n{second}", f"{second}\n{first}")
+
+        self.assertEqual(check_submission.check_submission(body), [])
+
+    def test_work_unit_form_requires_an_evidence_selection(self) -> None:
+        root = Path(__file__).resolve().parents[4]
+        form = (root / ".github/ISSUE_TEMPLATE/work-unit.yml").read_text(
+            encoding="utf-8"
+        )
+        evidence = form.split("    id: evidence", 1)[1].split("\n  - type:", 1)[0]
+
+        self.assertIn("    validations:\n      required: true", evidence)
 
     def test_non_pull_request_event_does_not_supply_a_body(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

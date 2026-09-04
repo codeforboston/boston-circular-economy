@@ -26,7 +26,7 @@ repos:
           -p test_*.py -v
         language: system
         files: >-
-          ^(\.agents/skills/make-evidence-based-technical-case/|\.github/pull_request_template\.md$|\.github/workflows/ci\.yml$|docs/CODE_CHANGE_STANDARD\.md$)
+          ^(\.agents/skills/make-evidence-based-technical-case/|\.github/ISSUE_TEMPLATE/work-unit\.yml$|\.github/pull_request_template\.md$|\.github/workflows/ci\.yml$|docs/CODE_CHANGE_STANDARD\.md$)
         pass_filenames: false
       - id: code-review-policy
         name: Test code review policy and model routing

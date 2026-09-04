@@ -27,6 +27,9 @@ The submission record must contain:
 11. Code ownership, failure behavior, recovery, and complexity effects.
 12. Reproducible checks, including a reason for each check that did not run.
 
+Select exactly one Green, Yellow, or Red lane in `Risk and scope`. Keep all seven
+standard `Evidence` rows. Use Pass, Fail, Not run, or Not affected for each result.
+
 The `Submission record` job checks the required sections, labels, risk lane, issue
 reference, AI disclosure, and submitter attestation. The `Prose` CI job checks selected
 language rules in repository files.

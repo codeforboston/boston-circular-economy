@@ -53,9 +53,20 @@ ACCOUNTABILITY = (
 )
 ISSUE_REFERENCE = re.compile(r"(?im)^\s*(?:closes|fixes|resolves)\s+#\d+\s*$")
 ISSUE_EXCEPTION = re.compile(r"(?im)^\s*issue exception:\s*\S.+$")
-RISK_LANE = re.compile(r"(?im)^\s*-?\s*risk lane:\s*(green|yellow|red)\s*$")
 SELECTED_AI_BOX = re.compile(r"(?im)^\s*-\s*\[[xX]]\s+.+$")
 PLACEHOLDER = re.compile(r"<!--.*?-->", re.DOTALL)
+REQUIRED_EVIDENCE_CHECKS = (
+    "Client lint and build",
+    "Server lint and build",
+    "ETL tests",
+    "Technical prose and editorial style",
+    "Manual user journey",
+    "Accessibility / responsive",
+    "Security / privacy / recovery",
+)
+ALLOWED_EVIDENCE_RESULTS = {"pass", "fail", "not run", "not affected"}
+SECTION_HEADING = re.compile(r"(?m)^##\s+(.+?)\s*$")
+TRAILING_HEADING_MARKS = re.compile(r"[ \t]+#+[ \t]*$")
 
 
 @dataclass(frozen=True, slots=True)
@@ -67,20 +78,30 @@ class SubmissionFinding:
         return f"{self.rule}: {self.detail}"
 
 
+def normalize_section_name(name: str) -> str:
+    without_comments = PLACEHOLDER.sub("", name)
+    without_marks = TRAILING_HEADING_MARKS.sub("", without_comments)
+    return " ".join(without_marks.split()).casefold()
+
+
 def section_map(body: str) -> dict[str, str]:
-    headings = list(re.finditer(r"(?m)^##\s+(.+?)\s*$", body))
+    headings = list(SECTION_HEADING.finditer(body))
     sections: dict[str, str] = {}
     for index, heading in enumerate(headings):
         start = heading.end()
         end = headings[index + 1].start() if index + 1 < len(headings) else len(body)
-        sections[heading.group(1)] = body[start:end].strip()
+        sections[normalize_section_name(heading.group(1))] = body[start:end].strip()
     return sections
 
 
-def labeled_value(content: str, label: str) -> str | None:
+def labeled_values(content: str, label: str) -> list[str]:
     pattern = re.compile(rf"(?im)^[ \t]*-[ \t]*{re.escape(label)}[ \t]*([^\r\n]*)$")
-    match = pattern.search(content)
-    return match.group(1) if match else None
+    return [match.group(1) for match in pattern.finditer(content)]
+
+
+def labeled_value(content: str, label: str) -> str | None:
+    values = labeled_values(content, label)
+    return values[0] if values else None
 
 
 def evidence_findings(content: str) -> list[SubmissionFinding]:
@@ -97,6 +118,7 @@ def evidence_findings(content: str) -> list[SubmissionFinding]:
 
     if len(rows) < 2:
         return [SubmissionFinding("evidence-table", "add at least one check row")]
+    supplied_checks: set[str] = set()
     for cells in rows[1:]:
         if len(cells) != 3:
             findings.append(
@@ -104,18 +126,24 @@ def evidence_findings(content: str) -> list[SubmissionFinding]:
             )
             continue
         check, result, evidence = cells
+        supplied_checks.add(check.casefold())
         if not check or not result or not evidence:
             findings.append(
                 SubmissionFinding(
                     "evidence-table", "fill the check, result, and evidence cells"
                 )
             )
-        if result.casefold() in {"n/a", "na"}:
+        if result.casefold() not in ALLOWED_EVIDENCE_RESULTS:
             findings.append(
                 SubmissionFinding(
                     "evidence-result",
-                    "use Not run or Not affected and give a specific reason",
+                    "use Pass, Fail, Not run, or Not affected",
                 )
+            )
+    for required_check in REQUIRED_EVIDENCE_CHECKS:
+        if required_check.casefold() not in supplied_checks:
+            findings.append(
+                SubmissionFinding("evidence-check", f"add {required_check}")
             )
     return findings
 
@@ -123,15 +151,23 @@ def evidence_findings(content: str) -> list[SubmissionFinding]:
 def check_submission(body: str) -> list[SubmissionFinding]:
     findings: list[SubmissionFinding] = []
     sections = section_map(body)
+    section_names = [
+        normalize_section_name(match.group(1))
+        for match in SECTION_HEADING.finditer(body)
+    ]
 
     for name in REQUIRED_SECTIONS:
-        if name not in sections:
+        section_key = normalize_section_name(name)
+        count = section_names.count(section_key)
+        if count > 1:
+            findings.append(SubmissionFinding("duplicate-section", name))
+        if count == 0:
             findings.append(SubmissionFinding("missing-section", name))
-        elif not PLACEHOLDER.sub("", sections[name]).strip():
+        elif not PLACEHOLDER.sub("", sections[section_key]).strip():
             findings.append(SubmissionFinding("empty-section", name))
 
     for section_name, labels in REQUIRED_SECTION_LABELS.items():
-        content = sections.get(section_name, "")
+        content = sections.get(normalize_section_name(section_name), "")
         for label in labels:
             value = labeled_value(content, label)
             if value is None:
@@ -154,15 +190,22 @@ def check_submission(body: str) -> list[SubmissionFinding]:
                 "add Closes #<number> or a specific Issue exception",
             )
         )
-    if not RISK_LANE.search(body):
+    risk_section = sections.get(normalize_section_name("Risk and scope"), "")
+    risk_values = labeled_values(risk_section, "Risk lane:")
+    if len(risk_values) != 1 or risk_values[0].strip().casefold() not in {
+        "green",
+        "yellow",
+        "red",
+    }:
         findings.append(SubmissionFinding("risk-lane", "select Green, Yellow, or Red"))
-    ai_section = sections.get("AI assistance", "")
+    ai_section = sections.get(normalize_section_name("AI assistance"), "")
     if ai_section and not SELECTED_AI_BOX.search(ai_section):
         findings.append(
             SubmissionFinding("ai-disclosure", "select at least one assistance option")
         )
-    if "Evidence" in sections:
-        findings.extend(evidence_findings(sections["Evidence"]))
+    evidence_key = normalize_section_name("Evidence")
+    if evidence_key in sections:
+        findings.extend(evidence_findings(sections[evidence_key]))
     if ACCOUNTABILITY not in body:
         findings.append(
             SubmissionFinding("accountability", "include the submitter attestation")
