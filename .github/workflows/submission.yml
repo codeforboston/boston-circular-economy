@@ -4,11 +4,11 @@ on:
   pull_request_target:
     branches: [main]
     types: [opened, reopened, synchronize, edited]
-  merge_group:
-    types: [checks_requested]
 
 permissions:
   contents: read
+  pull-requests: read
+  statuses: write
 
 concurrency:
   group: submission-${{ github.event.pull_request.number || github.ref }}
@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   record:
-    name: Submission record
+    name: Submission policy
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -33,10 +33,71 @@ jobs:
           python-version: '3.14.3'
       - name: Check pull request submission record
         if: github.event_name == 'pull_request_target'
-        run: >-
-          python -B
-          .agents/skills/make-evidence-based-technical-case/scripts/check_submission.py
-          --event "$GITHUB_EVENT_PATH"
-      - name: Preserve the required merge queue check
-        if: github.event_name == 'merge_group'
-        run: echo "Each pull request supplied its submission record before entering the merge queue."
+        id: check
+        continue-on-error: true
+        env:
+          CONTEXT: Submission record
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" \
+            > "$RUNNER_TEMP/current-pr.json"
+          jq -e \
+            --arg expected_head "$EXPECTED_HEAD_SHA" \
+            --slurpfile expected "$GITHUB_EVENT_PATH" \
+            '.head.sha == $expected_head and
+             (.body // "") == ($expected[0].pull_request.body // "")' \
+            "$RUNNER_TEMP/current-pr.json"
+          gh api --method POST \
+            "repos/$GITHUB_REPOSITORY/statuses/$HEAD_SHA" \
+            -f state=pending \
+            -f context="$CONTEXT" \
+            -f description="Checking the current pull request record." \
+            -f target_url="$TARGET_URL"
+          jq '{pull_request: {body: (.body // "")}}' \
+            "$RUNNER_TEMP/current-pr.json" \
+            > "$RUNNER_TEMP/submission-event.json"
+          python -B \
+            .agents/skills/make-evidence-based-technical-case/scripts/check_submission.py \
+            --event "$RUNNER_TEMP/submission-event.json"
+      - name: Publish the pull request record result
+        if: always() && github.event_name == 'pull_request_target'
+        id: publish
+        continue-on-error: true
+        env:
+          CHECK_OUTCOME: ${{ steps.check.outcome }}
+          CONTEXT: Submission record
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" \
+            > "$RUNNER_TEMP/latest-pr.json"
+          jq -e \
+            --arg expected_head "$EXPECTED_HEAD_SHA" \
+            --slurpfile expected "$GITHUB_EVENT_PATH" \
+            '.head.sha == $expected_head and
+             (.body // "") == ($expected[0].pull_request.body // "")' \
+            "$RUNNER_TEMP/latest-pr.json"
+          if [ "$CHECK_OUTCOME" = success ]; then
+            result=success
+          else
+            result=failure
+          fi
+          gh api --method POST \
+            "repos/$GITHUB_REPOSITORY/statuses/$HEAD_SHA" \
+            -f state="$result" \
+            -f context="$CONTEXT" \
+            -f description="The pull request record check completed." \
+            -f target_url="$TARGET_URL"
+      - name: Fail when the pull request record is invalid
+        if: >-
+          github.event_name == 'pull_request_target' &&
+          (steps.check.outcome != 'success' ||
+          steps.publish.outcome != 'success')
+        run: exit 1

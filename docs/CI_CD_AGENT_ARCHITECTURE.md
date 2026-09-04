@@ -68,12 +68,24 @@ affected.
 
 The submission workflow has a separate pull-request concurrency group. A description
 edit cancels only an older submission check. It cannot cancel code CI or publish
-replacement application contexts. The read-only `pull_request_target` workflow runs
-from the default branch and checks out only the base revision. It treats pull request
-metadata as data and never executes pull request code.
+replacement application contexts.
 
-The merge queue receives a stable `Submission record` context. Each constituent pull
-request supplies the validated record before it enters that queue.
+The read-only `pull_request_target` workflow runs from the default branch and checks
+out only the base revision. It treats pull request metadata as data and never executes
+pull request code. Its token can publish commit statuses but cannot write repository
+contents. The workflow publishes a fixed `Submission record` context on the pull
+request head commit.
+
+Before the workflow checks or publishes a result, it fetches the live pull request. It
+compares the live head and body with the event that started the run. A stale run does
+not publish a final status. The per-pull-request concurrency group also cancels older
+runs when GitHub delivers a new code or description event.
+
+This status gate is not merge-queue compatible. GitHub attaches a merge-queue check to
+the temporary merge-group commit, but that event does not provide each current pull
+request body. Keep merge queues disabled while `Submission record` is required. A
+future GitHub App or required workflow must revalidate every constituent record and
+store monotonic state before the team enables a merge queue.
 
 The router fails closed:
 
@@ -228,7 +240,8 @@ Connect the repository in Codex settings. Confirm that it is team-enabled before
 enable automatic review. Otherwise, use `@codex review` on each representative change.
 
 Keep the approval, last-push approval, resolved-thread, squash-merge, deletion, and
-non-fast-forward protections. Add the `merge_group` event before enabling a merge queue.
+non-fast-forward protections. Do not enable a merge queue while `Submission record` is
+required. The application checks support merge groups, but the metadata gate does not.
 
 Review routing paths, model defaults, false positives, CI minutes, and model usage after
 the first three merged work units.

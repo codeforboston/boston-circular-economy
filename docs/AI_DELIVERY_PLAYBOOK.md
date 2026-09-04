@@ -213,7 +213,10 @@ The deployment workflow listens for successful CI caused by a push to `main`. It
 downloads the tested client artifact from that CI run and deploys it to GitHub Pages.
 Pull-request runs cannot deploy.
 
-All third-party GitHub Actions are pinned to full commit SHAs. Workflow tokens receive read-only repository access unless the deployment job needs Pages and identity-token permissions.
+All third-party GitHub Actions are pinned to full commit SHAs. Workflow tokens receive
+read-only repository access unless a job publishes the fixed submission status or
+deploys through Pages. The submission workflow can write commit statuses but cannot
+write repository contents.
 
 Dependency advisory data changes independently from the commit. Dependabot monitors it
 outside the deterministic build gate. See [`CI_CD_AGENT_ARCHITECTURE.md`](CI_CD_AGENT_ARCHITECTURE.md)
@@ -298,8 +301,14 @@ history. The runner forces a read-only Codex sandbox.
 The `Submission record` job enforces the pull request evidence structure. Its read-only
 `pull_request_target` workflow runs from the default branch and checks out only the base
 revision. It treats the pull request description as untrusted data and never runs pull
-request code. The workflow becomes active for subsequent pull requests after this pilot
-enters `main`.
+request code. A status-only token publishes the result on the pull request head. The
+workflow becomes active for subsequent pull requests after this pilot enters `main`.
+
+The workflow fetches the live pull request before validation and immediately before it
+publishes a result. It compares the head commit and description with the triggering
+event. A stale run publishes no final status, so the newer run owns the fixed context.
+Keep merge queues disabled while this metadata status is required. A merge-group event
+does not contain enough information to revalidate every constituent pull request body.
 
 The `Prose` job enforces deterministic language rules in repository files. It applies
 sentence rules to Markdown and high-signal editorial checks to prose-bearing files.

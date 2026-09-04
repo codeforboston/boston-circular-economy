@@ -62,12 +62,24 @@ class LocalReviewRunnerTests(unittest.TestCase):
         self.assertEqual("yellow", effective_risk("green", str(assessment["risk"])))
 
     def test_authentication_path_requires_red_review(self) -> None:
-        assessment = infer_minimum_risk(
-            ["client/src/lib/auth.tsx"], load_risk_policy()
+        paths = (
+            "client/src/lib/auth.tsx",
+            "client/src/security/authentication.ts",
+            "client/src/auth/oauth.ts",
+            "server/src/identity/oidc.ts",
+            "server/src/routes/login.ts",
+            "server/src/services/user-session.ts",
         )
+        policy = load_risk_policy()
 
-        self.assertEqual("red", assessment["risk"])
-        self.assertEqual("red", effective_risk("green", str(assessment["risk"])))
+        for path in paths:
+            with self.subTest(path=path):
+                assessment = infer_minimum_risk([path], policy)
+                self.assertEqual("red", assessment["risk"])
+                self.assertEqual(
+                    "red",
+                    effective_risk("green", str(assessment["risk"])),
+                )
 
     def test_migration_path_requires_red_review(self) -> None:
         assessment = infer_minimum_risk(
@@ -151,8 +163,9 @@ class LocalReviewRunnerTests(unittest.TestCase):
             "types: [opened, reopened, synchronize, edited]",
             submission_workflow,
         )
-        self.assertIn("name: Submission record", submission_workflow)
-        self.assertIn("merge_group:", submission_workflow)
+        self.assertIn("name: Submission policy", submission_workflow)
+        self.assertIn("CONTEXT: Submission record", submission_workflow)
+        self.assertNotIn("merge_group:", submission_workflow)
         self.assertIn("group: submission-", submission_workflow)
         self.assertIn("pull_request_target:", submission_workflow)
         self.assertNotIn("\n  pull_request:\n", submission_workflow)
@@ -161,6 +174,30 @@ class LocalReviewRunnerTests(unittest.TestCase):
             submission_workflow,
         )
         self.assertIn("persist-credentials: false", submission_workflow)
+        self.assertIn("pull-requests: read", submission_workflow)
+        self.assertIn("statuses: write", submission_workflow)
+        self.assertIn(
+            "HEAD_SHA: ${{ github.event.pull_request.head.sha }}",
+            submission_workflow,
+        )
+        self.assertIn("continue-on-error: true", submission_workflow)
+        self.assertIn("steps.check.outcome", submission_workflow)
+        self.assertIn("steps.publish.outcome", submission_workflow)
+        self.assertIn("--slurpfile expected", submission_workflow)
+        self.assertIn("pull_request.body", submission_workflow)
+        self.assertIn("$RUNNER_TEMP/latest-pr.json", submission_workflow)
+        self.assertIn("-f state=pending", submission_workflow)
+        first_live_read = submission_workflow.index(
+            'gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER"'
+        )
+        pending_status = submission_workflow.index("-f state=pending")
+        final_live_read = submission_workflow.index(
+            'gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER"',
+            first_live_read + 1,
+        )
+        final_status = submission_workflow.index('-f state="$result"')
+        self.assertLess(first_live_read, pending_status)
+        self.assertLess(final_live_read, final_status)
 
 
 if __name__ == "__main__":

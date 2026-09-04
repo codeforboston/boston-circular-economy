@@ -25,3 +25,13 @@ This file adds review rules for workflows and repository automation. Apply the r
 - Flag path or event routing that can leave a required check absent, pending, or green
   after its router fails. Safe path: create stable named jobs and fail closed when the
   router cannot classify a change.
+
+### Pull request head status
+
+- Flag a `pull_request_target` gate that relies on its base-commit job context. Safe
+  path: run only trusted base code, treat pull request metadata as data, and publish a
+  fixed status context on the pull request head. Limit the token to status writes and
+  repository reads.
+- Flag a status writer when an older run can overwrite a newer pull request result.
+  Safe path: compare the live head and body with the triggering event before
+  publication. Cancel older runs and publish no final status after a mismatch.
