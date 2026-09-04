@@ -36,10 +36,12 @@ def load_risk_policy(path: Path = RISK_POLICY) -> dict[str, Any]:
 
 
 def path_matches(path: str, pattern: str) -> bool:
-    """Match a path while allowing a globstar to span zero directories."""
+    """Match a path case-insensitively and let globstars span zero directories."""
 
-    candidates = {pattern}
-    pending = [pattern]
+    normalized_path = path.casefold()
+    normalized_pattern = pattern.casefold()
+    candidates = {normalized_pattern}
+    pending = [normalized_pattern]
     while pending:
         candidate = pending.pop()
         marker = "**/"
@@ -50,7 +52,9 @@ def path_matches(path: str, pattern: str) -> bool:
         if collapsed not in candidates:
             candidates.add(collapsed)
             pending.append(collapsed)
-    return any(fnmatch.fnmatchcase(path, candidate) for candidate in candidates)
+    return any(
+        fnmatch.fnmatchcase(normalized_path, candidate) for candidate in candidates
+    )
 
 
 def infer_minimum_risk(

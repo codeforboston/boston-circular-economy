@@ -64,9 +64,11 @@ class LocalReviewRunnerTests(unittest.TestCase):
     def test_authentication_path_requires_red_review(self) -> None:
         paths = (
             "client/src/lib/auth.tsx",
+            "client/src/Auth.tsx",
             "client/src/security/authentication.ts",
             "client/src/auth/oauth.ts",
             "server/src/identity/oidc.ts",
+            "server/src/identity/OAuthClient.ts",
             "server/src/routes/login.ts",
             "server/src/services/user-session.ts",
         )
