@@ -149,6 +149,11 @@ Use Yellow when uncertain. The lane changes review depth, not whether determinis
 
 The build agent makes the smallest complete change that satisfies the issue. The contributor reads the diff and can explain it.
 
+Apply the repository
+[`write-self-explanatory-code`](../.agents/skills/write-self-explanatory-code/SKILL.md)
+skill during implementation. The change must expose its purpose, decision owner,
+contract, failure behavior, comprehension path, and safe refactor boundary.
+
 Before opening a PR, use a challenge pass with a fresh context when practical. Ask it to find counterexamples in four categories:
 
 - expected behavior.

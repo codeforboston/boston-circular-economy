@@ -44,6 +44,19 @@ source and configuration files for high-signal editorial violations. Human revie
 remains responsible for accuracy, active voice, term meaning, cadence, and rhetorical
 fairness.
 
+## Self-explanatory code contract
+
+Every agent that writes or refactors production code must read and apply
+[`write-self-explanatory-code`](.agents/skills/write-self-explanatory-code/SKILL.md).
+Define the observable contract before implementation. Make purpose, ownership,
+dependencies, failure behavior, and the safe refactor boundary visible in repository
+evidence.
+
+Do not use comments, documentation volume, test count, or an agent summary as a proxy
+for comprehension. Names, types, interfaces, module boundaries, validation, and
+behavior tests should expose ordinary behavior. Comments should preserve only the
+non-obvious reason, invariant, or recovery rule.
+
 ## Agent routing and token cost
 
 An agent that delegates work must read and apply
@@ -145,6 +158,9 @@ Use Yellow when the lane is unclear. A file under `client/src/pages/dev/` may mo
 - Keep generated files generated. Do not hand-edit `client/src/routeTree.gen.ts` unless the router workflow requires it.
 - Use names, types, interfaces, and tests to explain behavior. Add comments for
   non-obvious reasons, invariants, compatibility boundaries, or failure behavior.
+- Keep each rule, state transition, and side effect under one identifiable owner.
+- Expose a stable boundary where a future maintainer can change the behavior without
+  unrelated edits.
 - Do not add a comment that only restates the next line of code.
 - Never call paid or rate-limited external APIs in the default test suite.
 - Never commit API keys, credentials, local databases, or personally identifiable information. Never paste them into an AI prompt.
@@ -174,8 +190,9 @@ See `docs/AI_DELIVERY_PLAYBOOK.md` for issue selection, mentoring checkpoints, a
 
 - Flag code that contradicts the pull request claim, scope, qualifier, or a documented
   public contract. Cite the conflicting behavior and its shortest useful location.
-  Safe path: align the implementation and behavior test, or obtain a human-approved
-  scope change.
+  Also flag changed behavior that cannot be traced from its entry point through one
+  decision owner to an observable result. Safe path: align the contract, ownership,
+  implementation, and behavior test, or obtain a human-approved scope change.
 
 ### Failure and recovery
 

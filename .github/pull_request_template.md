@@ -22,6 +22,8 @@ Closes #<!-- issue number -->
 
 ## Code quality
 
+- Comprehension path: <!-- Name the entry point, decision owner, and observable result. -->
+- Refactor boundary: <!-- Name the smallest stable contract for a future behavior change. -->
 - Boundary and ownership: <!-- State which module owns the rule, state, or side effect. -->
 - Failure and recovery: <!-- State the failure signal, containment, retry, rollback, or operator action. -->
 - Complexity added or removed: <!-- Name new branches, dependencies, state, or duplication. State what became simpler. -->

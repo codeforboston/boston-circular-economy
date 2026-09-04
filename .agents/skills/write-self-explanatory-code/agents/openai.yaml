@@ -1,0 +1,4 @@
+interface:
+  display_name: "Write Self-Explanatory Code"
+  short_description: "Make code understandable and safe to refactor"
+  default_prompt: "Use $write-self-explanatory-code to implement this change with explicit contracts and a clear refactor boundary."

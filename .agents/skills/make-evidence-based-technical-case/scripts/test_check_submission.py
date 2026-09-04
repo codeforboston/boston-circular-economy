@@ -15,7 +15,24 @@ check_submission = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = check_submission
 SPEC.loader.exec_module(check_submission)
 
-VALID_BODY = """## Claim
+WHY_NOT = (
+    "- Why not the closest alternative: A second module would duplicate "
+    "the rule."
+)
+COMPREHENSION_PATH = (
+    "- Comprehension path: The request enters the route and reaches the "
+    "lookup service."
+)
+REFACTOR_BOUNDARY = (
+    "- Refactor boundary: The lookup service contract contains future "
+    "ordering changes."
+)
+ACCOUNTABILITY = (
+    "I read and understand the submitted diff. I verified the evidence "
+    "above and remain accountable for the change."
+)
+
+VALID_BODY = f"""## Claim
 
 Residents can find services under the stated data limits.
 
@@ -31,12 +48,14 @@ Closes #123
 ## Decision explanation
 
 - Why this design: It keeps lookup rules in one module.
-- Why not the closest alternative: A second module would duplicate the rule.
+{WHY_NOT}
 - Trade-off accepted: The module owns one additional branch.
 - Revisit when: A second provider needs another contract.
 
 ## Code quality
 
+{COMPREHENSION_PATH}
+{REFACTOR_BOUNDARY}
 - Boundary and ownership: The service owns lookup ordering.
 - Failure and recovery: The caller receives an empty result and can retry.
 - Complexity added or removed: One conditional replaces two duplicated checks.
@@ -66,7 +85,7 @@ Closes #123
 
 - [x] No substantial AI assistance
 
-I read and understand the submitted diff. I verified the evidence above and remain accountable for the change.
+{ACCOUNTABILITY}
 
 ## Review focus and uncertainty
 
@@ -110,11 +129,31 @@ class CheckSubmissionTests(unittest.TestCase):
 
     def test_empty_why_not_label_fails(self) -> None:
         body = VALID_BODY.replace(
-            "- Why not the closest alternative: A second module would duplicate the rule.",
+            WHY_NOT,
             "- Why not the closest alternative:",
         )
         rules = [finding.rule for finding in check_submission.check_submission(body)]
         self.assertIn("empty-label", rules)
+
+    def test_empty_comprehension_path_fails(self) -> None:
+        body = VALID_BODY.replace(
+            COMPREHENSION_PATH,
+            "- Comprehension path:",
+        )
+        details = [
+            finding.detail for finding in check_submission.check_submission(body)
+        ]
+        self.assertIn("Code quality: Comprehension path:", details)
+
+    def test_empty_refactor_boundary_fails(self) -> None:
+        body = VALID_BODY.replace(
+            REFACTOR_BOUNDARY,
+            "- Refactor boundary:",
+        )
+        details = [
+            finding.detail for finding in check_submission.check_submission(body)
+        ]
+        self.assertIn("Code quality: Refactor boundary:", details)
 
     def test_template_placeholder_fails(self) -> None:
         body = VALID_BODY.replace("Residents can", "<!-- actor --> Residents can")

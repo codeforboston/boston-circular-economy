@@ -153,7 +153,8 @@ See `docs/decisions/0001-pr-review-hooks.md` for the complete decision and limit
 ## Submission and explainability
 
 Every pull request follows `docs/CODE_CHANGE_STANDARD.md`. The record includes the claim,
-evidence, reasoning, selected design, rejected alternative, limits, and review question.
+evidence, reasoning, selected design, rejected alternative, and limits. It also includes
+the comprehension path, refactor boundary, and review question.
 
 The `Prose` job enforces the structure and selected language rules. Human review decides
 whether the stated why and why-not match the code and evidence.

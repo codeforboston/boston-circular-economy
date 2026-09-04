@@ -86,6 +86,7 @@ class LocalReviewRunnerTests(unittest.TestCase):
         workflow_guidance = (ROOT / ".github/AGENTS.md").read_text(encoding="utf-8")
 
         self.assertIn("review-code-change", root_guidance)
+        self.assertIn("write-self-explanatory-code", root_guidance)
         self.assertIn("## Code Review Rules", root_guidance)
         self.assertIn("### Contract and claim", root_guidance)
         self.assertIn("## Code Review Rules", workflow_guidance)

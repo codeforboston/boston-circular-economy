@@ -22,8 +22,10 @@ The submission record must contain:
 6. The selected design and its operating mechanism.
 7. The closest credible alternative and the reason it loses under the stated conditions.
 8. The accepted trade-off and the condition that should reopen the decision.
-9. Code ownership, failure behavior, recovery, and complexity effects.
-10. Reproducible checks, including a reason for each check that did not run.
+9. A comprehension path from the entry point through the decision owner to the result.
+10. The smallest stable boundary for a future refactor.
+11. Code ownership, failure behavior, recovery, and complexity effects.
+12. Reproducible checks, including a reason for each check that did not run.
 
 The `Prose` CI job checks the required sections, labels, risk lane, issue reference,
 AI disclosure, and submitter attestation. It also checks selected language rules.
@@ -66,6 +68,15 @@ a decision record.
 
 ## Code explanation rules
 
+Apply the repository
+[`write-self-explanatory-code`](../.agents/skills/write-self-explanatory-code/SKILL.md)
+skill during implementation and refactoring. Self-explanatory code exposes enough
+structural and semantic context for a human to trace and safely change its behavior.
+
+The pull request must state the comprehension path and refactor boundary. The path
+names the entry point, decision owner, and observable result. The boundary names the
+smallest stable contract where behavior can change without unrelated edits.
+
 Code should explain behavior through names, interfaces, types, and tests. Add a comment
 only when those elements cannot expose an important reason or constraint.
 
@@ -91,6 +102,8 @@ Address each quality property that the change affects:
 
 | Property | Review question |
 |---|---|
+| Comprehension | Can a maintainer trace the entry point, decision owner, and result? |
+| Refactor | Which stable boundary contains a future behavior change? |
 | Boundary | Which module owns the rule, state, or side effect? |
 | Contract | Which caller-visible behavior can change? |
 | Data | Which validation, provenance, retention, or freshness rule applies? |
@@ -134,6 +147,7 @@ reviewer should ask for revision when:
 - the qualifier omits a material boundary.
 - the code moves ownership without documenting the new owner.
 - the failure path has no signal, containment, or recovery account.
+- the stated comprehension path or refactor boundary does not match the code.
 
 Use the Toulmin structure and language guidance in the repository communication skill.
 The human review owns technical accuracy, rhetorical fairness, and decision quality.

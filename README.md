@@ -33,4 +33,6 @@ Contributors using an AI coding assistant should read [`AGENTS.md`](AGENTS.md) a
 proposed [`AI-assisted delivery playbook`](docs/AI_DELIVERY_PLAYBOOK.md). The
 [`CI/CD architecture`](docs/CI_CD_AGENT_ARCHITECTURE.md) defines hooks, routing, checks,
 and deployment. The [`review skill`](.agents/skills/review-code-change/SKILL.md)
-defines the independent code-change review method.
+defines the independent code-change review method. The
+[`self-explanatory code skill`](.agents/skills/write-self-explanatory-code/SKILL.md)
+defines the implementation and refactoring method.

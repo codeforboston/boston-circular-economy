@@ -34,6 +34,8 @@ REQUIRED_SECTION_LABELS = {
         "Revisit when:",
     ),
     "Code quality": (
+        "Comprehension path:",
+        "Refactor boundary:",
         "Boundary and ownership:",
         "Failure and recovery:",
         "Complexity added or removed:",

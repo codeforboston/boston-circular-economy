@@ -10,6 +10,7 @@ finding when the available evidence does not support one.
 
 Read the root `AGENTS.md`, the closest applicable `AGENTS.md`, the pull request or work
 unit, and `docs/CODE_CHANGE_STANDARD.md`. Read
+`../write-self-explanatory-code/SKILL.md` before tracing the implementation. Read
 `../make-evidence-based-technical-case/SKILL.md` before writing review text.
 
 ## Keep the review independent
@@ -59,6 +60,7 @@ existing contract.
 Challenge these properties when the change affects them:
 
 - ownership and caller-visible contracts.
+- the stated comprehension path and safe refactor boundary.
 - validation, provenance, and data boundaries.
 - failure signals, containment, and supported recovery.
 - changed branches, state transitions, dependencies, and duplicate paths.
