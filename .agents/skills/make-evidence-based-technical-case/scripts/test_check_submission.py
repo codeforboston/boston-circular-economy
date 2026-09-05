@@ -143,6 +143,43 @@ class CheckSubmissionTests(unittest.TestCase):
                     ],
                 )
 
+    def test_untouched_template_guidance_does_not_fill_a_section(self) -> None:
+        challenge_guidance = (
+            "Describe how you tried to prove the change wrong. Include normal, "
+            "boundary, failure, and regression cases that apply."
+        )
+        review_guidance = (
+            "What should the human reviewer examine most closely? Which rebuttal "
+            "or qualifier needs human judgment? What is not yet proven?"
+        )
+        cases = (
+            (
+                "Challenge cases",
+                "- Empty input returns an empty result.",
+                f"{challenge_guidance}\n\n-",
+            ),
+            (
+                "Review focus and uncertainty",
+                "Review the stale-data boundary.",
+                f"{review_guidance}\n\n-",
+            ),
+        )
+
+        for section, author_response, untouched_content in cases:
+            with self.subTest(section=section):
+                body = VALID_BODY.replace(author_response, untouched_content)
+
+                findings = check_submission.check_submission(body)
+
+                self.assertIn(
+                    section,
+                    [
+                        finding.detail
+                        for finding in findings
+                        if finding.rule == "empty-section"
+                    ],
+                )
+
     def test_label_in_wrong_section_fails(self) -> None:
         body = VALID_BODY.replace(
             "- Revisit when: A second provider needs another contract.\n",

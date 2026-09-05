@@ -46,6 +46,7 @@
     "client/src/**/reset*tenant*",
     "etl/**/migration*",
     "etl/**/migrations/**",
+    "etl/src/**/*privacy*",
     "etl/src/**/delete*",
     "etl/src/**/purge*",
     "etl/src/**/reset*data*",

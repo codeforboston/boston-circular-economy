@@ -103,6 +103,19 @@ class LocalReviewRunnerTests(unittest.TestCase):
                 assessment = infer_minimum_risk([path], policy)
                 self.assertEqual("red", assessment["risk"])
 
+    def test_etl_privacy_path_requires_red_review(self) -> None:
+        paths = (
+            "etl/src/privacy.py",
+            "etl/src/etl/privacy/redact.py",
+            "etl/src/etl/jobs/privacy-export.py",
+        )
+        policy = load_risk_policy()
+
+        for path in paths:
+            with self.subTest(path=path):
+                assessment = infer_minimum_risk([path], policy)
+                self.assertEqual("red", assessment["risk"])
+
     def test_critical_accessibility_path_requires_red_review(self) -> None:
         paths = (
             "client/src/accessibility/focus-trap.tsx",

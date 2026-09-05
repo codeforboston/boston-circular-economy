@@ -82,6 +82,20 @@ EMPTY_MARKDOWN_LINE = re.compile(
     r"(?m)^[ \t]*(?:(?:[-+*]|\d{1,9}[.)])(?:[ \t]+\[[ xX]\])?|"
     r"(?:[*_-][ \t]*){3,}|>+|#{1,6})[ \t]*$"
 )
+TEMPLATE_GUIDANCE = (
+    "Describe how you tried to prove the change wrong. Include normal, boundary, "
+    "failure, and regression cases that apply.",
+    "For UI changes, add before-and-after screenshots or a recording.",
+    "What should the human reviewer examine most closely? Which rebuttal or "
+    "qualifier needs human judgment? What is not yet proven?",
+    "Follow the [`Code Change Standard`](https://github.com/codeforboston/"
+    "boston-circular-economy/blob/main/docs/CODE_CHANGE_STANDARD.md) for the "
+    "submission and explanation rules.",
+)
+TEMPLATE_GUIDANCE_PATTERNS = tuple(
+    re.compile(r"\s+".join(re.escape(word) for word in guidance.split()))
+    for guidance in TEMPLATE_GUIDANCE
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -100,10 +114,13 @@ def normalize_section_name(name: str) -> str:
 
 
 def has_meaningful_section_content(content: str) -> bool:
-    """Reject empty template bullets as section content."""
+    """Reject untouched template guidance and empty Markdown as section content."""
 
     without_placeholders = PLACEHOLDER.sub("", content)
-    return bool(EMPTY_MARKDOWN_LINE.sub("", without_placeholders).strip())
+    without_guidance = without_placeholders
+    for pattern in TEMPLATE_GUIDANCE_PATTERNS:
+        without_guidance = pattern.sub("", without_guidance)
+    return bool(EMPTY_MARKDOWN_LINE.sub("", without_guidance).strip())
 
 
 def mask_markdown_code_blocks(body: str) -> str:
