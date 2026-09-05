@@ -59,9 +59,9 @@ workflow uses path filters because a filtered required workflow can remain pendi
 |---|---|---|
 | `Route changes` | Always | Tests the policy and classifies the diff. |
 | `Submission record v1` | Always | Checks the committed `.github/submission.md` without changing application contexts. |
-| `Prose` | Always | Checks repository prose and review policy. |
+| `Prose` | Always | Checks prose, submissions, work-unit schemas, and review policy. |
 | `Frontend` | Routed | Installs locked npm dependencies, then lints and builds the client. |
-| `Server` | Routed | Installs locked npm dependencies, then lints and builds the server. |
+| `Server` | Routed | Installs locked dependencies, lints and builds, then starts the server and checks `/ping`. |
 | `ETL` | Routed | Installs the locked uv environment, then runs Ruff and pytest. |
 
 The required check names are `Submission record v1`, `Prose`, `Frontend`, `Server`, and
@@ -122,19 +122,21 @@ an application failure.
 
 The pre-commit framework installs two hook stages from `.pre-commit-config.yaml`.
 
-Each hook uses a pre-commit Python environment and its `python` executable. This
-avoids requiring a system `python3` alias. The local runner resolves external commands
-through `PATH`, including Windows command launchers, and propagates nonzero exits.
+Python hooks use a pre-commit Python environment and its `python` executable. This
+avoids requiring a system `python3` alias. Schema validation uses a pinned `uvx` tool.
+The local runner resolves external commands through `PATH`, including Windows command
+launchers, and propagates nonzero exits.
 
-The commit stage checks prose-bearing changed files. It also runs routing tests when a
-routing, hook, or CI file changes.
+The commit stage checks prose-bearing changed files and validates changed work-unit
+manifests. It also runs routing tests when a routing, hook, or CI file changes.
 
 The commit stage also tests the local review runner when review rules, review skills,
 or model routes change. The tests inspect routing without invoking a model.
 
 The push stage uses the source and destination commit IDs supplied by pre-commit for
-the push. It runs the full prose scan, routing tests, and applicable application checks.
-It also requires the pushed head to update the record from its first parent.
+the push. It runs the full prose scan, schema validation, routing tests, and applicable
+application checks. The Server route includes its startup smoke test. The push stage
+also requires the pushed head to update the record from its first parent.
 Manual execution compares `HEAD` with `origin/main` unless the caller supplies another
 range. When pre-commit requests all files without a commit range, the runner preserves
 that request and runs every application check.

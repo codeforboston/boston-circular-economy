@@ -139,6 +139,23 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_decodes_markdown_entities_before_language_checks(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.md"
+            path.write_text(
+                "Use &mdash; between clauses.\n&#x55;nlock the potential.\n",
+                encoding="utf-8",
+            )
+
+            sentence_findings = markdown_findings(path, load_profile(DEFAULT_PROFILE))
+            editorial = editorial_findings(path)
+
+        self.assertNotIn("semicolon", {finding.rule for finding in sentence_findings})
+        self.assertEqual(
+            [(2, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in editorial],
+        )
+
     def test_shorter_inner_fence_does_not_close_a_longer_outer_fence(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.md"

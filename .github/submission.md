@@ -71,6 +71,10 @@ issue existed.
 - Check contractions in visible Markdown headings without applying paragraph limits to those headings.
 - Keep Markdown link labels and titles in prose checks while excluding destinations and bare URLs.
 - Decode non-raw Python reader strings before editorial matching, including f-string literal segments.
+- Decode Markdown entities before language checks so entity terminators do not look like prose semicolons.
+- Validate every work-unit manifest against its schema in commit hooks, push hooks, and CI.
+- Add an invalid manifest fixture that proves CI rejects missing required fields.
+- Start the built server with temporary SQLite and verify `/ping` in local push checks and CI.
 
 ## Challenge cases
 
@@ -106,6 +110,9 @@ issue existed.
 - A contraction in a visible Markdown heading fails even though the heading is outside paragraph-length checks.
 - A prohibited term in an external Markdown destination or bare URL remains inert, while the same term in a visible label or title fails.
 - Hexadecimal and Unicode escapes in non-raw Python reader strings are checked as rendered text, while raw strings retain literal backslashes.
+- A Markdown entity does not create a false semicolon finding, and an encoded prohibited term remains visible to editorial checks.
+- Five valid work-unit manifests pass schema validation, while the incomplete fixture fails on its missing fields.
+- Server smoke testing imports the native SQLite binding, uses a temporary database, binds an available port, and requires a successful `pong` response.
 - An unclosed list fence stops masking when visible prose leaves the list container.
 - An unclosed quote fence stops masking when the quote depth decreases.
 - A clean server install initializes temporary SQLite and returns `pong` from `/ping`.
@@ -119,10 +126,10 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass; startup creates temporary SQLite and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 112 communication and submission tests |
-| Routing policy | Pass | 34 routing and hook-context tests, policy validation, and model-route samples |
+| Technical prose and editorial style | Pass | Full repository scan and 113 communication and submission tests |
+| Routing policy | Pass | 34 routing and hook-context tests, manifest schema validation, and model-route samples |
 | Review policy and model routing | Pass | 25 local-runner tests and independent delivery challenges |
-| Local hook configuration | Pass | Pre-commit validation plus commit-stage and push-stage runs |
+| Local hook configuration | Pass | Pre-commit validation, schema validation, and commit-stage and push-stage runs |
 | Workflow syntax | Pass | Actionlint 1.7.11 and YAML parsing |
 | Hosted pull-request CI | Not run | Hosted CI starts after this record enters the commit |
 | Manual user journey | Pass | Server starts with temporary SQLite and `GET /ping` returns `pong` |

@@ -156,7 +156,10 @@ class LocalCheckRunnerTests(unittest.TestCase):
             main(["--all", "--head", "HEAD"])
 
         self.assertEqual(2, require_clean.call_count)
-        self.assertEqual(4, run_check.call_count)
+        self.assertEqual(5, run_check.call_count)
+        manifest_command = run_check.call_args_list[1].args[0]
+        self.assertIn("check-jsonschema==0.35.0", manifest_command)
+        self.assertIn("manifest.schema.json", " ".join(manifest_command))
         resolve_commit.assert_has_calls([mock.call("HEAD"), mock.call("HEAD")])
         load_policy.assert_called_once_with()
         require_submission_update.assert_called_once_with("1111111")

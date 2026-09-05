@@ -387,6 +387,9 @@ class LocalReviewRunnerTests(unittest.TestCase):
         )
         self.assertIn("github.event.pull_request.number || github.sha }}", ci_workflow)
         self.assertIn("cancel-in-progress: true", ci_workflow)
+        self.assertIn("check-jsonschema==0.35.0", ci_workflow)
+        self.assertIn("invalid-missing-fields.json", ci_workflow)
+        self.assertIn("npm run test:smoke -w server", ci_workflow)
         self.assertIn(
             "types: [opened, reopened, synchronize, edited]",
             submission_workflow,
@@ -438,9 +441,7 @@ class LocalReviewRunnerTests(unittest.TestCase):
         self.assertNotIn("-f state=pending", submission_workflow)
         self.assertEqual(
             1,
-            submission_workflow.count(
-                '"repos/$GITHUB_REPOSITORY/statuses/$HEAD_SHA"'
-            ),
+            submission_workflow.count('"repos/$GITHUB_REPOSITORY/statuses/$HEAD_SHA"'),
         )
         self.assertNotIn("--paginate --slurp", submission_workflow)
         first_live_read = submission_workflow.index(

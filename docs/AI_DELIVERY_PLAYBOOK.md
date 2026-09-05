@@ -207,9 +207,9 @@ events. Its concurrency group cannot cancel code CI.
 | Check | Evidence |
 |---|---|
 | `Submission / Submission record v1` | Committed reasoning fields, evidence, and accountability for the exact head revision |
-| `CI / Prose` | Selected language rules, editorial patterns, and high-signal AI cliché checks |
+| `CI / Prose` | Language rules, editorial patterns, AI cliché checks, and work-unit schema validation |
 | `CI / Frontend` | Client lint and production build |
-| `CI / Server` | Server lint and TypeScript build |
+| `CI / Server` | Server lint, TypeScript build, SQLite startup, and `/ping` smoke test |
 | `CI / ETL` | Locked Python environment, Ruff lint and format checks, and pytest suite |
 
 The router runs all application checks for unknown paths, policy changes, and main-branch

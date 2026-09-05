@@ -37,6 +37,9 @@ AI prompts, deliverables, checks, reviewer, and handoff. The
 [schema](manifest.schema.json) validates that structure. Schema validity does not
 prove that a design is correct or complete.
 
+The commit hook and CI validate each `ui-NNN.json` file against the schema. CI also
+proves that the validator rejects the intentionally incomplete file in `fixtures`.
+
 The [screen template](screen-manifest.template.yaml) describes the resulting UI
 contract: components, visible states, actions, data needs, and acceptance cases.
 It is a draft template. Empty fields require decisions before implementation.

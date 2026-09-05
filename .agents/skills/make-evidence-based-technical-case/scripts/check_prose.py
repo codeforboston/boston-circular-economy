@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import html
 import io
 import json
 import re
@@ -221,6 +222,7 @@ def plain_markdown(line: str) -> str:
     text = URL.sub(" URL ", text)
     text = re.sub(r"^\s*(?:[-+*]|\d+[.)])\s+", "", text)
     text = re.sub(r"[*_~]", "", text)
+    text = html.unescape(text)
     return " ".join(text.split())
 
 
@@ -301,6 +303,21 @@ def mask_markdown_link_destinations(text: str) -> str:
     masked = "".join(output)
     for match in URL.finditer(masked):
         mask_span(output, text, match.start(), match.end())
+    return "".join(output)
+
+
+def decode_markdown_entities(text: str) -> str:
+    """Decode Markdown entities without changing source offsets or line numbers."""
+
+    output: list[str] = []
+    for line in text.splitlines(keepends=True):
+        content = line.rstrip("\r\n")
+        ending = line[len(content) :]
+        decoded = "".join(
+            " " if character in "\r\n" else character
+            for character in html.unescape(content)
+        )
+        output.append(decoded.ljust(len(content))[: len(content)] + ending)
     return "".join(output)
 
 
@@ -439,7 +456,9 @@ def editorial_findings(path: Path) -> list[Finding]:
     source_text = path.read_text(encoding="utf-8")
     suffix = path.suffix.casefold()
     if suffix == ".md":
-        text = mask_markdown_link_destinations(mask_markdown_code(source_text))
+        text = decode_markdown_entities(
+            mask_markdown_link_destinations(mask_markdown_code(source_text))
+        )
     else:
         text = mask_source_code(path, source_text)
     for name, pattern in EDITORIAL_PATTERNS.items():

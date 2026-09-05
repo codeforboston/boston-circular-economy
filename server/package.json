@@ -6,7 +6,8 @@
     "dev": "nodemon --exec 'node --import @swc-node/register/esm-register src/index.ts' --watch src --ext ts",
     "start": "node dist/index.js",
     "build": "tsc",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test:smoke": "node scripts/smoke-test.mjs"
   },
   "dependencies": {
     "better-sqlite3": "^12.4.1",

@@ -22,6 +22,9 @@ PROSE_CHECKER = (
 REVIEW_CHECKER_DIRECTORY = (
     REPOSITORY_ROOT / ".agents" / "skills" / "review-code-change" / "scripts"
 )
+WORK_UNIT_DIRECTORY = REPOSITORY_ROOT / "docs" / "work-units"
+WORK_UNIT_SCHEMA = WORK_UNIT_DIRECTORY / "manifest.schema.json"
+WORK_UNIT_MANIFESTS = sorted(WORK_UNIT_DIRECTORY.glob("ui-[0-9][0-9][0-9].json"))
 
 
 def is_zero_oid(revision: str) -> bool:
@@ -177,6 +180,17 @@ def main(argv: list[str] | None = None) -> int:
     run([sys.executable, "-B", str(PROSE_CHECKER), "."])
     run(
         [
+            "uvx",
+            "--from",
+            "check-jsonschema==0.35.0",
+            "check-jsonschema",
+            "--schemafile",
+            str(WORK_UNIT_SCHEMA),
+            *(str(path) for path in WORK_UNIT_MANIFESTS),
+        ]
+    )
+    run(
+        [
             sys.executable,
             "-B",
             "-m",
@@ -224,6 +238,7 @@ def main(argv: list[str] | None = None) -> int:
     if route.checks["server"]:
         run(["npm", "run", "lint", "-w", "server"])
         run(["npm", "run", "build", "-w", "server"])
+        run(["npm", "run", "test:smoke", "-w", "server"])
     if route.checks["etl"]:
         etl = REPOSITORY_ROOT / "etl"
         run(["uv", "run", "ruff", "check", "."], cwd=etl)
