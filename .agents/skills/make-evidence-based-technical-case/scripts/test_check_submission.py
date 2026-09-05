@@ -486,6 +486,13 @@ class CheckSubmissionTests(unittest.TestCase):
 
         self.assertEqual(check_submission.check_submission(body), [])
 
+    def test_backtick_in_fence_info_does_not_mask_following_text(self) -> None:
+        body = "```bad`\nVisible reader text.\n```\n"
+
+        masked = check_submission.mask_markdown_code_blocks(body)
+
+        self.assertIn("Visible reader text", masked)
+
     def test_list_contained_fence_does_not_scan_html(self) -> None:
         body = VALID_BODY.replace(
             "- Empty input returns an empty result.",

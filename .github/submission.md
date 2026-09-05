@@ -79,6 +79,9 @@ issue existed.
 - Route every GitHub Actions workflow change to Red review because any workflow can change permissions or authorization.
 - Add authorization to the Red risk option in the work-unit issue form.
 - Check contractions and semicolons in visible Markdown table cells while keeping inline code inert.
+- Reject backticks in backtick-fence info strings so invalid fences cannot hide visible prose.
+- Preserve indented paragraph continuations while masking real indented code blocks.
+- Check visible Markdown image alt text while excluding the image destination.
 
 ## Challenge cases
 
@@ -123,6 +126,9 @@ issue existed.
 - A clean server install initializes temporary SQLite and returns `pong` from `/ping`.
 - An unavailable SQLite directory stops server startup with a visible error.
 - Contractions and semicolons in visible table cells fail prose checks, while table-cell inline code remains inert.
+- An invalid backtick fence cannot mask the prose before the next valid fence.
+- A four-space-indented line after live paragraph text remains subject to prose checks.
+- A contraction or semicolon in image alt text fails while its image destination remains inert.
 - Red review stops for specialist and human escalation, including ETL credential and secret paths.
 
 ## Evidence
@@ -132,7 +138,7 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass. Startup creates temporary SQLite and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 114 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 118 communication and submission tests |
 | Routing policy | Pass | 37 routing, hook-context, and manifest-discovery tests plus model-route samples |
 | Review policy and model routing | Pass | 25 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation, schema validation, and commit-stage and push-stage runs |
@@ -154,9 +160,9 @@ I read and understand the submitted diff. I verified the evidence above and rema
 ## Review focus and uncertainty
 
 Review the versioned first-parent record boundary, terminal-only status publication,
-Markdown structure and prose boundaries, Python escape decoding, and the Red workflow
-risk floor. Examine native SQLite lockfile changes, path mapping, evidence threshold,
-model defaults, and protected-branch activation steps.
+Markdown fence, paragraph, table, image-alt boundaries, Python escape decoding, and the
+Red workflow risk floor. Examine native SQLite lockfile changes, path mapping, evidence
+threshold, model defaults, and protected-branch activation steps.
 
 The repository has not observed the submission workflow from `main`. A repository
 administrator must configure the named required checks only after the hosted evidence

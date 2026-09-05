@@ -59,7 +59,7 @@ TEMPORAL_EXEMPT_NAMES = {
 
 WORD = re.compile(r"[A-Za-z0-9]+(?:[-'][A-Za-z0-9]+)*")
 SENTENCE_END = re.compile(r"(?<=[.!?])(?:\s+|$)")
-IMAGE = re.compile(r"!\[[^]]*]\([^)]+\)")
+IMAGE = re.compile(r"!\[([^]]*)]\([^)]+\)")
 LINK = re.compile(r"\[([^]]+)]\([^)]+\)")
 URL = re.compile(r"https?://\S+")
 MARKDOWN_ATX_HEADING = re.compile(r"^[ ]{0,3}#{1,6}(?:[ \t]+|$)")
@@ -217,7 +217,7 @@ def prose_files(inputs: list[Path]) -> list[Path]:
 
 
 def plain_markdown(line: str) -> str:
-    text = IMAGE.sub("", line)
+    text = IMAGE.sub(r"\1", line)
     text = LINK.sub(r"\1", text)
     text = URL.sub(" URL ", text)
     text = re.sub(r"^\s*(?:[-+*]|\d+[.)])\s+", "", text)

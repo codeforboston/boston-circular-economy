@@ -180,6 +180,21 @@ class ProseCheckerTests(unittest.TestCase):
 
         self.assertEqual([], findings)
 
+    def test_backtick_in_fence_info_cannot_hide_visible_prose(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.md"
+            path.write_text(
+                "```bad`\nUnlock the potential.\n```\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(2, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_four_space_marker_does_not_close_a_top_level_fence(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.md"
@@ -246,6 +261,21 @@ class ProseCheckerTests(unittest.TestCase):
             findings = editorial_findings(path)
 
         self.assertEqual([], findings)
+
+    def test_indented_line_after_paragraph_remains_visible_prose(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.md"
+            path.write_text(
+                "Visible introduction\n    Don't deploy.\n",
+                encoding="utf-8",
+            )
+
+            findings = markdown_findings(path, load_profile(DEFAULT_PROFILE))
+
+        self.assertEqual(
+            [(2, "contraction")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
 
     def test_ignores_indented_code_inside_a_blockquote(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -828,6 +858,20 @@ class ProseCheckerTests(unittest.TestCase):
 
         self.assertEqual(
             [(3, "semicolon"), (3, "contraction")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
+    def test_checks_visible_markdown_image_alt_text(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.md"
+            path.write_text(
+                "![Don't deploy; wait](image.png)\n",
+                encoding="utf-8",
+            )
+            findings = markdown_findings(path, load_profile(DEFAULT_PROFILE))
+
+        self.assertEqual(
+            [(1, "semicolon"), (1, "contraction")],
             [(finding.line, finding.rule) for finding in findings],
         )
 

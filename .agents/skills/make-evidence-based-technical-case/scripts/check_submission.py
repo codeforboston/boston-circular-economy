@@ -82,7 +82,12 @@ EVIDENCE_HEADER = ("Check", "Result", "Evidence or reason not run")
 ALLOWED_EVIDENCE_RESULTS = {"pass", "fail", "not run", "not affected"}
 SECTION_HEADING = re.compile(r"(?m)^##[ \t]+(.+?)[ \t]*$")
 TRAILING_HEADING_MARKS = re.compile(r"[ \t]+#+[ \t]*$")
-FENCE_START = re.compile(r"(`{3,}|~{3,})[^\r\n]*$")
+FENCE_START = re.compile(r"(?P<marker>`{3,}|~{3,})(?P<info>[^\r\n]*)$")
+ATX_BLOCK_START = re.compile(r"#{1,6}(?:[ \t]+|$)")
+THEMATIC_OR_SETEXT_LINE = re.compile(
+    r"(?:=+[ \t]*|-+[ \t]*|(?:\*[ \t]*){3,}|(?:_[ \t]*){3,})$"
+)
+REFERENCE_DEFINITION = re.compile(r"\[[^]\r\n]+]:[ \t]*\S")
 LIST_ITEM_START = re.compile(
     r"^(?P<indent>[ \t]*)(?:[-+*]|\d{1,9}[.)])(?P<spacing>[ \t]+)"
 )
@@ -265,6 +270,34 @@ def strip_blockquote_markers(
     return prefix + remainder, depth
 
 
+def markdown_fence_start(content: str) -> re.Match[str] | None:
+    """Return a valid CommonMark fence opener at the start of content."""
+
+    match = FENCE_START.match(content)
+    if (
+        match is not None
+        and match.group("marker").startswith("`")
+        and "`" in match.group("info")
+    ):
+        return None
+    return match
+
+
+def markdown_line_opens_paragraph(content: str) -> bool:
+    """Return whether visible content can continue onto an indented line."""
+
+    stripped = content.lstrip()
+    if not stripped:
+        return False
+    if ATX_BLOCK_START.match(stripped) or THEMATIC_OR_SETEXT_LINE.fullmatch(stripped):
+        return False
+    if REFERENCE_DEFINITION.match(stripped) or stripped.startswith("<"):
+        return False
+    if stripped.count("|") >= 2:
+        return False
+    return markdown_fence_start(stripped) is None
+
+
 def mask_markdown_code_blocks(body: str) -> str:
     """Hide Markdown code blocks so examples cannot satisfy record fields."""
 
@@ -274,6 +307,9 @@ def mask_markdown_code_blocks(body: str) -> str:
     fence_container_indent = 0
     fence_quote_depth = 0
     list_indents: list[tuple[int, int]] = []
+    paragraph_open = False
+    paragraph_container_indent = 0
+    paragraph_quote_depth = 0
     for line in body.splitlines(keepends=True):
         content = line.rstrip("\r\n")
         container_content, outer_quote_depth = strip_blockquote_markers(content)
@@ -309,6 +345,7 @@ def mask_markdown_code_blocks(body: str) -> str:
                     fence_container_indent = 0
                     fence_quote_depth = 0
                 output.append("".join("\n" if value == "\n" else " " for value in line))
+                paragraph_open = False
                 continue
 
         list_item = LIST_ITEM_START.match(container_content)
@@ -334,7 +371,7 @@ def mask_markdown_code_blocks(body: str) -> str:
                 ].expandtabs(4)
             )
             opening_fence = (
-                FENCE_START.match(fence_candidate.lstrip())
+                markdown_fence_start(fence_candidate.lstrip())
                 if candidate_indent <= 3
                 else None
             )
@@ -344,24 +381,36 @@ def mask_markdown_code_blocks(body: str) -> str:
                 container_indent=container_indent,
             )
             opening_fence = (
-                FENCE_START.match(fence_candidate.lstrip())
+                markdown_fence_start(fence_candidate.lstrip())
                 if 0 <= relative_indent <= 3
                 else None
             )
         if opening_fence is not None:
-            marker = opening_fence.group(1)
+            marker = opening_fence.group("marker")
             fence_character = marker[0]
             fence_length = len(marker)
             fence_container_indent = container_indent
             fence_quote_depth = outer_quote_depth + inner_quote_depth
             output.append("".join("\n" if value == "\n" else " " for value in line))
+            paragraph_open = False
             continue
 
         code_indent = (list_indents[-1][1] + 4) if list_indents else 4
-        if list_item is None and indentation >= code_indent:
+        line_quote_depth = outer_quote_depth + inner_quote_depth
+        continues_paragraph = (
+            paragraph_open
+            and paragraph_container_indent == container_indent
+            and paragraph_quote_depth == line_quote_depth
+        )
+        if list_item is None and indentation >= code_indent and not continues_paragraph:
             output.append("".join("\n" if value == "\n" else " " for value in line))
+            paragraph_open = False
             continue
         output.append(line)
+        paragraph_open = markdown_line_opens_paragraph(fence_candidate)
+        if paragraph_open:
+            paragraph_container_indent = container_indent
+            paragraph_quote_depth = line_quote_depth
     return "".join(output)
 
 
