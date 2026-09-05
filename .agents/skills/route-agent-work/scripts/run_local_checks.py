@@ -50,16 +50,16 @@ def require_checked_out_commit(target: str, checked_out: str) -> None:
 
     if target != checked_out:
         raise ValueError(
-            "local checks require the pushed commit to be checked out; "
-            "push one checked-out branch at a time"
+            "local checks require the pushed commit to be checked out. "
+            "Push one checked-out branch at a time"
         )
 
 
 def require_clean_worktree(
     *,
     failure_message: str = (
-        "local push checks require a clean worktree; "
-        "commit, stash, or remove local changes before pushing"
+        "local push checks require a clean worktree. "
+        "Commit, stash, or remove local changes before pushing"
     ),
 ) -> None:
     """Reject local evidence that includes content outside the pushed commit."""
@@ -234,7 +234,7 @@ def main(argv: list[str] | None = None) -> int:
         run(["uv", "run", "pytest"], cwd=etl)
     require_clean_worktree(
         failure_message=(
-            "local push checks modified the worktree; review and commit generated "
+            "local push checks modified the worktree. Review and commit generated "
             "or formatted files before pushing"
         )
     )

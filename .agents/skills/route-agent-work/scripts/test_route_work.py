@@ -79,7 +79,7 @@ class RouteWorkTests(unittest.TestCase):
             )
             client_file = repository / "client/src/lookup.ts"
             client_file.parent.mkdir(parents=True)
-            client_file.write_text("export const lookup = true;\n", encoding="utf-8")
+            client_file.write_text("export const lookup = true\n", encoding="utf-8")
             subprocess.run(["git", "add", "."], cwd=repository, check=True)
             subprocess.run(
                 ["git", "commit", "-qm", "Add client file"],

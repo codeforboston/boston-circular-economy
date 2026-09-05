@@ -65,7 +65,7 @@
     },
     {
       "step": "Produce",
-      "prompt": "After I select a treatment, create one editable polished 390-pixel screen and a PNG preview. Preserve all information and actions. Use at least 16-pixel body text, clear grouping, and explicit selected/focus states. List the source of each font, color, spacing value, and component; label proposals."
+      "prompt": "After I select a treatment, create one editable polished 390-pixel screen and a PNG preview. Preserve all information and actions. Use at least 16-pixel body text, clear grouping, and explicit selected/focus states. List the source of each font, color, spacing value, and component. Label proposals."
     },
     {
       "step": "Challenge",

@@ -16,6 +16,7 @@ check_submission = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = check_submission
 SPEC.loader.exec_module(check_submission)
 
+HTML_ENTITY_TERMINATOR = chr(59)
 WHY_NOT = "- Why not the closest alternative: A second module would duplicate the rule."
 COMPREHENSION_PATH = (
     "- Comprehension path: The request enters the route and reaches the lookup service."
@@ -342,7 +343,11 @@ class CheckSubmissionTests(unittest.TestCase):
                 self.assertIn("Technical case: Grounds:", details)
 
     def test_html_only_labeled_value_fails(self) -> None:
-        for markup in ("&nbsp;", "<br>", "<span></span>"):
+        for markup in (
+            f"&nbsp{HTML_ENTITY_TERMINATOR}",
+            "<br>",
+            "<span></span>",
+        ):
             with self.subTest(markup=markup):
                 body = VALID_BODY.replace(
                     "- Grounds: The tests pass.",
@@ -601,7 +606,7 @@ class CheckSubmissionTests(unittest.TestCase):
     def test_unclosed_list_fence_ends_when_the_list_dedents(self) -> None:
         body = VALID_BODY.replace(
             "- Empty input returns an empty result.",
-            "- ```text\n  Example only; the fence is intentionally unclosed.",
+            "- ```text\n  Example only, and the fence is intentionally unclosed.",
         )
 
         masked = check_submission.mask_markdown_code_blocks(body)
@@ -843,7 +848,11 @@ class CheckSubmissionTests(unittest.TestCase):
                 self.assertIn("evidence-table", rules)
 
     def test_html_only_evidence_reason_fails(self) -> None:
-        for markup in ("&nbsp;", "<br>", "<span></span>"):
+        for markup in (
+            f"&nbsp{HTML_ENTITY_TERMINATOR}",
+            "<br>",
+            "<span></span>",
+        ):
             with self.subTest(markup=markup):
                 body = VALID_BODY.replace(
                     "| ETL tests | Pass | `uv run pytest` |",

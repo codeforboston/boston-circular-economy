@@ -87,7 +87,7 @@ class LocalCheckRunnerTests(unittest.TestCase):
 
     def test_requires_the_pushed_commit_to_be_checked_out(self) -> None:
         require_checked_out_commit("1111111", "1111111")
-        with self.assertRaisesRegex(ValueError, "push one checked-out branch"):
+        with self.assertRaisesRegex(ValueError, "Push one checked-out branch"):
             require_checked_out_commit("2222222", "1111111")
 
     @mock.patch("run_local_checks.subprocess.run")
@@ -203,7 +203,7 @@ class LocalCheckRunnerTests(unittest.TestCase):
             )
             environment = {
                 "PATH": temporary + os.pathsep + os.environ.get("PATH", ""),
-                "PATHEXT": ".COM;.EXE;.BAT;.CMD",
+                "PATHEXT": os.pathsep.join([".COM", ".EXE", ".BAT", ".CMD"]),
             }
             with mock.patch.dict(os.environ, environment):
                 run(["check-tool", "verified"], cwd=directory)

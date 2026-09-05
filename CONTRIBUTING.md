@@ -67,8 +67,9 @@ correcting a finding. Do not remove technical conditions or evidence to satisfy 
 Codex users can run an independent, read-only review against the base branch:
 
 ```bash
-python3 -B .agents/skills/review-code-change/scripts/run_local_review.py \
-  --risk yellow --base origin/main
+git show origin/main:.agents/skills/review-code-change/scripts/run_local_review.py | \
+  python3 -B - --repository "$PWD" --trusted-ref origin/main \
+    --risk yellow --base origin/main
 ```
 
 Use the risk lane from the work unit. Add `--dry-run` to inspect the model route without
@@ -76,6 +77,8 @@ spending tokens. The review skill limits findings to discrete, evidence-backed d
 The default scope compares the current tracked state with the base. Add
 `--scope uncommitted` to review staged, unstaged, and untracked work without branch
 history. The runner forces a read-only Codex sandbox.
+Run the script from the trusted base as shown. Do not execute review code from the
+proposed tree before the sandbox starts.
 
 When the pull request is ready, the managed Codex hook applies the repository
 `## Code Review Rules`. A maintainer can request a new pass after a material update by

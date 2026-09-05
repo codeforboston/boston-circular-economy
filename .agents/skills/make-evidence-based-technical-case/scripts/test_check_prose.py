@@ -422,6 +422,39 @@ class ProseCheckerTests(unittest.TestCase):
 
         self.assertIn("formulaic AI opening", rules)
 
+    def test_checks_semicolons_in_each_masked_prose_format(self) -> None:
+        cases = {
+            "example.js": 'const message = "Do not deploy; wait.";\n',
+            "example.ts": 'const message = "Do not deploy; wait.";\n',
+            "example.py": 'message = "Do not deploy; wait."\n',
+            "example.yaml": "message: Do not deploy; wait.\n",
+            "example.toml": 'message = "Do not deploy; wait."\n',
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            for name, content in cases.items():
+                with self.subTest(name=name):
+                    path = Path(directory) / name
+                    path.write_text(content, encoding="utf-8")
+                    findings = editorial_findings(path)
+                    self.assertEqual(
+                        [(1, "semicolon")],
+                        [(finding.line, finding.rule) for finding in findings],
+                    )
+
+            work_units = Path(directory) / "docs" / "work-units"
+            work_units.mkdir(parents=True)
+            assignment = work_units / "ui-999.json"
+            assignment.write_text(
+                '{"objective": "Do not deploy; wait.", "status": "ready;now"}\n',
+                encoding="utf-8",
+            )
+            findings = editorial_findings(assignment)
+
+        self.assertEqual(
+            [(1, "semicolon")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_checks_html_text_and_reader_facing_attributes(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "index.html"
@@ -524,6 +557,26 @@ class ProseCheckerTests(unittest.TestCase):
             [(2, "promotional cliche"), (3, "promotional cliche")],
             [(finding.line, finding.rule) for finding in findings],
         )
+
+    def test_preserves_suppressed_html_state_across_markdown_lines(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.md"
+            path.write_text(
+                "<pre>\n"
+                "Don't deploy; wait.\n"
+                "</pre>\n"
+                "<script>\n"
+                "Don't deploy; wait.\n"
+                "</script>\n"
+                "Publish the tested artifact.\n",
+                encoding="utf-8",
+            )
+
+            editorial = editorial_findings(path)
+            sentence = markdown_findings(path, load_profile(DEFAULT_PROFILE))
+
+        self.assertEqual([], editorial)
+        self.assertEqual([], sentence)
 
     def test_ignores_javascript_identifiers_but_checks_reader_text(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

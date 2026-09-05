@@ -54,7 +54,7 @@ def infer_activities(tags: dict) -> list[str]:
     # From shop type
     activities.update(ACTIVITY_MAP.get(shop, set()))
 
-    # Explicit repair tag (yes, or semicolon-delimited value like "pump;motor")
+    # An explicit repair tag can contain one value or multiple delimited values.
     repair_val = tags.get("repair", "")
     if repair_val and repair_val != "no":
         activities.add("repair")

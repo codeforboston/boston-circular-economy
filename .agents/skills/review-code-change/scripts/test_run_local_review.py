@@ -284,7 +284,7 @@ class LocalReviewRunnerTests(unittest.TestCase):
             )
             client_file = repository / "client/src/lookup.ts"
             client_file.parent.mkdir(parents=True)
-            client_file.write_text("export const lookup = true;\n", encoding="utf-8")
+            client_file.write_text("export const lookup = true\n", encoding="utf-8")
             subprocess.run(["git", "add", "."], cwd=repository, check=True)
             subprocess.run(
                 ["git", "commit", "-qm", "Add client file"],
@@ -343,7 +343,7 @@ class LocalReviewRunnerTests(unittest.TestCase):
             )
             auth_file = repository / "server/src/auth.ts"
             auth_file.parent.mkdir(parents=True)
-            original = "export const mode = 'public';\n"
+            original = "export const mode = 'public'\n"
             auth_file.write_text(original, encoding="utf-8")
             subprocess.run(["git", "add", "."], cwd=repository, check=True)
             subprocess.run(
@@ -351,7 +351,7 @@ class LocalReviewRunnerTests(unittest.TestCase):
                 cwd=repository,
                 check=True,
             )
-            auth_file.write_text("export const mode = 'admin';\n", encoding="utf-8")
+            auth_file.write_text("export const mode = 'admin'\n", encoding="utf-8")
             subprocess.run(["git", "add", str(auth_file)], cwd=repository, check=True)
             auth_file.write_text(original, encoding="utf-8")
 
@@ -466,6 +466,7 @@ class LocalReviewRunnerTests(unittest.TestCase):
     def test_repository_guidance_keeps_review_rules_near_the_change(self) -> None:
         root_guidance = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
         workflow_guidance = (ROOT / ".github/AGENTS.md").read_text(encoding="utf-8")
+        contributing = (ROOT / "CONTRIBUTING.md").read_text(encoding="utf-8")
 
         self.assertIn("review-code-change", root_guidance)
         self.assertIn("write-self-explanatory-code", root_guidance)
@@ -475,6 +476,17 @@ class LocalReviewRunnerTests(unittest.TestCase):
         self.assertIn("### Untrusted pull request code", workflow_guidance)
         self.assertIn("### Tested deployment identity", workflow_guidance)
         self.assertIn("### Required check continuity", workflow_guidance)
+        self.assertIn(
+            "git show origin/main:.agents/skills/review-code-change/scripts/"
+            "run_local_review.py",
+            contributing,
+        )
+        self.assertIn("--trusted-ref origin/main", contributing)
+        self.assertNotIn(
+            "python3 -B .agents/skills/review-code-change/scripts/"
+            "run_local_review.py",
+            contributing,
+        )
 
     def test_submission_status_uses_a_commit_bound_record(self) -> None:
         ci_workflow = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")

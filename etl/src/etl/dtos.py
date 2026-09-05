@@ -92,6 +92,6 @@ class NormalizedLocation(BaseModel):
 
 
 # MatchGroup is the boundary between MergeProcessor.match() and .prioritize().
-# Keyed by DataSource; a source is only present if it has a NormalizedLocation
+# Keyed by DataSource. A source is only present if it has a NormalizedLocation
 # for this business. Never empty.
 MatchGroup = dict[DataSource, NormalizedLocation]

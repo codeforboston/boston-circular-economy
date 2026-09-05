@@ -41,7 +41,7 @@ SCANNED_SUFFIXES = {
     ".yaml",
     ".yml",
 }
-SEMICOLON_SCANNED_SUFFIXES = {".css", ".html", ".jsx", ".svg", ".tsx"}
+SEMICOLON_SCANNED_SUFFIXES = SCANNED_SUFFIXES - {".md"}
 IGNORED_PARTS = {
     ".git",
     ".pytest_cache",
@@ -433,9 +433,10 @@ def markdown_findings(path: Path, profile: dict[str, object]) -> list[Finding]:
         paragraph.clear()
 
     source_text = path.read_text(encoding="utf-8")
-    masked_lines = mask_markdown_reference_controls(
+    masked_markdown = mask_markdown_reference_controls(
         mask_markdown_code(source_text)
-    ).splitlines()
+    )
+    masked_lines = mask_html_code(masked_markdown).splitlines()
     for number, (raw_line, checked_line) in enumerate(
         zip(source_text.splitlines(), masked_lines, strict=True), start=1
     ):

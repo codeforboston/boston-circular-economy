@@ -103,7 +103,9 @@ EMPTY_MARKDOWN_LINE = re.compile(
 )
 MARKDOWN_CHECKBOX = re.compile(r"\[[ xX]\]")
 RAW_HTML_TAG = re.compile(r"</?[A-Za-z][A-Za-z0-9-]*(?:[ \t\r\n][^>]*|/?)>")
-HTML_ENTITY = re.compile(r"&(?:#[0-9]+|#x[0-9A-Fa-f]+|[A-Za-z][A-Za-z0-9]+);")
+HTML_ENTITY = re.compile(
+    r"&(?:#[0-9]+|#x[0-9A-Fa-f]+|[A-Za-z][A-Za-z0-9]+)\x3b"
+)
 BLOCKQUOTE_MARKER = re.compile(r"[ ]{0,3}>[ \t]?")
 TEMPLATE_GUIDANCE = (
     "Describe how you tried to prove the change wrong. Include normal, boundary, "
