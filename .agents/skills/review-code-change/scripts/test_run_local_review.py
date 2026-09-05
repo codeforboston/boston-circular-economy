@@ -162,6 +162,19 @@ class LocalReviewRunnerTests(unittest.TestCase):
                     effective_risk("green", str(assessment["risk"])),
                 )
 
+    def test_credential_utilities_outside_source_require_red_review(self) -> None:
+        paths = (
+            "client/scripts/rotate-credentials.ts",
+            "etl/scripts/rotate_credentials.py",
+            "server/scripts/rotate-credentials.ts",
+        )
+        policy = load_risk_policy()
+
+        for path in paths:
+            with self.subTest(path=path):
+                assessment = infer_minimum_risk([path], policy)
+                self.assertEqual("red", assessment["risk"])
+
     def test_critical_accessibility_path_requires_red_review(self) -> None:
         paths = (
             "client/src/accessibility/focus-trap.tsx",

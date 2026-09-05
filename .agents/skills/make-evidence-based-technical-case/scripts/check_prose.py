@@ -1349,6 +1349,22 @@ def assignment_manifest_json(path: Path) -> bool:
     return in_work_units and re.fullmatch(r"ui-[0-9]{3}\.json", path.name) is not None
 
 
+def copy_decoded_json_string(
+    output: list[str], text: str, start: int, end: int
+) -> None:
+    """Copy one decoded JSON string without changing source line positions."""
+
+    decoded = json.loads(text[start:end])
+    visible = "".join(
+        " " if character.isspace() else character for character in decoded
+    )
+    destination_start = start + 1
+    destination_end = min(destination_start + len(visible), end - 1)
+    output[destination_start:destination_end] = visible[
+        : destination_end - destination_start
+    ]
+
+
 def mask_assignment_json(text: str) -> str:
     """Keep reader-facing assignment values while hiding JSON controls and metadata."""
 
@@ -1408,7 +1424,7 @@ def mask_assignment_json(text: str) -> str:
             ):
                 containers[-1]["key"] = json.loads(value)
             elif value_is_prose():
-                copy_span(output, text, token.start(), token.end())
+                copy_decoded_json_string(output, text, token.start(), token.end())
     return "".join(output)
 
 

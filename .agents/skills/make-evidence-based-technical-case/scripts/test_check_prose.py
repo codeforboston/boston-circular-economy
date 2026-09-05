@@ -446,6 +446,26 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_decodes_escaped_assignment_json_prose(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            work_units = Path(directory) / "docs" / "work-units"
+            work_units.mkdir(parents=True)
+            path = work_units / "ui-999.json"
+            path.write_text(
+                "{\n"
+                '  "objective": "\\u0055nlock the potential for residents.",\n'
+                '  "id": "\\u0055nlock the potential"\n'
+                "}\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(2, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_ignores_yaml_and_toml_keys_but_checks_values_and_comments(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             yaml_path = Path(directory) / "example.yaml"

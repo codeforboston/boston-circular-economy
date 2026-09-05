@@ -34,7 +34,10 @@ issue existed.
 
 ## Risk and scope
 
-- Risk lane: Yellow
+- Risk lane: Red
+- Maintainer checkpoint: The fork owner approved the CI/CD policy and authorized its implementation on the fork before the branch was pushed.
+- Adversarial evidence: Tests exercise untrusted pull-request data, status races, permission-bearing workflows, credential paths, destructive paths, and failed routing.
+- Recovery and rollback: Before merge, close the pull request. After merge, revert the change, remove its required status before retiring the workflow, and redeploy the last successful Pages artifact.
 - In scope: hooks, routed CI, advisory review, tested-artifact deployment, submission standards, prose checks, skills, model routing, ETL lint configuration, and local SQLite server startup.
 - Out of scope: autonomous approval, autonomous merge, a secret-bearing custom review Action, backend deployment, production monitoring, database schema design, and migrations.
 - Important invariants: Pull requests cannot deploy. Models cannot determine check results. One head commit has one submission result. Database initialization fails visibly when its file is unavailable.
@@ -72,8 +75,8 @@ issue existed.
 - JavaScript route paths remain outside prose checks while reader-facing strings remain inside.
 - Python mapping keys remain outside prose checks while string values remain inside.
 - Incomplete Python keeps plain, formatted, byte, and nested mapping keys outside prose checks.
-- Assignment JSON checks reader-facing values while paths, identifiers, and status values remain outside the scan.
-- Authentication and security workflow paths require Red review.
+- Assignment JSON decodes and checks reader-facing values while paths, identifiers, and status values remain outside the scan.
+- Authentication, credential, and security workflow or utility paths require Red review across subsystem directories.
 - Documentation manifests retain the Green review route.
 - Destructive utilities outside source directories require Red review, while fixture data remains Yellow.
 - Uncommitted review routing unions staged, unstaged, and untracked paths before applying the risk floor.
@@ -93,15 +96,15 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass; startup creates temporary SQLite and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 97 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 98 communication and submission tests |
 | Routing policy | Pass | 34 routing and hook-context tests, policy validation, and model-route samples |
-| Review policy and model routing | Pass | 23 local-runner tests and independent delivery challenges |
+| Review policy and model routing | Pass | 24 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation plus commit-stage and push-stage runs |
 | Workflow syntax | Pass | Actionlint 1.7.11 and YAML parsing |
 | Hosted pull-request CI | Not run | Hosted CI starts after this record enters the commit |
 | Manual user journey | Pass | Server starts with temporary SQLite and `GET /ping` returns `pong` |
 | Accessibility / responsive | Not affected | No visible interface changes |
-| Security / privacy / recovery | Pass | Restricted tokens, action pins, failed-route closure, and tested-artifact deployment |
+| Security / privacy / recovery | Pass | Maintainer checkpoint, restricted tokens, action pins, adversarial path and status tests, failed-route closure, and a revert and redeploy plan |
 
 ## AI assistance
 
