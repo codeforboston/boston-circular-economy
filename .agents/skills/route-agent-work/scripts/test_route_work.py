@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -61,6 +62,52 @@ class RouteWorkTests(unittest.TestCase):
         route = route_work.classify_files(["future-app/main.go"], self.policy)
         self.assertTrue(all(route.checks.values()))
         self.assertEqual(route.unknown_files, ("future-app/main.go",))
+
+    def test_cross_boundary_rename_routes_both_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            repository = Path(directory)
+            subprocess.run(["git", "init", "-q"], cwd=repository, check=True)
+            subprocess.run(
+                ["git", "config", "user.email", "routing@example.invalid"],
+                cwd=repository,
+                check=True,
+            )
+            subprocess.run(
+                ["git", "config", "user.name", "Routing test"],
+                cwd=repository,
+                check=True,
+            )
+            client_file = repository / "client/src/lookup.ts"
+            client_file.parent.mkdir(parents=True)
+            client_file.write_text("export const lookup = true;\n", encoding="utf-8")
+            subprocess.run(["git", "add", "."], cwd=repository, check=True)
+            subprocess.run(
+                ["git", "commit", "-qm", "Add client file"],
+                cwd=repository,
+                check=True,
+            )
+            base = subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                cwd=repository,
+                check=True,
+                capture_output=True,
+                text=True,
+            ).stdout.strip()
+            docs_file = repository / "docs/lookup.ts"
+            docs_file.parent.mkdir()
+            client_file.rename(docs_file)
+            subprocess.run(["git", "add", "-A"], cwd=repository, check=True)
+            subprocess.run(
+                ["git", "commit", "-qm", "Move client file"],
+                cwd=repository,
+                check=True,
+            )
+
+            files = route_work.changed_files(base, "HEAD", repository=repository)
+            route = route_work.classify_files(files, self.policy)
+
+        self.assertEqual(files, ["client/src/lookup.ts", "docs/lookup.ts"])
+        self.assertTrue(route.checks["frontend"])
 
     def test_force_all_runs_all_checks(self) -> None:
         route = route_work.classify_files(

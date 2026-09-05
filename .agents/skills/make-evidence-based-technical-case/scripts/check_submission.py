@@ -180,7 +180,7 @@ def evidence_findings(content: str) -> list[SubmissionFinding]:
 
     if len(rows) < 2:
         return [SubmissionFinding("evidence-table", "add at least one check row")]
-    supplied_checks: set[str] = set()
+    supplied_checks: dict[str, int] = {}
     for cells in rows[1:]:
         if len(cells) != 3:
             findings.append(
@@ -188,7 +188,8 @@ def evidence_findings(content: str) -> list[SubmissionFinding]:
             )
             continue
         check, result, evidence = cells
-        supplied_checks.add(check.casefold())
+        normalized_check = " ".join(check.split()).casefold()
+        supplied_checks[normalized_check] = supplied_checks.get(normalized_check, 0) + 1
         if not check or not result or not evidence:
             findings.append(
                 SubmissionFinding(
@@ -203,9 +204,17 @@ def evidence_findings(content: str) -> list[SubmissionFinding]:
                 )
             )
     for required_check in REQUIRED_EVIDENCE_CHECKS:
-        if required_check.casefold() not in supplied_checks:
+        count = supplied_checks.get(required_check.casefold(), 0)
+        if count == 0:
             findings.append(
                 SubmissionFinding("evidence-check", f"add {required_check}")
+            )
+        elif count > 1:
+            findings.append(
+                SubmissionFinding(
+                    "duplicate-evidence-check",
+                    f"list {required_check} exactly once",
+                )
             )
     return findings
 

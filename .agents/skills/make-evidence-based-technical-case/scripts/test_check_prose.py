@@ -58,6 +58,36 @@ class ProseCheckerTests(unittest.TestCase):
 
         self.assertEqual([], findings)
 
+    def test_ignores_cliche_examples_inside_indented_markdown_code(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.md"
+            path.write_text(
+                "Example output:\n\n"
+                "    unlock the potential\n"
+                "\trobust and scalable\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual([], findings)
+
+    def test_checks_rendered_prose_in_an_indented_list_continuation(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.md"
+            path.write_text(
+                "- Result:\n"
+                "    Unlock the potential.\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(2, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_allows_revision_history_in_changelog(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "CHANGELOG.md"

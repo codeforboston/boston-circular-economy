@@ -304,6 +304,22 @@ class CheckSubmissionTests(unittest.TestCase):
 
         self.assertEqual(check_submission.check_submission(body), [])
 
+    def test_conflicting_duplicate_evidence_row_fails(self) -> None:
+        original = "| ETL tests | Pass | `uv run pytest` |"
+        conflicting = "| ETL  tests | Fail | One ETL test failed. |"
+        body = VALID_BODY.replace(original, f"{original}\n{conflicting}")
+
+        findings = check_submission.check_submission(body)
+
+        self.assertIn(
+            "list ETL tests exactly once",
+            [
+                finding.detail
+                for finding in findings
+                if finding.rule == "duplicate-evidence-check"
+            ],
+        )
+
     def test_escaped_evidence_pipe_stays_in_one_cell(self) -> None:
         body = VALID_BODY.replace(
             "| ETL tests | Pass | `uv run pytest` |",

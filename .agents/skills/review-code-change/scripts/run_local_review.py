@@ -85,11 +85,15 @@ def effective_risk(declared: str, inferred: str) -> str:
     return max((declared, inferred), key=RISK_ORDER.__getitem__)
 
 
-def changed_files(base: str, scope: str) -> list[str]:
+def changed_files(
+    base: str, scope: str, *, repository: Path = ROOT
+) -> list[str]:
+    """Return review paths, including both sides of cross-path renames."""
+
     if scope == "branch":
         merge_base = subprocess.run(
             ["git", "merge-base", base, "HEAD"],
-            cwd=ROOT,
+            cwd=repository,
             check=True,
             capture_output=True,
             text=True,
@@ -97,6 +101,7 @@ def changed_files(base: str, scope: str) -> list[str]:
         command = [
             "git",
             "diff",
+            "--no-renames",
             "--name-only",
             "--diff-filter=ACDMRTUXB",
             "-z",
@@ -105,7 +110,7 @@ def changed_files(base: str, scope: str) -> list[str]:
         ]
         completed = subprocess.run(
             command,
-            cwd=ROOT,
+            cwd=repository,
             check=True,
             capture_output=True,
         )
@@ -119,18 +124,19 @@ def changed_files(base: str, scope: str) -> list[str]:
         [
             "git",
             "diff",
+            "--no-renames",
             "--name-only",
             "--diff-filter=ACDMRTUXB",
             "-z",
             "HEAD",
         ],
-        cwd=ROOT,
+        cwd=repository,
         check=True,
         capture_output=True,
     )
     untracked = subprocess.run(
         ["git", "ls-files", "--others", "--exclude-standard", "-z"],
-        cwd=ROOT,
+        cwd=repository,
         check=True,
         capture_output=True,
     )

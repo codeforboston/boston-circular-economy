@@ -3,10 +3,12 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
 from run_local_review import (
+    changed_files,
     effective_risk,
     infer_minimum_risk,
     load_risk_policy,
@@ -163,6 +165,50 @@ class LocalReviewRunnerTests(unittest.TestCase):
         assessment = infer_minimum_risk(["docs/operator-guide.md"], load_risk_policy())
 
         self.assertEqual("green", assessment["risk"])
+
+    def test_cross_boundary_rename_reviews_both_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            repository = Path(directory)
+            subprocess.run(["git", "init", "-q"], cwd=repository, check=True)
+            subprocess.run(
+                ["git", "config", "user.email", "review@example.invalid"],
+                cwd=repository,
+                check=True,
+            )
+            subprocess.run(
+                ["git", "config", "user.name", "Review test"],
+                cwd=repository,
+                check=True,
+            )
+            client_file = repository / "client/src/lookup.ts"
+            client_file.parent.mkdir(parents=True)
+            client_file.write_text("export const lookup = true;\n", encoding="utf-8")
+            subprocess.run(["git", "add", "."], cwd=repository, check=True)
+            subprocess.run(
+                ["git", "commit", "-qm", "Add client file"],
+                cwd=repository,
+                check=True,
+            )
+            base = subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                cwd=repository,
+                check=True,
+                capture_output=True,
+                text=True,
+            ).stdout.strip()
+            docs_file = repository / "docs/lookup.ts"
+            docs_file.parent.mkdir()
+            client_file.rename(docs_file)
+            subprocess.run(["git", "add", "-A"], cwd=repository, check=True)
+            subprocess.run(
+                ["git", "commit", "-qm", "Move client file"],
+                cwd=repository,
+                check=True,
+            )
+
+            files = changed_files(base, "branch", repository=repository)
+
+        self.assertEqual(files, ["client/src/lookup.ts", "docs/lookup.ts"])
 
     def test_integration_review_uses_sol(self) -> None:
         result = self.dry_run("--risk", "yellow", "--task-type", "integration")

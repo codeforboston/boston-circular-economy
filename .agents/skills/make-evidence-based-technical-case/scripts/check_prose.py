@@ -54,6 +54,9 @@ TEMPORAL_EXEMPT_NAMES = {
 WORD = re.compile(r"[A-Za-z0-9]+(?:[-'][A-Za-z0-9]+)*")
 SENTENCE_END = re.compile(r"(?<=[.!?])(?:\s+|$)")
 INLINE_CODE = re.compile(r"`[^`]*`")
+LIST_ITEM_START = re.compile(
+    r"^(?P<indent>[ \t]*)(?:[-+*]|\d{1,9}[.)])(?P<spacing>[ \t]+)"
+)
 IMAGE = re.compile(r"!\[[^]]*]\([^)]+\)")
 LINK = re.compile(r"\[([^]]+)]\([^)]+\)")
 URL = re.compile(r"https?://\S+")
@@ -856,6 +859,7 @@ def mask_markdown_code(text: str) -> str:
 
     output: list[str] = []
     in_fence = False
+    list_indents: list[tuple[int, int]] = []
     for line in text.splitlines(keepends=True):
         stripped = line.lstrip()
         if stripped.startswith(("```", "~~~")):
@@ -863,6 +867,24 @@ def mask_markdown_code(text: str) -> str:
             output.append("".join("\n" if char == "\n" else " " for char in line))
             continue
         if in_fence:
+            output.append("".join("\n" if char == "\n" else " " for char in line))
+            continue
+        content = line.rstrip("\r\n")
+        indentation_text = content[: len(content) - len(content.lstrip(" \t"))]
+        indentation = len(indentation_text.expandtabs(4))
+        list_item = LIST_ITEM_START.match(content)
+        if list_item is not None:
+            marker_indent = len(list_item.group("indent").expandtabs(4))
+            while list_indents and marker_indent <= list_indents[-1][0]:
+                list_indents.pop()
+            content_indent = len(content[: list_item.end()].expandtabs(4))
+            list_indents.append((marker_indent, content_indent))
+        elif content.strip():
+            while list_indents and indentation < list_indents[-1][1]:
+                list_indents.pop()
+
+        code_indent = (list_indents[-1][1] + 4) if list_indents else 4
+        if list_item is None and indentation >= code_indent:
             output.append("".join("\n" if char == "\n" else " " for char in line))
             continue
         output.append(INLINE_CODE.sub(lambda match: " " * len(match.group(0)), line))

@@ -115,17 +115,23 @@ def classify_files(
     )
 
 
-def changed_files(base: str, head: str) -> list[str]:
+def changed_files(
+    base: str, head: str, *, repository: Path | None = None
+) -> list[str]:
+    """Return both sides of cross-path renames so no routed check is skipped."""
+
     completed = subprocess.run(
         [
             "git",
             "diff",
+            "--no-renames",
             "--name-only",
             "--diff-filter=ACDMRTUXB",
             "-z",
             base,
             head,
         ],
+        cwd=repository,
         check=True,
         capture_output=True,
     )
