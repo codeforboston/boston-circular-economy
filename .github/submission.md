@@ -139,6 +139,7 @@ issue existed.
 - Join implicit and added Python reader strings before checking rendered wording.
 - Apply the semicolon rule to every masked reader-facing source format.
 - Scan reader-facing text and accessible attributes in standalone SVG files.
+- Scan visible HTML inside standalone SVG `foreignObject` elements.
 - Preserve suppressed HTML element state across complete Markdown documents.
 - Use the trusted-base local review command in contributor guidance.
 - Keep JavaScript and TypeScript database operation strings outside prose checks.
@@ -251,6 +252,7 @@ issue existed.
 - Static JSX string addition cannot split a prohibited contraction across literals.
 - Static JavaScript and Python string expressions cannot split prohibited wording.
 - SVG titles, descriptions, text, and accessible attributes remain visible while metadata and scripts remain inert.
+- HTML inside an SVG `foreignObject` remains visible while drawing paths remain inert.
 - Language syntax stays inert while semicolons in reader-facing source values fail.
 - Multiline Markdown `pre` and `script` elements keep their content outside prose checks.
 - SQL statement separators remain machine syntax while adjacent reader text is checked.
@@ -297,7 +299,7 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass. Startup creates and closes a temporary SQLite database, and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 165 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 166 communication and submission tests |
 | Routing policy | Pass | 44 routing, hook-context, manifest-integrity, and model-route tests |
 | Review policy and model routing | Pass | 33 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation, schema validation, and commit-stage and push-stage runs |
@@ -328,7 +330,8 @@ human-readable ARIA value text, visible blockquotes, heading semicolons, and wor
 dependency integrity. Examine static JSX string addition and source semicolon handling.
 Examine ordinary JavaScript additions and adjacent Python reader strings. Examine
 element-specific HTML and JSX attributes, React children, and JavaScript property keys.
-Examine trusted-base local review execution and standalone SVG reader-text boundaries.
+Examine trusted-base local review execution and standalone SVG reader-text boundaries,
+including visible HTML inside `foreignObject` elements.
 Examine semicolon coverage and multiline HTML suppression in Markdown.
 Examine database-operation string classification and front-matter closure detection.
 Examine deliverable-name classification and adjacent rendered-text source mapping.

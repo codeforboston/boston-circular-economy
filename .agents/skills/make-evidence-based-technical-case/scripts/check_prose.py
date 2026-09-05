@@ -144,7 +144,7 @@ HTML_TEXT_BOUNDARY_ELEMENTS = {
     "tr",
     "ul",
 }
-SVG_READER_TEXT_ELEMENTS = {"desc", "text", "title"}
+SVG_READER_TEXT_ELEMENTS = {"desc", "foreignobject", "text", "title"}
 HTML_ATTRIBUTE = re.compile(
     r"""(?P<name>[A-Za-z_:][-A-Za-z0-9_:.]*)[ \t\r\n]*=[ \t\r\n]*"""
     r"""(?:"(?P<double>[^"]*)"|'(?P<single>[^']*)'|"""

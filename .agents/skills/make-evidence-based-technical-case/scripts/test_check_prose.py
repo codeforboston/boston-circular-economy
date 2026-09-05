@@ -699,6 +699,26 @@ class ProseCheckerTests(unittest.TestCase):
             {(finding.line, finding.rule) for finding in findings},
         )
 
+    def test_checks_visible_html_inside_svg_foreign_object(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "map.svg"
+            path.write_text(
+                '<svg xmlns="http://www.w3.org/2000/svg">\n'
+                "<metadata>Unlock the potential.</metadata>\n"
+                '<foreignObject><div xmlns="http://www.w3.org/1999/xhtml">'
+                "Unlock the potential.</div></foreignObject>\n"
+                '<path d="M0 0 L10 10" />\n'
+                "</svg>\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(3, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_checks_accessible_aria_descriptions_in_html_and_jsx(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             html_path = Path(directory) / "index.html"
