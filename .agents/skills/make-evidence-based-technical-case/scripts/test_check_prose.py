@@ -541,6 +541,21 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_checks_text_passed_to_a_generic_header_method(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "section.ts"
+            path.write_text(
+                'section.header("Unlock the potential.");\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(1, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_checks_html_text_and_reader_facing_attributes(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "index.html"

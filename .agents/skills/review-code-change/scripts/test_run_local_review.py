@@ -121,6 +121,23 @@ class LocalReviewRunnerTests(unittest.TestCase):
                     effective_risk("green", str(assessment["risk"])),
                 )
 
+    def test_access_control_path_requires_red_review(self) -> None:
+        paths = (
+            "client/src/security/access-control.ts",
+            "etl/src/etl/security/access_control.py",
+            "server/src/access-control.ts",
+        )
+        policy = load_risk_policy()
+
+        for path in paths:
+            with self.subTest(path=path):
+                assessment = infer_minimum_risk([path], policy)
+                self.assertEqual("red", assessment["risk"])
+                self.assertEqual(
+                    "red",
+                    effective_risk("green", str(assessment["risk"])),
+                )
+
     def test_design_token_path_keeps_yellow_review(self) -> None:
         assessment = infer_minimum_risk(
             ["client/src/styles/design-tokens.ts"], load_risk_policy()

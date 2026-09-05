@@ -90,6 +90,7 @@ issue existed.
 - Start the built server with temporary SQLite and verify `/ping` in local push checks and CI.
 - Route every GitHub Actions workflow change to Red review because any workflow can change permissions or authorization.
 - Route every repo-local GitHub Action change to Red review because it executes with its caller's privileges.
+- Route access-control modules in every application subsystem to Red review.
 - Route trusted submission-status helpers to Red review because they run with a status-writing token.
 - Route `migrate` utility names to Red review in the ETL and server subsystems.
 - Add authorization to the Red risk option in the work-unit issue form.
@@ -261,6 +262,7 @@ issue existed.
   prerequisite remains unaccepted. The waiting state remains valid.
 - Client, server, and ETL migration paths all require Red review.
 - Custom textbox placeholders exposed through ARIA remain visible to wording checks.
+- Generic UI header calls remain visible while known protocol response headers remain masked.
 - Red review stops for specialist and human escalation, including ETL credential and secret paths.
 
 ## Evidence
@@ -270,9 +272,9 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass. Startup creates and closes a temporary SQLite database, and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 158 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 159 communication and submission tests |
 | Routing policy | Pass | 44 routing, hook-context, manifest-integrity, and model-route tests |
-| Review policy and model routing | Pass | 31 local-runner tests and independent delivery challenges |
+| Review policy and model routing | Pass | 32 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation, schema validation, and commit-stage and push-stage runs |
 | Workflow syntax | Pass | Actionlint 1.7.11 and YAML parsing |
 | Hosted pull-request CI | Not run | Hosted CI starts after this record enters the commit |
@@ -312,6 +314,7 @@ Examine shared-ref resolution, protocol-header classification, and ARIA role des
 Examine prerequisite-state enforcement for dependent work units.
 Examine client migration routing and ARIA placeholder coverage.
 Examine repo-local GitHub Action routing.
+Examine access-control routing and generic header-call text visibility.
 Examine Python resource identifiers, heading termination, hook suffix coverage, and the
 Red workflow risk floor. Confirm the deployment reconcile step verifies the selected
 run has an unexpired client artifact before it marks the deployment ready. Confirm

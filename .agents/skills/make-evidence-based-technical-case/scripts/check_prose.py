@@ -1637,7 +1637,10 @@ def javascript_protocol_header_argument(tokens: list[str]) -> bool:
     receiver, separator, method = normalized[-4:-1]
     if separator != ".":
         return False
-    if method in JAVASCRIPT_HEADER_METHODS:
+    if (
+        method in JAVASCRIPT_HEADER_METHODS
+        and receiver in JAVASCRIPT_RESPONSE_RECEIVERS
+    ):
         return True
     return bool(
         method in JAVASCRIPT_HEADER_COLLECTION_METHODS
