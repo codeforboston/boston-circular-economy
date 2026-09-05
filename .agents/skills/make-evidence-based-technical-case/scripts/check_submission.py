@@ -175,11 +175,6 @@ def labeled_values(content: str, label: str) -> list[str]:
     return [match.group(1) for match in pattern.finditer(content)]
 
 
-def labeled_value(content: str, label: str) -> str | None:
-    values = labeled_values(content, label)
-    return values[0] if values else None
-
-
 def unescaped_pipe_positions(value: str) -> list[int]:
     """Locate Markdown table separators and ignore escaped pipe characters."""
 
@@ -289,12 +284,16 @@ def check_submission(body: str) -> list[SubmissionFinding]:
     for section_name, labels in REQUIRED_SECTION_LABELS.items():
         content = sections.get(normalize_section_name(section_name), "")
         for label in labels:
-            value = labeled_value(content, label)
-            if value is None:
+            values = labeled_values(content, label)
+            if not values:
                 findings.append(
                     SubmissionFinding("missing-label", f"{section_name}: {label}")
                 )
-            elif not has_meaningful_section_content(value):
+            elif len(values) > 1:
+                findings.append(
+                    SubmissionFinding("duplicate-label", f"{section_name}: {label}")
+                )
+            elif not has_meaningful_section_content(values[0]):
                 findings.append(
                     SubmissionFinding("empty-label", f"{section_name}: {label}")
                 )

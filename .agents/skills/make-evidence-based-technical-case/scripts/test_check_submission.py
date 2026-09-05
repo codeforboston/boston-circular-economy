@@ -201,6 +201,19 @@ class CheckSubmissionTests(unittest.TestCase):
         rules = [finding.rule for finding in check_submission.check_submission(body)]
         self.assertIn("empty-label", rules)
 
+    def test_duplicate_required_label_fails(self) -> None:
+        body = VALID_BODY.replace(
+            "- Rebuttal: Provider data can become stale.",
+            "- Rebuttal: Provider data can become stale.\n"
+            "- Rebuttal: Cached data can also become stale.",
+        )
+
+        details = [
+            finding.detail for finding in check_submission.check_submission(body)
+        ]
+
+        self.assertIn("Technical case: Rebuttal:", details)
+
     def test_empty_why_not_label_fails(self) -> None:
         body = VALID_BODY.replace(
             WHY_NOT,

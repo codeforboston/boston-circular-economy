@@ -137,6 +137,23 @@ class LocalCheckRunnerTests(unittest.TestCase):
     def test_all_files_mode_does_not_resolve_a_base(self) -> None:
         self.assertEqual([], files_for_run(True, "missing/main", "HEAD"))
 
+    def test_default_etl_output_directory_is_ignored(self) -> None:
+        repository = Path(__file__).resolve().parents[4]
+
+        completed = subprocess.run(
+            [
+                "git",
+                "check-ignore",
+                "--quiet",
+                "--no-index",
+                "etl/data/snapshots/example.json",
+            ],
+            cwd=repository,
+            check=False,
+        )
+
+        self.assertEqual(0, completed.returncode)
+
     def test_missing_tool_fails_with_the_required_command_name(self) -> None:
         with mock.patch("run_local_checks.shutil.which", return_value=None):
             with self.assertRaisesRegex(FileNotFoundError, "not on PATH: missing-tool"):
