@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import html
 import json
 import re
 import sys
@@ -88,6 +89,8 @@ EMPTY_MARKDOWN_LINE = re.compile(
     r"(?:[*_-][ \t]*){3,}|>+|#{1,6})[ \t]*$"
 )
 MARKDOWN_CHECKBOX = re.compile(r"\[[ xX]\]")
+RAW_HTML_TAG = re.compile(r"</?[A-Za-z][^>]*>")
+HTML_ENTITY = re.compile(r"&(?:#[0-9]+|#x[0-9A-Fa-f]+|[A-Za-z][A-Za-z0-9]+);")
 TEMPLATE_GUIDANCE = (
     "Describe how you tried to prove the change wrong. Include normal, boundary, "
     "failure, and regression cases that apply.",
@@ -127,7 +130,9 @@ def has_meaningful_section_content(content: str) -> bool:
     for pattern in TEMPLATE_GUIDANCE_PATTERNS:
         without_guidance = pattern.sub("", without_guidance)
     without_checkboxes = MARKDOWN_CHECKBOX.sub("", without_guidance)
-    without_empty_markdown = EMPTY_MARKDOWN_LINE.sub("", without_checkboxes)
+    without_html = RAW_HTML_TAG.sub("", without_checkboxes)
+    decoded_entities = html.unescape(without_html)
+    without_empty_markdown = EMPTY_MARKDOWN_LINE.sub("", decoded_entities)
     return any(character.isalnum() for character in without_empty_markdown)
 
 
@@ -301,6 +306,16 @@ def check_submission(body: str) -> list[SubmissionFinding]:
     if PLACEHOLDER.search(record):
         findings.append(
             SubmissionFinding("template-placeholder", "remove all HTML placeholders")
+        )
+    if RAW_HTML_TAG.search(record):
+        findings.append(
+            SubmissionFinding("raw-html", "use visible Markdown instead of HTML tags")
+        )
+    if HTML_ENTITY.search(record):
+        findings.append(
+            SubmissionFinding(
+                "html-entity", "use visible characters instead of HTML entities"
+            )
         )
     if not ISSUE_REFERENCE.search(record) and not ISSUE_EXCEPTION.search(record):
         findings.append(

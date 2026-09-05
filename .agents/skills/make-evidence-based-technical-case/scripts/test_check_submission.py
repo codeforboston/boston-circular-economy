@@ -237,6 +237,21 @@ class CheckSubmissionTests(unittest.TestCase):
 
                 self.assertIn("Technical case: Grounds:", details)
 
+    def test_html_only_labeled_value_fails(self) -> None:
+        for markup in ("&nbsp;", "<br>", "<span></span>"):
+            with self.subTest(markup=markup):
+                body = VALID_BODY.replace(
+                    "- Grounds: The tests pass.",
+                    f"- Grounds: {markup}",
+                )
+
+                details = [
+                    finding.detail
+                    for finding in check_submission.check_submission(body)
+                ]
+
+                self.assertIn("Technical case: Grounds:", details)
+
     def test_empty_comprehension_path_fails(self) -> None:
         body = VALID_BODY.replace(
             COMPREHENSION_PATH,
@@ -401,6 +416,28 @@ class CheckSubmissionTests(unittest.TestCase):
             details,
         )
 
+    def test_hidden_disclosure_fails(self) -> None:
+        replacements = (
+            (
+                "- [x] No substantial AI assistance",
+                "<div hidden>\n- [x] No substantial AI assistance\n</div>",
+            ),
+            (
+                "- [x] No documentation change is needed",
+                "<div hidden>\n- [x] No documentation change is needed\n</div>",
+            ),
+        )
+        for visible, hidden in replacements:
+            with self.subTest(visible=visible):
+                body = VALID_BODY.replace(visible, hidden)
+
+                rules = [
+                    finding.rule
+                    for finding in check_submission.check_submission(body)
+                ]
+
+                self.assertIn("raw-html", rules)
+
     def test_missing_documentation_selection_fails(self) -> None:
         body = VALID_BODY.replace(
             "- [x] No documentation change is needed",
@@ -463,6 +500,21 @@ class CheckSubmissionTests(unittest.TestCase):
                 body = VALID_BODY.replace(
                     "| ETL tests | Pass | `uv run pytest` |",
                     f"| ETL tests | Not run | {marker} |",
+                )
+
+                rules = [
+                    finding.rule
+                    for finding in check_submission.check_submission(body)
+                ]
+
+                self.assertIn("evidence-table", rules)
+
+    def test_html_only_evidence_reason_fails(self) -> None:
+        for markup in ("&nbsp;", "<br>", "<span></span>"):
+            with self.subTest(markup=markup):
+                body = VALID_BODY.replace(
+                    "| ETL tests | Pass | `uv run pytest` |",
+                    f"| ETL tests | Not run | {markup} |",
                 )
 
                 rules = [
