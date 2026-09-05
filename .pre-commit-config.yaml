@@ -20,14 +20,9 @@ repos:
       - id: work-unit-manifests
         name: Validate work-unit manifests
         entry: >-
-          uvx --from check-jsonschema==0.35.0 check-jsonschema
-          --schemafile docs/work-units/manifest.schema.json
-          docs/work-units/ui-001.json
-          docs/work-units/ui-002.json
-          docs/work-units/ui-003.json
-          docs/work-units/ui-004.json
-          docs/work-units/ui-005.json
-        language: system
+          python -B
+          .agents/skills/route-agent-work/scripts/validate_work_units.py
+        language: python
         files: '^docs/work-units/(manifest\.schema\.json|ui-[0-9]{3}\.json)$'
         pass_filenames: false
       - id: routing-policy

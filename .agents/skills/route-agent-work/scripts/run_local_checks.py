@@ -22,9 +22,7 @@ PROSE_CHECKER = (
 REVIEW_CHECKER_DIRECTORY = (
     REPOSITORY_ROOT / ".agents" / "skills" / "review-code-change" / "scripts"
 )
-WORK_UNIT_DIRECTORY = REPOSITORY_ROOT / "docs" / "work-units"
-WORK_UNIT_SCHEMA = WORK_UNIT_DIRECTORY / "manifest.schema.json"
-WORK_UNIT_MANIFESTS = sorted(WORK_UNIT_DIRECTORY.glob("ui-[0-9][0-9][0-9].json"))
+WORK_UNIT_VALIDATOR = Path(__file__).with_name("validate_work_units.py")
 
 
 def is_zero_oid(revision: str) -> bool:
@@ -178,17 +176,7 @@ def main(argv: list[str] | None = None) -> int:
     print(json.dumps(route.as_dict(), indent=2, sort_keys=True))
 
     run([sys.executable, "-B", str(PROSE_CHECKER), "."])
-    run(
-        [
-            "uvx",
-            "--from",
-            "check-jsonschema==0.35.0",
-            "check-jsonschema",
-            "--schemafile",
-            str(WORK_UNIT_SCHEMA),
-            *(str(path) for path in WORK_UNIT_MANIFESTS),
-        ]
-    )
+    run([sys.executable, "-B", str(WORK_UNIT_VALIDATOR)])
     run(
         [
             sys.executable,

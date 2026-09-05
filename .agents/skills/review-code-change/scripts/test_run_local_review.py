@@ -379,6 +379,9 @@ class LocalReviewRunnerTests(unittest.TestCase):
         submission_workflow = (ROOT / ".github/workflows/submission.yml").read_text(
             encoding="utf-8"
         )
+        work_unit_validator = (
+            ROOT / ".agents/skills/route-agent-work/scripts/validate_work_units.py"
+        ).read_text(encoding="utf-8")
 
         self.assertNotIn("github.event.action != 'edited'", ci_workflow)
         self.assertIn(
@@ -387,8 +390,12 @@ class LocalReviewRunnerTests(unittest.TestCase):
         )
         self.assertIn("github.event.pull_request.number || github.sha }}", ci_workflow)
         self.assertIn("cancel-in-progress: true", ci_workflow)
-        self.assertIn("check-jsonschema==0.35.0", ci_workflow)
+        self.assertIn('CHECK_JSONSCHEMA_VERSION = "0.35.0"', work_unit_validator)
+        self.assertIn(
+            'f"check-jsonschema=={CHECK_JSONSCHEMA_VERSION}"', work_unit_validator
+        )
         self.assertIn("invalid-missing-fields.json", ci_workflow)
+        self.assertIn("validate_work_units.py", ci_workflow)
         self.assertIn("npm run test:smoke -w server", ci_workflow)
         self.assertIn(
             "types: [opened, reopened, synchronize, edited]",

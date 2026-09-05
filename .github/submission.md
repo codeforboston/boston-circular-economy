@@ -73,6 +73,7 @@ issue existed.
 - Decode non-raw Python reader strings before editorial matching, including f-string literal segments.
 - Decode Markdown entities before language checks so entity terminators do not look like prose semicolons.
 - Validate every work-unit manifest against its schema in commit hooks, push hooks, and CI.
+- Discover numbered work-unit manifests in one tested script so future units cannot bypass validation.
 - Add an invalid manifest fixture that proves CI rejects missing required fields.
 - Start the built server with temporary SQLite and verify `/ping` in local push checks and CI.
 
@@ -127,7 +128,7 @@ issue existed.
 | Server lint and build | Pass | Lint and build pass; startup creates temporary SQLite and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
 | Technical prose and editorial style | Pass | Full repository scan and 113 communication and submission tests |
-| Routing policy | Pass | 34 routing and hook-context tests, manifest schema validation, and model-route samples |
+| Routing policy | Pass | 37 routing, hook-context, and manifest-discovery tests plus model-route samples |
 | Review policy and model routing | Pass | 25 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation, schema validation, and commit-stage and push-stage runs |
 | Workflow syntax | Pass | Actionlint 1.7.11 and YAML parsing |
