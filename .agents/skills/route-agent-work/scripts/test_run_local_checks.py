@@ -16,6 +16,7 @@ from run_local_checks import (
     main,
     require_checked_out_commit,
     require_clean_worktree,
+    require_submission_updated_in_head,
     run,
 )
 
@@ -104,15 +105,40 @@ class LocalCheckRunnerTests(unittest.TestCase):
             text=True,
         )
 
+    @mock.patch("run_local_checks.subprocess.run")
+    def test_accepts_a_submission_changed_from_the_first_parent(
+        self, run_process: mock.Mock
+    ) -> None:
+        run_process.side_effect = [
+            SimpleNamespace(stdout="head-sha parent-sha\n"),
+            SimpleNamespace(returncode=1, args=["git", "diff"]),
+        ]
+
+        require_submission_updated_in_head("head-sha")
+
+    @mock.patch("run_local_checks.subprocess.run")
+    def test_rejects_a_submission_inherited_from_the_first_parent(
+        self, run_process: mock.Mock
+    ) -> None:
+        run_process.side_effect = [
+            SimpleNamespace(stdout="head-sha parent-sha\n"),
+            SimpleNamespace(returncode=0, args=["git", "diff"]),
+        ]
+
+        with self.assertRaisesRegex(ValueError, "head commit must update"):
+            require_submission_updated_in_head("head-sha")
+
     @mock.patch("run_local_checks.run")
     @mock.patch("run_local_checks.route_work.classify_files")
     @mock.patch("run_local_checks.route_work.load_policy", return_value={})
+    @mock.patch("run_local_checks.require_submission_updated_in_head")
     @mock.patch("run_local_checks.require_clean_worktree")
     @mock.patch("run_local_checks.resolve_commit", return_value="1111111")
     def test_rechecks_worktree_after_commands_can_generate_files(
         self,
         resolve_commit: mock.Mock,
         require_clean: mock.Mock,
+        require_submission_update: mock.Mock,
         load_policy: mock.Mock,
         classify_files: mock.Mock,
         run_check: mock.Mock,
@@ -133,6 +159,7 @@ class LocalCheckRunnerTests(unittest.TestCase):
         self.assertEqual(4, run_check.call_count)
         resolve_commit.assert_has_calls([mock.call("HEAD"), mock.call("HEAD")])
         load_policy.assert_called_once_with()
+        require_submission_update.assert_called_once_with("1111111")
 
     def test_all_files_mode_does_not_resolve_a_base(self) -> None:
         self.assertEqual([], files_for_run(True, "missing/main", "HEAD"))

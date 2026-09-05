@@ -45,5 +45,5 @@ This file adds review rules for workflows and repository automation. Apply the r
 - Flag a commit status whose result depends on mutable pull request metadata. Two pull
   requests at one head commit share statuses but can have different titles, bodies, or
   labels. Safe path: validate a versioned record fetched from the exact head as inert
-  data. Require that record to differ from its base-commit version so inherited evidence
-  cannot satisfy a new change.
+  data. Require the head commit to change that record from its first parent. This rule
+  keeps the result intrinsic to the head and rejects inherited evidence.

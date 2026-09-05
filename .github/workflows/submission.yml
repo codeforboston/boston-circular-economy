@@ -40,7 +40,6 @@ jobs:
         continue-on-error: true
         env:
           CONTEXT: Submission record
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
           EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
@@ -59,18 +58,27 @@ jobs:
             -f context="$CONTEXT" \
             -f description="Checking the committed submission record." \
             -f target_url="$TARGET_URL"
+          gh api "repos/$GITHUB_REPOSITORY/commits/$HEAD_SHA" \
+            > "$RUNNER_TEMP/head-commit.json"
+          HEAD_PARENT_SHA="$(
+            python -B \
+              .agents/skills/make-evidence-based-technical-case/scripts/check_submission_freshness.py \
+              --expected-head "$HEAD_SHA" \
+              --head-commit-json "$RUNNER_TEMP/head-commit.json" \
+              --print-first-parent
+          )"
           gh api \
-            "repos/$GITHUB_REPOSITORY/contents/.github/submission.md?ref=$BASE_SHA" \
-            > "$RUNNER_TEMP/base-submission.json"
+            "repos/$GITHUB_REPOSITORY/contents/.github/submission.md?ref=$HEAD_PARENT_SHA" \
+            > "$RUNNER_TEMP/parent-submission.json"
           gh api \
             "repos/$GITHUB_REPOSITORY/contents/.github/submission.md?ref=$HEAD_SHA" \
             > "$RUNNER_TEMP/head-submission.json"
-          jq -e '.type == "file" and .encoding == "base64"' \
-            "$RUNNER_TEMP/base-submission.json" \
-            "$RUNNER_TEMP/head-submission.json"
-          test \
-            "$(jq -r .sha "$RUNNER_TEMP/base-submission.json")" != \
-            "$(jq -r .sha "$RUNNER_TEMP/head-submission.json")"
+          python -B \
+            .agents/skills/make-evidence-based-technical-case/scripts/check_submission_freshness.py \
+            --expected-head "$HEAD_SHA" \
+            --head-commit-json "$RUNNER_TEMP/head-commit.json" \
+            --parent-record-json "$RUNNER_TEMP/parent-submission.json" \
+            --head-record-json "$RUNNER_TEMP/head-submission.json"
           jq -r .content "$RUNNER_TEMP/head-submission.json" \
             | base64 --decode \
             > "$RUNNER_TEMP/submission.md"

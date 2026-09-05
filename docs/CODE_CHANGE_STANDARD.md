@@ -39,10 +39,10 @@ language rules in repository files.
 
 `Submission record` is a commit status, so its evidence must also belong to the commit.
 The trusted workflow fetches `.github/submission.md` from the exact head as inert data
-and requires its blob to differ from the base revision. Two pull requests at one head
-therefore use the same record and correctly receive the same result. Human approval
-remains a separate required judgment because a cosmetic file change can satisfy the
-blob check without making the evidence accurate.
+and requires its blob to differ from the head's first parent. The final head commit must
+therefore update the record. Two pull requests at one head use the same record and
+receive the same result, even when their bases differ. Human approval remains a
+separate judgment because a cosmetic edit can satisfy the blob check.
 
 CI cannot decide whether the stated rationale is true or complete. The contributor and
 human reviewer must compare the explanation with the implementation and evidence.

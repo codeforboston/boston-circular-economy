@@ -389,23 +389,25 @@ class LocalReviewRunnerTests(unittest.TestCase):
             "HEAD_SHA: ${{ github.event.pull_request.head.sha }}",
             submission_workflow,
         )
-        self.assertIn(
-            "BASE_SHA: ${{ github.event.pull_request.base.sha }}",
-            submission_workflow,
-        )
+        self.assertNotIn("BASE_SHA", submission_workflow)
         self.assertIn("continue-on-error: true", submission_workflow)
         self.assertIn("steps.check.outcome", submission_workflow)
         self.assertIn("steps.publish.outcome", submission_workflow)
         self.assertNotIn("--slurpfile expected", submission_workflow)
         self.assertNotIn("pull_request.body", submission_workflow)
-        self.assertIn("$RUNNER_TEMP/base-submission.json", submission_workflow)
+        self.assertIn("$RUNNER_TEMP/head-commit.json", submission_workflow)
+        self.assertIn("$RUNNER_TEMP/parent-submission.json", submission_workflow)
         self.assertIn("$RUNNER_TEMP/head-submission.json", submission_workflow)
         self.assertIn("$RUNNER_TEMP/submission.md", submission_workflow)
-        self.assertIn("contents/.github/submission.md?ref=$BASE_SHA", submission_workflow)
+        self.assertIn("commits/$HEAD_SHA", submission_workflow)
+        self.assertIn(
+            "contents/.github/submission.md?ref=$HEAD_PARENT_SHA",
+            submission_workflow,
+        )
         self.assertIn("contents/.github/submission.md?ref=$HEAD_SHA", submission_workflow)
-        self.assertIn(".type == \"file\" and .encoding == \"base64\"", submission_workflow)
-        self.assertIn('$(jq -r .sha "$RUNNER_TEMP/base-submission.json")', submission_workflow)
-        self.assertIn('$(jq -r .sha "$RUNNER_TEMP/head-submission.json")', submission_workflow)
+        self.assertIn("check_submission_freshness.py", submission_workflow)
+        self.assertIn("--print-first-parent", submission_workflow)
+        self.assertIn("--parent-record-json", submission_workflow)
         self.assertIn("base64 --decode", submission_workflow)
         self.assertIn("--body-file", submission_workflow)
         self.assertIn("$RUNNER_TEMP/latest-pr.json", submission_workflow)

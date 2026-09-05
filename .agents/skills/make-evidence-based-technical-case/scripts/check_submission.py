@@ -161,8 +161,10 @@ def has_meaningful_section_content(content: str) -> bool:
     return any(character.isalnum() for character in without_empty_markdown)
 
 
-def strip_blockquote_markers(content: str, *, container_indent: int = 0) -> str:
-    """Remove quote controls after a container's indentation."""
+def strip_blockquote_markers(
+    content: str, *, container_indent: int = 0
+) -> tuple[str, int]:
+    """Remove quote controls and return their depth at one container boundary."""
 
     prefix_end = 0
     indentation = 0
@@ -173,18 +175,20 @@ def strip_blockquote_markers(content: str, *, container_indent: int = 0) -> str:
         elif character == "\t":
             indentation += 4 - (indentation % 4)
         else:
-            return content
+            return content, 0
         prefix_end += 1
     if indentation != container_indent:
-        return content
+        return content, 0
 
     prefix = content[:prefix_end]
     remainder = content[prefix_end:]
+    depth = 0
     while marker := BLOCKQUOTE_MARKER.match(remainder):
         marker_text = marker.group(0)
         leading_spaces = marker_text.index(">")
         remainder = (" " * leading_spaces) + remainder[marker.end() :]
-    return prefix + remainder
+        depth += 1
+    return prefix + remainder, depth
 
 
 def mask_markdown_code_blocks(body: str) -> str:
@@ -194,29 +198,35 @@ def mask_markdown_code_blocks(body: str) -> str:
     fence_character: str | None = None
     fence_length = 0
     fence_container_indent = 0
+    fence_quote_depth = 0
     list_indents: list[tuple[int, int]] = []
     for line in body.splitlines(keepends=True):
         content = line.rstrip("\r\n")
-        container_content = strip_blockquote_markers(content)
+        container_content, outer_quote_depth = strip_blockquote_markers(content)
         indentation_text = container_content[
             : len(container_content) - len(container_content.lstrip(" \t"))
         ]
         indentation = len(indentation_text.expandtabs(4))
 
         if fence_character is not None:
-            fence_content = strip_blockquote_markers(
+            fence_content, inner_quote_depth = strip_blockquote_markers(
                 container_content,
                 container_indent=fence_container_indent,
             )
             fence_stripped = fence_content.lstrip()
-            if (
-                fence_container_indent > 0
-                and container_content.strip()
-                and indentation < fence_container_indent
-            ):
+            current_quote_depth = outer_quote_depth + inner_quote_depth
+            outside_fence_container = content.strip() and (
+                (
+                    fence_container_indent > 0
+                    and indentation < fence_container_indent
+                )
+                or current_quote_depth < fence_quote_depth
+            )
+            if outside_fence_container:
                 fence_character = None
                 fence_length = 0
                 fence_container_indent = 0
+                fence_quote_depth = 0
             else:
                 relative_indent = indentation - fence_container_indent
                 if 0 <= relative_indent <= 3 and re.fullmatch(
@@ -226,6 +236,7 @@ def mask_markdown_code_blocks(body: str) -> str:
                     fence_character = None
                     fence_length = 0
                     fence_container_indent = 0
+                    fence_quote_depth = 0
                 output.append(
                     "".join("\n" if value == "\n" else " " for value in line)
                 )
@@ -247,7 +258,7 @@ def mask_markdown_code_blocks(body: str) -> str:
         container_indent = list_indents[-1][1] if list_indents else 0
         relative_indent = indentation - container_indent
         if list_item is not None:
-            fence_candidate = strip_blockquote_markers(
+            fence_candidate, inner_quote_depth = strip_blockquote_markers(
                 container_content[list_item.end() :]
             )
             candidate_indent = len(
@@ -261,7 +272,7 @@ def mask_markdown_code_blocks(body: str) -> str:
                 else None
             )
         else:
-            fence_candidate = strip_blockquote_markers(
+            fence_candidate, inner_quote_depth = strip_blockquote_markers(
                 container_content,
                 container_indent=container_indent,
             )
@@ -275,6 +286,7 @@ def mask_markdown_code_blocks(body: str) -> str:
             fence_character = marker[0]
             fence_length = len(marker)
             fence_container_indent = container_indent
+            fence_quote_depth = outer_quote_depth + inner_quote_depth
             output.append(
                 "".join("\n" if value == "\n" else " " for value in line)
             )

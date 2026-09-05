@@ -74,6 +74,44 @@ def require_clean_worktree(
         raise ValueError(failure_message)
 
 
+def require_submission_updated_in_head(
+    head: str,
+    *,
+    repository: Path = REPOSITORY_ROOT,
+) -> None:
+    """Require the checked head to change the record from its first parent."""
+
+    revision = subprocess.run(
+        ["git", "rev-list", "--parents", "-n", "1", head],
+        cwd=repository,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.split()
+    if len(revision) < 2:
+        raise ValueError("the submission policy requires a head with a first parent")
+    first_parent = revision[1]
+    difference = subprocess.run(
+        [
+            "git",
+            "diff",
+            "--quiet",
+            first_parent,
+            head,
+            "--",
+            ".github/submission.md",
+        ],
+        cwd=repository,
+        check=False,
+    )
+    if difference.returncode == 0:
+        raise ValueError(
+            "the head commit must update .github/submission.md from its first parent"
+        )
+    if difference.returncode != 1:
+        raise subprocess.CalledProcessError(difference.returncode, difference.args)
+
+
 def resolve_commit(revision: str) -> str:
     completed = subprocess.run(
         ["git", "rev-parse", "--verify", f"{revision}^{{commit}}"],
@@ -122,11 +160,10 @@ def main(argv: list[str] | None = None) -> int:
         print("Skipping checks for a deleted Git ref.")
         return 0
 
-    require_checked_out_commit(
-        resolve_commit(arguments.head),
-        resolve_commit("HEAD"),
-    )
+    target_commit = resolve_commit(arguments.head)
+    require_checked_out_commit(target_commit, resolve_commit("HEAD"))
     require_clean_worktree()
+    require_submission_updated_in_head(target_commit)
     policy = route_work.load_policy()
     force_all = arguments.force_all or hook_force_all
     files = files_for_run(force_all, arguments.base, arguments.head)

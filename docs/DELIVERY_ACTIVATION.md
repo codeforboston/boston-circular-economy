@@ -29,7 +29,7 @@ not prove GitHub event delivery or status permissions.
 4. Confirm `Deploy to GitHub Pages` downloads that CI run's `github-pages-client` artifact.
 5. Check the published page and record the CI run, deployment run, commit, and artifact identifiers.
 6. Open the first agreed work unit as a draft PR from the merged `main`.
-7. Replace and commit `.github/submission.md`, then confirm the `Submission record` status succeeds.
+7. Update `.github/submission.md` in the final head commit, then confirm `Submission record` succeeds.
 8. An administrator adds the five contexts to `Protect Main Branch` and reads back the rule.
 9. Require branches to be up to date, then verify the merge box requires those contexts and the existing human approval.
 10. Configure managed review and observe one completed review before declaring that integration active.
@@ -71,7 +71,8 @@ defect before human review.
 | Remove one required field from `.github/submission.md`, commit, then restore it in another commit | `Submission record` fails and later succeeds on the respective revisions |
 | Edit only the PR description | No submission or application result changes because the record belongs to the commit |
 | Open two pull requests at the same head commit | Both use the same committed record and receive the same submission result |
-| Leave `.github/submission.md` unchanged from the base | `Submission record` fails before publishing success |
+| Give those pull requests different base commits | Both retain the same head-bound submission result |
+| Leave `.github/submission.md` unchanged from the head's first parent | `Submission record` fails before publishing success |
 | Push a documented lint violation, then repair it | The affected application job fails and succeeds on the respective revisions |
 | Open a docs-only PR after the pilot merges | Named application jobs skip successfully and prose still runs |
 | Inspect a PR CI run | It publishes no Pages artifact or deployment |

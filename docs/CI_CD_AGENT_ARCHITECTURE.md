@@ -77,23 +77,24 @@ share a head commit join the same serialized group.
 
 The read-only `pull_request_target` workflow runs from the default branch and checks
 out only the base revision. The trusted checker comes from that base. The workflow
-fetches `.github/submission.md` from the base commit and the exact pull request head
-through the Contents API. It checks the response type and encoding, requires different
-blob identifiers, and decodes the head file as inert data. It never executes pull
-request code. Its token can publish commit statuses but cannot write repository
-contents.
+fetches the exact head commit metadata and selects its first parent. It then fetches
+`.github/submission.md` from that parent and the exact head through the Contents API.
+It validates both responses, requires different blob identifiers, and decodes the head
+file as inert data. It never executes pull request code. Its token can publish commit
+statuses but cannot write repository contents.
 
-The changed-blob rule rejects a byte-identical record inherited from the base. It cannot
-detect a cosmetic edit or decide whether the evidence is true. A human reviewer must
-compare the record with the diff. Before the workflow publishes `pending` or a final
-result, it fetches the live pull request and confirms the event still names its head.
-The concurrency group serializes writers for that head and does not cancel an active
-writer. A manually canceled or stale run does not publish a final result.
+The changed-blob rule rejects a record inherited from the head's first parent. Thus,
+the tip commit must update the evidence. The rule uses the first parent for a merge
+head and fails closed for a root commit or missing parent record. It cannot detect a
+cosmetic edit or decide whether the evidence is true.
+
+A human reviewer must compare the record with the diff. Before the workflow publishes
+a result, it confirms the live
+pull request still names the event head. A canceled or stale run publishes no result.
 
 GitHub commit statuses belong to a commit, not to one pull request. The input record now
-has that same identity: two pull requests at one head commit use the same versioned
-evidence and correctly share one result. Mutable pull request titles, bodies, and labels
-do not affect the status.
+has that same identity. Two pull requests at one head commit share one result, even
+when their base commits differ. Mutable pull request text does not affect the status.
 
 This status gate is not yet merge-queue compatible. The current workflow does not
 handle `merge_group` or publish `Submission record` on the temporary merge-group
@@ -126,6 +127,7 @@ or model routes change. The tests inspect routing without invoking a model.
 
 The push stage uses the source and destination commit IDs supplied by pre-commit for
 the push. It runs the full prose scan, routing tests, and applicable application checks.
+It also requires the pushed head to update the record from its first parent.
 Manual execution compares `HEAD` with `origin/main` unless the caller supplies another
 range. When pre-commit requests all files without a commit range, the runner preserves
 that request and runs every application check.

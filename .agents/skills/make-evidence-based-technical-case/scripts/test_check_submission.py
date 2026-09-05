@@ -432,6 +432,45 @@ class CheckSubmissionTests(unittest.TestCase):
         self.assertNotIn("Example only", masked)
         self.assertIn("## Evidence", masked)
 
+    def test_unclosed_quote_fence_ends_when_the_quote_exits(self) -> None:
+        body = "> ```text\n> Example only.\n## Evidence\nVisible evidence.\n"
+
+        masked = check_submission.mask_markdown_code_blocks(body)
+
+        self.assertNotIn("Example only", masked)
+        self.assertIn("## Evidence", masked)
+        self.assertIn("Visible evidence", masked)
+
+    def test_unclosed_nested_quote_fence_ends_when_quote_depth_decreases(
+        self,
+    ) -> None:
+        body = (
+            "> > ```text\n"
+            "> > Example only.\n"
+            "> Visible quote text.\n"
+            "## Evidence\n"
+        )
+
+        masked = check_submission.mask_markdown_code_blocks(body)
+
+        self.assertNotIn("Example only", masked)
+        self.assertIn("Visible quote text", masked)
+        self.assertIn("## Evidence", masked)
+
+    def test_unclosed_list_quote_fence_preserves_the_list_continuation(self) -> None:
+        body = (
+            "- > ```text\n"
+            "  > Example only.\n"
+            "  Visible list text.\n"
+            "After the list.\n"
+        )
+
+        masked = check_submission.mask_markdown_code_blocks(body)
+
+        self.assertNotIn("Example only", masked)
+        self.assertIn("Visible list text", masked)
+        self.assertIn("After the list", masked)
+
     def test_indented_code_cannot_satisfy_submission_fields(self) -> None:
         body = "\n".join(
             line if line.startswith("## ") or not line else f"    {line}"

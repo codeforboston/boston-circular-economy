@@ -174,6 +174,10 @@ the risk lane, list checks that ran and did not run, and disclose substantial AI
 assistance. The disclosure is about review context, not authorship. The pull request
 description can mirror the committed record for reviewer convenience.
 
+The final head commit must update `.github/submission.md` from its first parent. Amend
+the record when a follow-up commit changes the evidence. This rule gives every pull
+request at one head commit the same submission result.
+
 Every agent that reviews a code change must read and apply
 [`review-code-change`](.agents/skills/review-code-change/SKILL.md). Keep the review
 independent from implementation. Route local reviews through the repository model

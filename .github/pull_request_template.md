@@ -1,7 +1,8 @@
 <!--
 The required submission record is .github/submission.md. Replace that file with this
-template's completed content and commit it with every change. You may mirror the same
-record here for reviewer convenience. CI does not validate this pull request body.
+template's completed content. The final head commit must change the record from its
+first parent. Amend it when later work changes the evidence. You may mirror the record
+here for reviewer convenience. CI does not validate this pull request body.
 -->
 
 ## Claim

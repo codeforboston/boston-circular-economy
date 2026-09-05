@@ -315,17 +315,20 @@ history. The runner forces a read-only Codex sandbox.
 
 The `Submission record` job enforces the committed evidence structure. Its read-only
 `pull_request_target` workflow runs from the default branch and checks out only the base
-revision. The trusted workflow fetches `.github/submission.md` from the base and exact
-head commits, requires different blob identifiers, and decodes the head file as inert
-data. It never runs pull request code. A status-only token publishes the result on the
-pull request head. The workflow becomes active for subsequent pull requests after this
-pilot enters `main`.
+revision. The trusted workflow reads the exact head commit and its first parent. It
+fetches `.github/submission.md` from both commits, requires different blob identifiers,
+and decodes the head file as inert data. It never runs pull request code. A status-only
+token publishes the result on the pull request head.
+
+The workflow becomes active for subsequent pull requests after this pilot enters
+`main`.
 
 The workflow confirms the live pull request head before validation and immediately
 before it publishes a result. Its head-commit concurrency group serializes status
 writers without canceling an active writer. A manually canceled or stale run publishes
 no final status. Two pull requests at one head use the same committed record and
-correctly share the same commit status. Mutable pull request text cannot change it.
+share the same commit status, even when their bases differ. Mutable pull request text
+cannot change it. The final head commit must update the record from its first parent.
 
 Keep merge queues disabled while this status is required. The current workflow does not
 handle `merge_group` or publish the context on the temporary merge-group commit.

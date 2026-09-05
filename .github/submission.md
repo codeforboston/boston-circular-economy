@@ -4,37 +4,40 @@ Contributors can submit explainable code changes through deterministic hooks and
 CI checks. A cost-routed advisory review challenges the change before human review and
 tested-artifact deployment.
 
+The server also declares its existing SQLite runtime. A clean install can initialize
+the local database and start.
+
 Issue exception: This pilot implements the team process discussion before a dedicated
 issue existed.
 
 ## Technical case
 
-- Grounds: Pull requests had no CI checks, while pushes to `main` deployed the client. Contributors also asked how to request review and find bounded asynchronous work.
-- Warrant and backing: Versioned checks expose repeatable failures before merge and give rotating volunteers one shared contract.
-- Qualifier: The policy covers repository checks, committed submission records, agent routing, advisory review, and GitHub Pages deployment.
-- Rebuttal: Passing checks and AI review cannot prove untested production, usability, accessibility, security, or decision quality.
+- Grounds: Pull requests had no CI checks, while pushes to `main` deployed the client. Contributors also asked how to request review and find bounded asynchronous work. The server imported `better-sqlite3` without declaring that runtime package.
+- Warrant and backing: Versioned checks expose repeatable failures before merge and give rotating volunteers one shared contract. Declaring direct runtime imports makes clean installs reproducible.
+- Qualifier: The policy covers repository checks, committed submission records, agent routing, advisory review, and GitHub Pages deployment. Server evidence covers temporary local SQLite and `/ping` only.
+- Rebuttal: Passing checks and AI review cannot prove untested production, usability, accessibility, security, or decision quality. The smoke test does not prove deployed persistence or migrations.
 
 ## Decision explanation
 
-- Why this design: One versioned path policy selects checks for local hooks and CI. A committed record makes the submission result a property of the reviewed commit.
-- Why not the closest alternative: A mutable pull request body can differ between pull requests that share one commit status.
-- Trade-off accepted: Each pull request must update one versioned record, and concurrent changes can conflict at that file.
-- Revisit when: GitHub provides a trusted, PR-scoped required workflow on the repository's plan.
+- Why this design: One versioned path policy selects checks for local hooks and CI. A committed record makes the submission result a property of the reviewed commit. The server workspace declares the dependency owned by its database module.
+- Why not the closest alternative: A mutable pull request body can differ between pull requests that share one commit status. Omitting SQLite leaves the server's clean-install contract incomplete.
+- Trade-off accepted: The final head commit must update one versioned record. Native SQLite adds a platform dependency and expands the locked dependency graph.
+- Revisit when: Use a PR-scoped check when the repository plan supports one. Revisit SQLite when the server selects its production persistence design.
 
 ## Code quality
 
-- Comprehension path: The committed record defines the observable claim. The implementation skill traces its decision owner and result before the review skill challenges the diff.
-- Refactor boundary: The submission checker owns record structure. The trusted workflow owns head-file retrieval and status publication.
-- Boundary and ownership: The routing skill owns path and model policy. CI owns merge evidence. Humans own intent and approval.
-- Failure and recovery: Unknown paths run all checks. A missing, unchanged, or invalid committed record fails the submission status.
-- Complexity added or removed: One versioned record removes mutable pull request identity from the commit-scoped status decision.
+- Comprehension path: The committed record defines the observable claim. The implementation skill traces its owner and result before independent review. Server startup imports the database module, which initializes SQLite.
+- Refactor boundary: The freshness checker owns first-parent comparison. The trusted workflow owns status publication. The server database module owns SQLite initialization.
+- Boundary and ownership: The routing skill owns path and model policy. CI owns merge evidence. The server workspace owns runtime dependencies. Humans own intent and approval.
+- Failure and recovery: Unknown paths run all checks. An invalid or inherited record fails submission. An inaccessible SQLite path stops startup. Correct the path and restart.
+- Complexity added or removed: One record removes mutable pull request identity from the status decision. One native dependency completes an existing database import.
 
 ## Risk and scope
 
 - Risk lane: Yellow
-- In scope: hooks, routed CI, advisory review, tested-artifact deployment, submission standards, prose checks, skills, model routing, and ETL lint configuration.
-- Out of scope: autonomous approval, autonomous merge, a secret-bearing custom review Action, backend deployment, and production monitoring.
-- Important invariants: Pull requests cannot deploy. Models cannot determine check results. Humans retain accountable decisions.
+- In scope: hooks, routed CI, advisory review, tested-artifact deployment, submission standards, prose checks, skills, model routing, ETL lint configuration, and local SQLite server startup.
+- Out of scope: autonomous approval, autonomous merge, a secret-bearing custom review Action, backend deployment, production monitoring, database schema design, and migrations.
+- Important invariants: Pull requests cannot deploy. Models cannot determine check results. One head commit has one submission result. Database initialization fails visibly when its file is unavailable.
 
 ## What changed
 
@@ -45,6 +48,8 @@ issue existed.
 - Add code-change standards for ownership, failure, recovery, and refactor boundaries.
 - Add capability defaults for deterministic tools, Luna, Terra, Sol, specialists, and humans.
 - Add self-explanatory implementation and independent review skills.
+- Declare the server's existing SQLite runtime and types, and use its emitted JavaScript import path.
+- Refresh the locked Node dependency graph to include the native SQLite package.
 - Add the pinned ETL lint toolchain and format existing ETL code without changing its data contracts.
 - Deploy the exact client artifact produced by successful main-branch CI.
 - Import and extend the Library of Context communication layer with Toulmin and ASD-STE100-aligned guidance.
@@ -56,8 +61,8 @@ issue existed.
 - A routing failure causes required application checks to fail rather than disappear.
 - Pull-request CI cannot satisfy the deployment condition.
 - A mutable pull request description cannot alter the committed submission result.
-- Two pull requests at one head commit validate the same record and receive the same result.
-- A missing or unchanged `.github/submission.md` fails before success is published.
+- Two pull requests at one head commit receive the same result, even when their bases differ.
+- A missing record or one inherited from the head's first parent fails before success is published.
 - Module paths and workflow commands remain outside prose checks while reader-facing strings and comments remain inside.
 - Action references remain outside prose checks while action names, nested values, and comments remain inside.
 - JavaScript route paths remain outside prose checks while reader-facing strings remain inside.
@@ -68,6 +73,9 @@ issue existed.
 - Hosted frontend CI rejects generated client files that differ after the build.
 - List-marker fences stay masked, including tilde fences and nested quotes.
 - An unclosed list fence stops masking when visible prose leaves the list container.
+- An unclosed quote fence stops masking when the quote depth decreases.
+- A clean server install initializes temporary SQLite and returns `pong` from `/ping`.
+- An unavailable SQLite directory stops server startup with a visible error.
 - Red review stops for specialist and human escalation, including ETL credential and secret paths.
 
 ## Evidence
@@ -75,15 +83,15 @@ issue existed.
 | Check | Result | Evidence or reason not run |
 |---|---|---|
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
-| Server lint and build | Pass | `npm run lint -w server` and `npm run build -w server` |
+| Server lint and build | Pass | Lint and build pass; startup creates temporary SQLite and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 86 communication and submission tests |
-| Routing policy | Pass | 32 routing and hook-context tests, policy validation, and model-route samples |
+| Technical prose and editorial style | Pass | Full repository scan and 95 communication and submission tests |
+| Routing policy | Pass | 34 routing and hook-context tests, policy validation, and model-route samples |
 | Review policy and model routing | Pass | 22 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation plus commit-stage and push-stage runs |
 | Workflow syntax | Pass | Actionlint 1.7.11 and YAML parsing |
 | Hosted pull-request CI | Not run | Hosted CI starts after this record enters the commit |
-| Manual user journey | Not affected | No application behavior changes |
+| Manual user journey | Pass | Server starts with temporary SQLite and `GET /ping` returns `pong` |
 | Accessibility / responsive | Not affected | No visible interface changes |
 | Security / privacy / recovery | Pass | Restricted tokens, action pins, failed-route closure, and tested-artifact deployment |
 
@@ -98,12 +106,13 @@ I read and understand the submitted diff. I verified the evidence above and rema
 
 ## Review focus and uncertainty
 
-Review the committed-record boundary, path mapping, evidence threshold, model defaults,
-and protected-branch activation steps.
+Review the first-parent record boundary, native SQLite lockfile changes, path mapping,
+evidence threshold, model defaults, and protected-branch activation steps.
 
 The repository has not observed the submission workflow from `main`. A repository
 administrator must configure the named required checks only after the hosted evidence
 exists. Managed review also needs repository connection and team enablement.
+The server smoke test does not cover production persistence, schema, or migrations.
 
 ## Documentation and learning
 
