@@ -252,6 +252,17 @@ class CheckSubmissionTests(unittest.TestCase):
 
                 self.assertIn("Technical case: Grounds:", details)
 
+    def test_html_like_text_in_inline_code_is_visible_content(self) -> None:
+        body = VALID_BODY.replace(
+            "- Grounds: The tests pass.",
+            "- Grounds: The contract uses `Map<string, Location>`.",
+        ).replace(
+            "| ETL tests | Pass | `uv run pytest` |",
+            "| ETL tests | Pass | Verify `Map<string, Location>`. |",
+        )
+
+        self.assertEqual(check_submission.check_submission(body), [])
+
     def test_empty_comprehension_path_fails(self) -> None:
         body = VALID_BODY.replace(
             COMPREHENSION_PATH,

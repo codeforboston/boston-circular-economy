@@ -91,6 +91,9 @@ EMPTY_MARKDOWN_LINE = re.compile(
 MARKDOWN_CHECKBOX = re.compile(r"\[[ xX]\]")
 RAW_HTML_TAG = re.compile(r"</?[A-Za-z][^>]*>")
 HTML_ENTITY = re.compile(r"&(?:#[0-9]+|#x[0-9A-Fa-f]+|[A-Za-z][A-Za-z0-9]+);")
+INLINE_CODE_SPAN = re.compile(
+    r"(?<!`)(?P<ticks>`+)(?!`)(?P<code>[^\r\n]*?)(?<!`)(?P=ticks)(?!`)"
+)
 TEMPLATE_GUIDANCE = (
     "Describe how you tried to prove the change wrong. Include normal, boundary, "
     "failure, and regression cases that apply.",
@@ -122,6 +125,21 @@ def normalize_section_name(name: str) -> str:
     return " ".join(without_marks.split()).casefold()
 
 
+def mask_inline_code_spans(content: str) -> str:
+    """Hide visible code spans before checking for raw HTML controls."""
+
+    return INLINE_CODE_SPAN.sub(lambda match: " " * len(match.group(0)), content)
+
+
+def expose_inline_code_text(content: str) -> str:
+    """Keep code-span text meaningful without parsing its symbols as HTML."""
+
+    return INLINE_CODE_SPAN.sub(
+        lambda match: re.sub(r"[<>&]", " ", match.group("code")),
+        content,
+    )
+
+
 def has_meaningful_section_content(content: str) -> bool:
     """Require substantive text after removing template and Markdown controls."""
 
@@ -130,7 +148,8 @@ def has_meaningful_section_content(content: str) -> bool:
     for pattern in TEMPLATE_GUIDANCE_PATTERNS:
         without_guidance = pattern.sub("", without_guidance)
     without_checkboxes = MARKDOWN_CHECKBOX.sub("", without_guidance)
-    without_html = RAW_HTML_TAG.sub("", without_checkboxes)
+    visible_inline_code = expose_inline_code_text(without_checkboxes)
+    without_html = RAW_HTML_TAG.sub("", visible_inline_code)
     decoded_entities = html.unescape(without_html)
     without_empty_markdown = EMPTY_MARKDOWN_LINE.sub("", decoded_entities)
     return any(character.isalnum() for character in without_empty_markdown)
@@ -307,11 +326,12 @@ def check_submission(body: str) -> list[SubmissionFinding]:
         findings.append(
             SubmissionFinding("template-placeholder", "remove all HTML placeholders")
         )
-    if RAW_HTML_TAG.search(record):
+    record_without_inline_code = mask_inline_code_spans(record)
+    if RAW_HTML_TAG.search(record_without_inline_code):
         findings.append(
             SubmissionFinding("raw-html", "use visible Markdown instead of HTML tags")
         )
-    if HTML_ENTITY.search(record):
+    if HTML_ENTITY.search(record_without_inline_code):
         findings.append(
             SubmissionFinding(
                 "html-entity", "use visible characters instead of HTML entities"
