@@ -505,6 +505,30 @@ class CheckSubmissionTests(unittest.TestCase):
         rules = [finding.rule for finding in check_submission.check_submission(body)]
         self.assertIn("evidence-table", rules)
 
+    def test_non_table_evidence_structure_fails(self) -> None:
+        body = VALID_BODY.replace(
+            "| Check | Result | Evidence or reason not run |\n|---|---|---|",
+            "| filler | filler | filler |\n| filler | filler | filler |",
+        )
+
+        details = [
+            finding.detail for finding in check_submission.check_submission(body)
+        ]
+
+        self.assertIn("include the standard evidence header exactly once", details)
+
+    def test_missing_evidence_delimiter_fails(self) -> None:
+        body = VALID_BODY.replace(
+            "|---|---|---|",
+            "| filler | filler | filler |",
+        )
+
+        details = [
+            finding.detail for finding in check_submission.check_submission(body)
+        ]
+
+        self.assertIn("put a three-column delimiter below the header", details)
+
     def test_markdown_only_evidence_reason_fails(self) -> None:
         for marker in ("-", "> -", "> >", "> ###", "- >"):
             with self.subTest(marker=marker):

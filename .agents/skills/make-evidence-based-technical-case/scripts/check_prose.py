@@ -57,6 +57,7 @@ INLINE_CODE = re.compile(r"`[^`]*`")
 LIST_ITEM_START = re.compile(
     r"^(?P<indent>[ \t]*)(?:[-+*]|\d{1,9}[.)])(?P<spacing>[ \t]+)"
 )
+BLOCKQUOTE_MARKER = re.compile(r"[ ]{0,3}>[ \t]?")
 IMAGE = re.compile(r"!\[[^]]*]\([^)]+\)")
 LINK = re.compile(r"\[([^]]+)]\([^)]+\)")
 URL = re.compile(r"https?://\S+")
@@ -861,8 +862,13 @@ def mask_markdown_code(text: str) -> str:
     list_indents: list[tuple[int, int]] = []
     for line in text.splitlines(keepends=True):
         content = line.rstrip("\r\n")
-        stripped = content.lstrip()
-        indentation_text = content[: len(content) - len(content.lstrip(" \t"))]
+        container_content = content
+        while marker := BLOCKQUOTE_MARKER.match(container_content):
+            container_content = container_content[marker.end() :]
+        stripped = container_content.lstrip()
+        indentation_text = container_content[
+            : len(container_content) - len(container_content.lstrip(" \t"))
+        ]
         indentation = len(indentation_text.expandtabs(4))
         if fence_character is not None:
             relative_indent = indentation - fence_container_indent
@@ -876,12 +882,14 @@ def mask_markdown_code(text: str) -> str:
             output.append("".join("\n" if char == "\n" else " " for char in line))
             continue
 
-        list_item = LIST_ITEM_START.match(content)
+        list_item = LIST_ITEM_START.match(container_content)
         if list_item is not None:
             marker_indent = len(list_item.group("indent").expandtabs(4))
             while list_indents and marker_indent <= list_indents[-1][0]:
                 list_indents.pop()
-            content_indent = len(content[: list_item.end()].expandtabs(4))
+            content_indent = len(
+                container_content[: list_item.end()].expandtabs(4)
+            )
             list_indents.append((marker_indent, content_indent))
         elif content.strip():
             while list_indents and indentation < list_indents[-1][1]:

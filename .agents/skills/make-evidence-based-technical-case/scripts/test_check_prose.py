@@ -134,6 +134,30 @@ class ProseCheckerTests(unittest.TestCase):
 
         self.assertEqual([], findings)
 
+    def test_ignores_indented_code_inside_a_blockquote(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.md"
+            path.write_text(
+                "> Example output:\n>\n>     unlock the potential\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual([], findings)
+
+    def test_ignores_fenced_code_inside_a_blockquote(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.md"
+            path.write_text(
+                "> Example output:\n> ```text\n> unlock the potential\n> ```\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual([], findings)
+
     def test_checks_rendered_prose_in_an_indented_list_continuation(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.md"

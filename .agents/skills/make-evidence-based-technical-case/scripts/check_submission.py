@@ -79,6 +79,7 @@ REQUIRED_EVIDENCE_CHECKS = (
     "Accessibility / responsive",
     "Security / privacy / recovery",
 )
+EVIDENCE_HEADER = ("Check", "Result", "Evidence or reason not run")
 ALLOWED_EVIDENCE_RESULTS = {"pass", "fail", "not run", "not affected"}
 SECTION_HEADING = re.compile(r"(?m)^##\s+(.+?)\s*$")
 TRAILING_HEADING_MARKS = re.compile(r"[ \t]+#+[ \t]*$")
@@ -233,19 +234,49 @@ def evidence_row_cells(line: str) -> list[str] | None:
 
 def evidence_findings(content: str) -> list[SubmissionFinding]:
     findings: list[SubmissionFinding] = []
+    lines = content.splitlines()
+    normalized_header = tuple(cell.casefold() for cell in EVIDENCE_HEADER)
+    header_indexes = [
+        index
+        for index, line in enumerate(lines)
+        if (cells := evidence_row_cells(line)) is not None
+        and tuple(" ".join(cell.split()).casefold() for cell in cells)
+        == normalized_header
+    ]
+    if len(header_indexes) != 1:
+        return [
+            SubmissionFinding(
+                "evidence-table", "include the standard evidence header exactly once"
+            )
+        ]
+
+    header_index = header_indexes[0]
+    delimiter_index = header_index + 1
+    delimiter = (
+        evidence_row_cells(lines[delimiter_index])
+        if delimiter_index < len(lines)
+        else None
+    )
+    if delimiter is None or len(delimiter) != 3 or not all(
+        re.fullmatch(r":?-{3,}:?", cell) for cell in delimiter
+    ):
+        return [
+            SubmissionFinding(
+                "evidence-table", "put a three-column delimiter below the header"
+            )
+        ]
+
     rows: list[list[str]] = []
-    for line in content.splitlines():
+    for line in lines[delimiter_index + 1 :]:
         cells = evidence_row_cells(line)
         if cells is None:
-            continue
-        if all(set(cell) <= {"-", ":"} for cell in cells):
-            continue
+            break
         rows.append(cells)
-
-    if len(rows) < 2:
+    if not rows:
         return [SubmissionFinding("evidence-table", "add at least one check row")]
+
     supplied_checks: dict[str, int] = {}
-    for cells in rows[1:]:
+    for cells in rows:
         if len(cells) != 3:
             findings.append(
                 SubmissionFinding("evidence-table", "each row must have three cells")
