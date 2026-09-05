@@ -404,6 +404,20 @@ def markdown_findings(path: Path, profile: dict[str, object]) -> list[Finding]:
                     Finding(path, number, "contraction", "contraction in prose")
                 )
             continue
+        if "|" in checked_line and checked_line.count("|") >= 2:
+            flush()
+            table_text = plain_markdown(checked_line)
+            if not bool(profile["permit_semicolon_in_prose"]) and ";" in table_text:
+                findings.append(
+                    Finding(path, number, "semicolon", "semicolon in prose")
+                )
+            if not bool(profile["permit_contractions_in_prose"]) and CONTRACTION.search(
+                table_text
+            ):
+                findings.append(
+                    Finding(path, number, "contraction", "contraction in prose")
+                )
+            continue
         if not eligible_markdown_line(checked_line):
             flush()
             continue

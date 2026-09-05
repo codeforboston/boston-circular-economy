@@ -208,9 +208,10 @@ bounded Yellow changes, and Sol for cross-subsystem review.
 
 The local runner requires a declared risk lane. Versioned path rules can raise that
 lane but cannot lower it. This check catches clear under-routing. Examples include
-authentication code, authentication or security workflows, and migration code declared
-Green. It does not replace a human risk decision, and a client-side hook cannot enforce
-policy against `--no-verify`.
+authentication code, every GitHub Actions workflow, and migration code declared Green.
+Every workflow uses Red review because permissions and authorization can change inside
+any workflow file. The path check does not replace a human risk decision, and a
+client-side hook cannot enforce policy against `--no-verify`.
 
 The managed reviewer does not receive a repository API secret through GitHub Actions.
 The repository does not check out contributor code inside a privileged review workflow.

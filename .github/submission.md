@@ -76,6 +76,9 @@ issue existed.
 - Discover numbered work-unit manifests in one tested script so future units cannot bypass validation.
 - Add an invalid manifest fixture that proves CI rejects missing required fields.
 - Start the built server with temporary SQLite and verify `/ping` in local push checks and CI.
+- Route every GitHub Actions workflow change to Red review because any workflow can change permissions or authorization.
+- Add authorization to the Red risk option in the work-unit issue form.
+- Check contractions and semicolons in visible Markdown table cells while keeping inline code inert.
 
 ## Challenge cases
 
@@ -96,7 +99,8 @@ issue existed.
 - Python environment-variable names remain outside prose checks while reader-facing values remain inside.
 - Incomplete Python keeps plain, formatted, byte, and nested mapping keys outside prose checks.
 - Assignment JSON decodes and checks reader-facing values while paths, identifiers, and status values remain outside the scan.
-- Authentication, credential, and security workflow or utility paths require Red review across subsystem directories.
+- Every workflow path requires Red review, including ordinary names such as `ci.yml` that can still change permissions.
+- The work-unit issue form identifies authorization changes as Red.
 - Documentation manifests retain the Green review route.
 - Destructive utilities outside source directories require Red review, while fixture data remains Yellow.
 - Uncommitted review routing unions staged, unstaged, and untracked paths before applying the risk floor.
@@ -118,6 +122,7 @@ issue existed.
 - An unclosed quote fence stops masking when the quote depth decreases.
 - A clean server install initializes temporary SQLite and returns `pong` from `/ping`.
 - An unavailable SQLite directory stops server startup with a visible error.
+- Contractions and semicolons in visible table cells fail prose checks, while table-cell inline code remains inert.
 - Red review stops for specialist and human escalation, including ETL credential and secret paths.
 
 ## Evidence
@@ -125,9 +130,9 @@ issue existed.
 | Check | Result | Evidence or reason not run |
 |---|---|---|
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
-| Server lint and build | Pass | Lint and build pass; startup creates temporary SQLite and `/ping` returns `pong` |
+| Server lint and build | Pass | Lint and build pass. Startup creates temporary SQLite and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 113 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 114 communication and submission tests |
 | Routing policy | Pass | 37 routing, hook-context, and manifest-discovery tests plus model-route samples |
 | Review policy and model routing | Pass | 25 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation, schema validation, and commit-stage and push-stage runs |
@@ -149,9 +154,9 @@ I read and understand the submitted diff. I verified the evidence above and rema
 ## Review focus and uncertainty
 
 Review the versioned first-parent record boundary, terminal-only status publication,
-Markdown structure and prose boundaries, and Python escape decoding. Examine native
-SQLite lockfile changes, path mapping, evidence threshold, model defaults, and
-protected-branch activation steps.
+Markdown structure and prose boundaries, Python escape decoding, and the Red workflow
+risk floor. Examine native SQLite lockfile changes, path mapping, evidence threshold,
+model defaults, and protected-branch activation steps.
 
 The repository has not observed the submission workflow from `main`. A repository
 administrator must configure the named required checks only after the hosted evidence

@@ -85,8 +85,11 @@ class LocalReviewRunnerTests(unittest.TestCase):
                     effective_risk("green", str(assessment["risk"])),
                 )
 
-    def test_authentication_workflow_requires_red_review(self) -> None:
+    def test_every_workflow_requires_red_review(self) -> None:
         paths = (
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            ".github/workflows/submission.yml",
             ".github/workflows/auth.yml",
             ".github/workflows/authorization-check.yaml",
             ".github/workflows/credentials.yml",
@@ -109,6 +112,15 @@ class LocalReviewRunnerTests(unittest.TestCase):
                     "red",
                     effective_risk("green", str(assessment["risk"])),
                 )
+
+        issue_template = (ROOT / ".github/ISSUE_TEMPLATE/work-unit.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn(
+            "Red — authentication, authorization, privacy, destructive action, "
+            "migration, or critical accessibility",
+            issue_template,
+        )
 
     def test_migration_path_requires_red_review(self) -> None:
         paths = (

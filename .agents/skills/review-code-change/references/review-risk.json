@@ -11,7 +11,6 @@
   "yellow_paths": [
     ".agents/**",
     ".github/AGENTS.md",
-    ".github/workflows/**",
     ".pre-commit-config.yaml",
     "AGENTS.md",
     "client/**",
@@ -26,16 +25,7 @@
     "server/**/fixtures/**"
   ],
   "red_paths": [
-    ".github/workflows/*auth*",
-    ".github/workflows/*credential*",
-    ".github/workflows/*login*",
-    ".github/workflows/*oauth*",
-    ".github/workflows/*oidc*",
-    ".github/workflows/*permission*",
-    ".github/workflows/*privacy*",
-    ".github/workflows/*secret*",
-    ".github/workflows/*security*",
-    ".github/workflows/*session*",
+    ".github/workflows/**",
     "client/**/auth.*",
     "client/**/auth/**",
     "client/**/*authentication*",

@@ -814,6 +814,23 @@ class ProseCheckerTests(unittest.TestCase):
         self.assertIn("contraction", rules)
         self.assertIn("sentence-length", rules)
 
+    def test_checks_visible_markdown_table_prose(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.md"
+            path.write_text(
+                "| Rule | Result |\n"
+                "| --- | --- |\n"
+                "| Deployment | Don't deploy; wait. |\n"
+                "| Literal | `don't; scan` |\n",
+                encoding="utf-8",
+            )
+            findings = markdown_findings(path, load_profile(DEFAULT_PROFILE))
+
+        self.assertEqual(
+            [(3, "semicolon"), (3, "contraction")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

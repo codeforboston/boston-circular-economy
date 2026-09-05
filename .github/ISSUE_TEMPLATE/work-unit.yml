@@ -81,7 +81,7 @@ body:
       options:
         - Green — docs, prototype, isolated style, or safe internal refactor
         - Yellow — user behavior, API, data transformation, or business logic
-        - Red — authentication, privacy, destructive action, migration, or critical accessibility
+        - Red — authentication, authorization, privacy, destructive action, migration, or critical accessibility
     validations:
       required: true
 
