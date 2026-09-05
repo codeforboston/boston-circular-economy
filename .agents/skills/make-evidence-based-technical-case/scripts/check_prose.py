@@ -1459,28 +1459,28 @@ def mask_source_code(path: Path, text: str) -> str:
     return text
 
 
-def mask_inline_code(line: str) -> str:
+def mask_inline_code(text: str) -> str:
     """Hide code spans whose closing backtick run matches the opener."""
 
-    output = list(line)
+    output = list(text)
     cursor = 0
-    while cursor < len(line):
-        opening_start = line.find("`", cursor)
+    while cursor < len(text):
+        opening_start = text.find("`", cursor)
         if opening_start < 0:
             break
         opening_end = opening_start
-        while opening_end < len(line) and line[opening_end] == "`":
+        while opening_end < len(text) and text[opening_end] == "`":
             opening_end += 1
         delimiter_length = opening_end - opening_start
 
         search = opening_end
         closing_end: int | None = None
-        while search < len(line):
-            closing_start = line.find("`", search)
+        while search < len(text):
+            closing_start = text.find("`", search)
             if closing_start < 0:
                 break
             run_end = closing_start
-            while run_end < len(line) and line[run_end] == "`":
+            while run_end < len(text) and text[run_end] == "`":
                 run_end += 1
             if run_end - closing_start == delimiter_length:
                 closing_end = run_end
@@ -1501,9 +1501,7 @@ def mask_markdown_code(text: str) -> str:
     """Hide Markdown code while preserving offsets and line numbers."""
 
     block_masked = mask_markdown_code_blocks(text)
-    return "".join(
-        mask_inline_code(line) for line in block_masked.splitlines(keepends=True)
-    )
+    return mask_inline_code(block_masked)
 
 
 def main(argv: list[str] | None = None) -> int:

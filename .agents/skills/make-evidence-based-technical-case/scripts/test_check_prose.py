@@ -73,6 +73,20 @@ class ProseCheckerTests(unittest.TestCase):
         self.assertEqual([], editorial)
         self.assertEqual([], sentence)
 
+    def test_inline_code_can_cross_a_line_break(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.md"
+            path.write_text(
+                "Use `don't scan this\nrobust and scalable` as a literal.\n",
+                encoding="utf-8",
+            )
+
+            editorial = editorial_findings(path)
+            sentence = markdown_findings(path, load_profile(DEFAULT_PROFILE))
+
+        self.assertEqual([], editorial)
+        self.assertEqual([], sentence)
+
     def test_shorter_inner_fence_does_not_close_a_longer_outer_fence(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.md"

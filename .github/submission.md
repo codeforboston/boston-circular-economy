@@ -52,6 +52,7 @@ issue existed.
 - Add code-change standards for ownership, failure, recovery, and refactor boundaries.
 - Add capability defaults for deterministic tools, Luna, Terra, Sol, specialists, and humans.
 - Add self-explanatory implementation and independent review skills.
+- Align the managed-review decision record with the review severities observed during this validation.
 - Route destructive utilities throughout each subsystem to Red review while excluding fixture data.
 - Declare the server's existing SQLite runtime and types, and use its emitted JavaScript import path.
 - Refresh the locked Node dependency graph to include the native SQLite package.
@@ -59,6 +60,7 @@ issue existed.
 - Deploy the exact client artifact produced by successful main-branch CI.
 - Import and extend the Library of Context communication layer with Toulmin and ASD-STE100-aligned guidance.
 - Scan reader-facing assignment-manifest values while excluding machine-only JSON metadata.
+- Mask valid Markdown inline-code spans that cross a line break.
 
 ## Challenge cases
 
@@ -83,6 +85,7 @@ issue existed.
 - Unrelated CI completions cannot cancel an active qualifying Pages deployment.
 - Hosted frontend CI rejects generated client files that differ after the build.
 - List-marker fences stay masked, including tilde fences and nested quotes.
+- Inline-code spans stay masked when matching backticks occur after a line break.
 - An unclosed list fence stops masking when visible prose leaves the list container.
 - An unclosed quote fence stops masking when the quote depth decreases.
 - A clean server install initializes temporary SQLite and returns `pong` from `/ping`.
@@ -96,7 +99,7 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass; startup creates temporary SQLite and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 98 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 99 communication and submission tests |
 | Routing policy | Pass | 34 routing and hook-context tests, policy validation, and model-route samples |
 | Review policy and model routing | Pass | 24 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation plus commit-stage and push-stage runs |

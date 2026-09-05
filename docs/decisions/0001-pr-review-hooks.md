@@ -23,7 +23,7 @@ local runner for an earlier challenge.
   states that the managed reviewer reads applicable `AGENTS.md` files and posts a
   standard GitHub review.
 - The managed reviewer supports automatic review and the `@codex review` command. It
-  limits GitHub findings to serious P0 and P1 issues.
+  posts prioritized findings under the repository review rules.
 - The local Codex reviewer compares a branch with its base without modifying the
   working tree.
 - The repository already uses deterministic hooks and CI for prose, routing, lint,
@@ -73,9 +73,10 @@ request `@codex review` again after a material change when no review starts. Run
 every push would reduce this gap but would spend more review credits and create repeated
 feedback. The team should select that trigger if missed changes prove more costly.
 
-Managed GitHub review emphasizes P0 and P1 issues. Local review, CI, and human review
-still own normal defects, maintainability, decision quality, and product intent. Red
-changes also require a qualified specialist and a human checkpoint.
+Managed GitHub review does not guarantee exhaustive coverage or a fixed severity
+threshold. Local review, CI, and human review still own defects, maintainability,
+decision quality, and product intent. Red changes also require a qualified specialist
+and a human checkpoint.
 
 ## Consequences
 
