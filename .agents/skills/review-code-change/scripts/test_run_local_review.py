@@ -806,7 +806,7 @@ class LocalReviewRunnerTests(unittest.TestCase):
             "format('deploy-ignored-{0}', github.event.workflow_run.id)",
             deployment,
         )
-        self.assertIn("cancel-in-progress: true", deployment)
+        self.assertIn("cancel-in-progress: false", deployment)
         self.assertIn("Resolve the successful CI run for current main", deployment)
         self.assertIn('actions/workflows/ci.yml/runs"', deployment)
         self.assertIn('-f head_sha="$current_sha"', deployment)
@@ -832,6 +832,17 @@ class LocalReviewRunnerTests(unittest.TestCase):
         self.assertIn('if [[ "$TESTED_SHA" != "$current_sha" ]]', deployment)
         self.assertIn("Detect main advancing during deployment", deployment)
         self.assertIn("will trigger a forward deployment", deployment)
+
+    def test_artifact_free_successor_waits_for_active_deployment(self) -> None:
+        deployment = (ROOT / ".github/workflows/deploy.yml").read_text(encoding="utf-8")
+
+        self.assertIn("'deploy-to-github-pages'", deployment)
+        self.assertIn("cancel-in-progress: false", deployment)
+        self.assertIn(
+            'echo "::notice::Current main CI did not produce a client artifact."',
+            deployment,
+        )
+        self.assertIn('echo "ready=false"', deployment)
 
 
 if __name__ == "__main__":

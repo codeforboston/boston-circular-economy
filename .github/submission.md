@@ -65,6 +65,7 @@ issue existed.
 - Add the pinned ETL lint toolchain and format existing ETL code without changing its data contracts.
 - Deploy the exact client artifact produced by successful main-branch CI.
 - Confirm that the selected CI run contains an unexpired client artifact before deployment.
+- Serialize qualifying Pages deployments so an artifact-free successor cannot cancel an active publisher.
 - Import and extend the Library of Context communication layer with Toulmin and ASD-STE100-aligned guidance.
 - Scan reader-facing assignment-manifest values while excluding machine-only JSON metadata.
 - Scan reader-facing assignment step labels while retaining machine-only step metadata exclusions.
@@ -158,6 +159,7 @@ issue existed.
 - A pull request retargeted to `main` receives both required workflows without another push.
 - Pull-request CI cannot satisfy the deployment condition.
 - A successful documentation-only main run without a client artifact leaves Pages unchanged.
+- An artifact-free successor waits for an active qualifying Pages publisher.
 - A mutable pull request description cannot alter the committed submission result.
 - Two pull requests at one head commit receive the same result, even when their bases differ.
 - Different trusted checker revisions cannot publish to the same versioned submission context.
@@ -333,6 +335,7 @@ ACL and RBAC risk routing.
 Examine Python resource identifiers, heading termination, hook suffix coverage, and the
 Red workflow risk floor. Confirm the deployment reconcile step verifies the selected
 run has an unexpired client artifact before it marks the deployment ready. Confirm
+the Pages concurrency group serializes qualifying runs without cancellation. Confirm
 accepted work units identify substantive review metadata and destructive utility synonyms
 retain the Red checkpoint. Confirm accepted records contain complete review metadata,
 manifest IDs match unique filenames, and schema validation uses the committed lock.

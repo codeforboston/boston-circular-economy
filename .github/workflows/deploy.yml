@@ -17,7 +17,7 @@ concurrency:
       'deploy-to-github-pages' ||
       format('deploy-ignored-{0}', github.event.workflow_run.id)
     }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   reconcile:
