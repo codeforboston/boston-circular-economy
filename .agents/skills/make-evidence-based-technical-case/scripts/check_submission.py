@@ -87,6 +87,7 @@ EMPTY_MARKDOWN_LINE = re.compile(
     r"(?m)^[ \t]*(?:(?:[-+*]|\d{1,9}[.)])(?:[ \t]+\[[ xX]\])?|"
     r"(?:[*_-][ \t]*){3,}|>+|#{1,6})[ \t]*$"
 )
+MARKDOWN_CHECKBOX = re.compile(r"\[[ xX]\]")
 TEMPLATE_GUIDANCE = (
     "Describe how you tried to prove the change wrong. Include normal, boundary, "
     "failure, and regression cases that apply.",
@@ -119,13 +120,15 @@ def normalize_section_name(name: str) -> str:
 
 
 def has_meaningful_section_content(content: str) -> bool:
-    """Reject untouched template guidance and empty Markdown as section content."""
+    """Require substantive text after removing template and Markdown controls."""
 
     without_placeholders = PLACEHOLDER.sub("", content)
     without_guidance = without_placeholders
     for pattern in TEMPLATE_GUIDANCE_PATTERNS:
         without_guidance = pattern.sub("", without_guidance)
-    return bool(EMPTY_MARKDOWN_LINE.sub("", without_guidance).strip())
+    without_checkboxes = MARKDOWN_CHECKBOX.sub("", without_guidance)
+    without_empty_markdown = EMPTY_MARKDOWN_LINE.sub("", without_checkboxes)
+    return any(character.isalnum() for character in without_empty_markdown)
 
 
 def mask_markdown_code_blocks(body: str) -> str:

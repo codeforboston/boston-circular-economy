@@ -210,7 +210,7 @@ class CheckSubmissionTests(unittest.TestCase):
         self.assertIn("empty-label", rules)
 
     def test_markdown_only_labeled_value_fails(self) -> None:
-        for marker in ("-", ">", "###", "- [ ]"):
+        for marker in ("-", ">", "###", "- [ ]", "> -", "> >", "> ###", "- >"):
             with self.subTest(marker=marker):
                 body = VALID_BODY.replace(
                     "- Grounds: The tests pass.",
@@ -445,14 +445,19 @@ class CheckSubmissionTests(unittest.TestCase):
         self.assertIn("evidence-table", rules)
 
     def test_markdown_only_evidence_reason_fails(self) -> None:
-        body = VALID_BODY.replace(
-            "| ETL tests | Pass | `uv run pytest` |",
-            "| ETL tests | Not run | - |",
-        )
+        for marker in ("-", "> -", "> >", "> ###", "- >"):
+            with self.subTest(marker=marker):
+                body = VALID_BODY.replace(
+                    "| ETL tests | Pass | `uv run pytest` |",
+                    f"| ETL tests | Not run | {marker} |",
+                )
 
-        rules = [finding.rule for finding in check_submission.check_submission(body)]
+                rules = [
+                    finding.rule
+                    for finding in check_submission.check_submission(body)
+                ]
 
-        self.assertIn("evidence-table", rules)
+                self.assertIn("evidence-table", rules)
 
     def test_na_evidence_result_fails(self) -> None:
         body = VALID_BODY.replace("| ETL tests | Pass |", "| ETL tests | N/A |")
