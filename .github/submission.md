@@ -64,7 +64,8 @@ issue existed.
 - Authentication and security workflow paths require Red review.
 - Uncommitted review routing unions staged, unstaged, and untracked paths before applying the risk floor.
 - Unrelated CI completions cannot cancel an active qualifying Pages deployment.
-- List-contained code examples cannot satisfy or invalidate submission fields.
+- List-marker fences stay masked, including tilde fences and nested quotes.
+- An unclosed list fence stops masking when visible prose leaves the list container.
 - Red review stops for specialist and human escalation, including ETL credential and secret paths.
 
 ## Evidence
@@ -74,7 +75,7 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | `npm run lint -w server` and `npm run build -w server` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 83 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 85 communication and submission tests |
 | Routing policy | Pass | 32 routing and hook-context tests, policy validation, and model-route samples |
 | Review policy and model routing | Pass | 22 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation plus commit-stage and push-stage runs |

@@ -135,6 +135,39 @@ class ProseCheckerTests(unittest.TestCase):
 
         self.assertEqual([], findings)
 
+    def test_fence_on_a_list_marker_line_is_not_scanned_as_prose(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.md"
+            path.write_text(
+                "- ~~~text\n"
+                "  don't scan this example\n"
+                "  ~~~\n",
+                encoding="utf-8",
+            )
+
+            editorial = editorial_findings(path)
+            sentence = markdown_findings(path, load_profile(DEFAULT_PROFILE))
+
+        self.assertEqual([], editorial)
+        self.assertEqual([], sentence)
+
+    def test_unclosed_list_fence_stops_at_the_container_dedent(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.md"
+            path.write_text(
+                "- ```text\n"
+                "  Example only; the fence is intentionally unclosed.\n\n"
+                "Unlock the potential.\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(4, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_ignores_cliche_examples_inside_indented_markdown_code(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.md"

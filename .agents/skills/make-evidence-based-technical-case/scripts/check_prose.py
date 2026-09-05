@@ -8,6 +8,8 @@ import tokenize
 from dataclasses import dataclass
 from pathlib import Path
 
+from check_submission import mask_markdown_code_blocks
+
 DEFAULT_PROFILE = (
     Path(__file__).resolve().parents[1] / "references" / "asd-ste100-software.yaml"
 )
@@ -53,10 +55,6 @@ TEMPORAL_EXEMPT_NAMES = {
 
 WORD = re.compile(r"[A-Za-z0-9]+(?:[-'][A-Za-z0-9]+)*")
 SENTENCE_END = re.compile(r"(?<=[.!?])(?:\s+|$)")
-LIST_ITEM_START = re.compile(
-    r"^(?P<indent>[ \t]*)(?:[-+*]|\d{1,9}[.)])(?P<spacing>[ \t]+)"
-)
-BLOCKQUOTE_MARKER = re.compile(r"[ ]{0,3}>[ \t]?")
 IMAGE = re.compile(r"!\[[^]]*]\([^)]+\)")
 LINK = re.compile(r"\[([^]]+)]\([^)]+\)")
 URL = re.compile(r"https?://\S+")
@@ -1271,63 +1269,10 @@ def mask_inline_code(line: str) -> str:
 def mask_markdown_code(text: str) -> str:
     """Hide Markdown code while preserving offsets and line numbers."""
 
-    output: list[str] = []
-    fence_character: str | None = None
-    fence_length = 0
-    fence_container_indent = 0
-    list_indents: list[tuple[int, int]] = []
-    for line in text.splitlines(keepends=True):
-        content = line.rstrip("\r\n")
-        container_content = content
-        while marker := BLOCKQUOTE_MARKER.match(container_content):
-            container_content = container_content[marker.end() :]
-        stripped = container_content.lstrip()
-        indentation_text = container_content[
-            : len(container_content) - len(container_content.lstrip(" \t"))
-        ]
-        indentation = len(indentation_text.expandtabs(4))
-        if fence_character is not None:
-            relative_indent = indentation - fence_container_indent
-            if 0 <= relative_indent <= 3 and re.fullmatch(
-                rf"{re.escape(fence_character)}{{{fence_length},}}[ \t]*",
-                stripped,
-            ):
-                fence_character = None
-                fence_length = 0
-                fence_container_indent = 0
-            output.append("".join("\n" if char == "\n" else " " for char in line))
-            continue
-
-        list_item = LIST_ITEM_START.match(container_content)
-        if list_item is not None:
-            marker_indent = len(list_item.group("indent").expandtabs(4))
-            while list_indents and marker_indent <= list_indents[-1][0]:
-                list_indents.pop()
-            content_indent = len(
-                container_content[: list_item.end()].expandtabs(4)
-            )
-            list_indents.append((marker_indent, content_indent))
-        elif content.strip():
-            while list_indents and indentation < list_indents[-1][1]:
-                list_indents.pop()
-
-        container_indent = list_indents[-1][1] if list_indents else 0
-        relative_indent = indentation - container_indent
-        opening_fence = re.match(r"(`{3,}|~{3,})", stripped)
-        if 0 <= relative_indent <= 3 and opening_fence is not None:
-            marker = opening_fence.group(1)
-            fence_character = marker[0]
-            fence_length = len(marker)
-            fence_container_indent = container_indent
-            output.append("".join("\n" if char == "\n" else " " for char in line))
-            continue
-
-        code_indent = (list_indents[-1][1] + 4) if list_indents else 4
-        if list_item is None and indentation >= code_indent:
-            output.append("".join("\n" if char == "\n" else " " for char in line))
-            continue
-        output.append(mask_inline_code(line))
-    return "".join(output)
+    block_masked = mask_markdown_code_blocks(text)
+    return "".join(
+        mask_inline_code(line) for line in block_masked.splitlines(keepends=True)
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
