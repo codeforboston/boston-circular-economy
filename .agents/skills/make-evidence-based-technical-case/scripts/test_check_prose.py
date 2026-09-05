@@ -942,7 +942,10 @@ class ProseCheckerTests(unittest.TestCase):
                 "      - name: Unlock the potential.\n"
                 "        env:\n"
                 "          run: Unlock the potential.\n"
-                "        run: powerful\n",
+                "        run: powerful\n"
+                "  reusable:\n"
+                "    name: Unlock the potential.\n"
+                "    uses: ./.github/workflows/unlock.yml\n",
                 encoding="utf-8",
             )
 
@@ -954,6 +957,7 @@ class ProseCheckerTests(unittest.TestCase):
                 (8, "promotional cliche"),
                 (11, "promotional cliche"),
                 (13, "promotional cliche"),
+                (16, "promotional cliche"),
             ],
             [(finding.line, finding.rule) for finding in findings],
         )

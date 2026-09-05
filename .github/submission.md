@@ -98,6 +98,7 @@ issue existed.
 - Keep TypeScript generic arrows as code while retaining JSX parsing for JSX-capable source files.
 - Decode YAML quoted-scalar escapes before checking reader-facing values.
 - Decode character references in direct JSX text and static reader-facing attributes.
+- Exclude reusable-workflow `uses` targets while retaining reader-facing job names.
 
 ## Challenge cases
 
@@ -162,6 +163,7 @@ issue existed.
 - TypeScript generic arrows remain inert at top level and inside template expressions.
 - YAML double-quoted Unicode escapes and doubled single quotes are checked as rendered text.
 - JSX character references decode in direct text and static attributes, but not inside JavaScript expression strings.
+- A reusable-workflow path remains machine input, while its job name remains subject to prose checks.
 - Red review stops for specialist and human escalation, including ETL credential and secret paths.
 
 ## Evidence

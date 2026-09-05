@@ -1994,6 +1994,9 @@ def mask_yaml_code(text: str, *, mask_actions_commands: bool = False) -> str:
     steps_indent: int | None = None
     step_sequence_indent: int | None = None
     step_mapping_indent: int | None = None
+    jobs_indent: int | None = None
+    job_indent: int | None = None
+    job_mapping_indent: int | None = None
     action_flow_value_spans: list[tuple[int, int]] = []
     for line in text.splitlines(keepends=True):
         body = line.rstrip("\r\n")
@@ -2007,6 +2010,16 @@ def mask_yaml_code(text: str, *, mask_actions_commands: bool = False) -> str:
         else:
             stripped = code.lstrip()
             sequence_item = stripped == "-" or stripped.startswith("- ")
+            if code.strip() and jobs_indent is not None:
+                if indentation <= jobs_indent:
+                    jobs_indent = None
+                    job_indent = None
+                    job_mapping_indent = None
+                elif not sequence_item and (
+                    job_indent is None or indentation <= job_indent
+                ):
+                    job_indent = indentation
+                    job_mapping_indent = None
             if code.strip() and steps_indent is not None:
                 if indentation < steps_indent or (
                     indentation == steps_indent and not sequence_item
@@ -2039,6 +2052,17 @@ def mask_yaml_code(text: str, *, mask_actions_commands: bool = False) -> str:
                         )
                     )
                 )
+                direct_job_key = bool(
+                    jobs_indent is not None
+                    and job_indent is not None
+                    and not sequence_item
+                    and indentation > job_indent
+                    and (
+                        job_mapping_indent is None or indentation == job_mapping_indent
+                    )
+                )
+                if direct_job_key and job_mapping_indent is None:
+                    job_mapping_indent = indentation
                 if (
                     direct_step_key
                     and not sequence_item
@@ -2047,7 +2071,11 @@ def mask_yaml_code(text: str, *, mask_actions_commands: bool = False) -> str:
                     step_mapping_indent = indentation
 
                 copy_value = not (
-                    mask_actions_commands and direct_step_key and key in {"run", "uses"}
+                    mask_actions_commands
+                    and (
+                        (direct_step_key and key in {"run", "uses"})
+                        or (direct_job_key and key == "uses")
+                    )
                 )
                 if copy_value:
                     copy_yaml_reader_value(
@@ -2084,6 +2112,10 @@ def mask_yaml_code(text: str, *, mask_actions_commands: bool = False) -> str:
                     steps_indent = indentation
                     step_sequence_indent = None
                     step_mapping_indent = None
+                if mask_actions_commands and key == "jobs" and not sequence_item:
+                    jobs_indent = indentation
+                    job_indent = None
+                    job_mapping_indent = None
             elif code.lstrip().startswith("- "):
                 value_start = code.index("-") + 2
                 copy_yaml_reader_value(
