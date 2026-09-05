@@ -263,6 +263,7 @@ issue existed.
 - Client, server, and ETL migration paths all require Red review.
 - Custom textbox placeholders exposed through ARIA remain visible to wording checks.
 - Generic UI header calls remain visible while known protocol response headers remain masked.
+- Protocol-specific header methods remain masked when a response object uses a local alias.
 - Red review stops for specialist and human escalation, including ETL credential and secret paths.
 
 ## Evidence
@@ -272,7 +273,7 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass. Startup creates and closes a temporary SQLite database, and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 159 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 160 communication and submission tests |
 | Routing policy | Pass | 44 routing, hook-context, manifest-integrity, and model-route tests |
 | Review policy and model routing | Pass | 32 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation, schema validation, and commit-stage and push-stage runs |
@@ -315,6 +316,7 @@ Examine prerequisite-state enforcement for dependent work units.
 Examine client migration routing and ARIA placeholder coverage.
 Examine repo-local GitHub Action routing.
 Examine access-control routing and generic header-call text visibility.
+Examine protocol-header recognition on aliased response objects.
 Examine Python resource identifiers, heading termination, hook suffix coverage, and the
 Red workflow risk floor. Confirm the deployment reconcile step verifies the selected
 run has an unexpired client artifact before it marks the deployment ready. Confirm

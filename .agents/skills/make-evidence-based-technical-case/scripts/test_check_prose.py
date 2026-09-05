@@ -556,6 +556,20 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_ignores_protocol_headers_on_an_aliased_response(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "response-alias.ts"
+            path.write_text(
+                'outgoing.setHeader("Content-Security-Policy", '
+                '"default-src self; img-src data:");\n'
+                'outgoing.appendHeader("Link", "</style.css>; rel=preload");\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual([], findings)
+
     def test_checks_html_text_and_reader_facing_attributes(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "index.html"

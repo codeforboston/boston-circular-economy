@@ -1566,7 +1566,8 @@ JAVASCRIPT_DATABASE_RECEIVERS = {
 }
 JAVASCRIPT_CSS_CALL_METHODS = {"insertrule", "replace", "replacesync"}
 JAVASCRIPT_CSS_STYLESHEET_RECEIVERS = {"sheet", "stylesheet"}
-JAVASCRIPT_HEADER_METHODS = {"appendheader", "header", "setheader"}
+JAVASCRIPT_PROTOCOL_HEADER_METHODS = {"appendheader", "setheader"}
+JAVASCRIPT_RESPONSE_HEADER_METHODS = {"header"}
 JAVASCRIPT_HEADER_COLLECTION_METHODS = {"append", "set"}
 JAVASCRIPT_RESPONSE_RECEIVERS = {"reply", "res", "response"}
 
@@ -1637,9 +1638,10 @@ def javascript_protocol_header_argument(tokens: list[str]) -> bool:
     receiver, separator, method = normalized[-4:-1]
     if separator != ".":
         return False
-    if (
-        method in JAVASCRIPT_HEADER_METHODS
-        and receiver in JAVASCRIPT_RESPONSE_RECEIVERS
+    if method in JAVASCRIPT_PROTOCOL_HEADER_METHODS:
+        return True
+    if method in JAVASCRIPT_RESPONSE_HEADER_METHODS and (
+        receiver in JAVASCRIPT_RESPONSE_RECEIVERS
     ):
         return True
     return bool(
