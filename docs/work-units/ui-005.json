@@ -1,0 +1,108 @@
+{
+  "manifest_version": 1,
+  "journey": "MVP M2: senior resident finds a textile repair clinic",
+  "owner_role": "Frontend work lead (Hubert)",
+  "github_issue": null,
+  "inputs": [
+    {
+      "reference": "https://docs.google.com/document/d/1eI7OL8zppM01br13fuhXvWKAKnKWhRBOJ45NMYenpHU/edit",
+      "purpose": "Prototype requirements M2.1 and M2.2, screens 5 and 6"
+    },
+    {
+      "reference": "https://patterns.boston.gov/",
+      "purpose": "Official Boston component and visual guidance"
+    },
+    {
+      "reference": "client/README.md",
+      "purpose": "Existing React, TypeScript, Vite, and TanStack Router boundaries"
+    }
+  ],
+  "constraints": [
+    "Use the current textile MVP, a 390-pixel mobile viewport, and Fleet conventions.",
+    "Treat the older television persona and technical prototypes as historical context.",
+    "Use two synthetic clinics. Do not infer that the backend supports the mock fields.",
+    "Separate source facts, AI suggestions, and unresolved decisions.",
+    "Do not implement production code, query paid APIs, collect personal data, or publish to Slack."
+  ],
+  "completion_record": {
+    "artifact_links": [],
+    "reviewed_by": null,
+    "review_date": null,
+    "accepted_revision": null
+  },
+  "id": "UI-005",
+  "title": "Specify the clinic-search backend call",
+  "kind": "api_contract",
+  "status": "waiting_for_reviewed_input",
+  "risk": "Yellow",
+  "timebox_minutes": 90,
+  "reviewer_roles": [
+    "Frontend work lead",
+    "Backend/API lead"
+  ],
+  "related_issues": [
+    "https://github.com/codeforboston/boston-circular-economy/issues/38",
+    "https://github.com/codeforboston/boston-circular-economy/issues/46",
+    "https://github.com/codeforboston/boston-circular-economy/issues/53"
+  ],
+  "depends_on": [
+    "UI-002"
+  ],
+  "objective": "Propose the single backend read operation needed by the accepted results/filter UI.",
+  "in_scope": [
+    "One clinic-search operation",
+    "Request/response examples and field provenance",
+    "Mock data and frontend failure behavior"
+  ],
+  "out_of_scope": [
+    "Implementing endpoints",
+    "Registration, QR, writes, authentication, or hosting",
+    "Choosing Express versus FastAPI",
+    "Live user locations or real provider data"
+  ],
+  "ai_steps": [
+    {
+      "step": "Map",
+      "prompt": "Read UI-002, issues #25, #46, #49, #53 and their comments, server/src/index.ts, and etl/src/etl/dtos.py. Map each UI field to a source field or a data gap. Current main only demonstrates /ping. Do not claim the clinic API exists. Propose one read operation and identify choices for Hubert and the backend lead."
+    },
+    {
+      "step": "Challenge",
+      "prompt": "Review the proposed call for ambiguous filters, date/time units, distance origin, pagination, empty results, nullable fields, partial matches, stale responses, cancellation, timeout, and failure recovery. Do not infer machine availability or accessibility from missing data. Return at most five decisions that block implementation."
+    },
+    {
+      "step": "Produce",
+      "prompt": "Draft api-call-manifest.yaml plus success.json, empty.json, and error.json using synthetic clinics. Include proposed method/path, typed parameters, response fields, example statuses, action triggers, local-versus-server state, cancellation and retry rules, and field provenance. Mark the contract proposed. Ask me and the backend lead to accept the same revision before any implementation."
+    }
+  ],
+  "deliverables": [
+    {
+      "name": "api-call-manifest.yaml",
+      "format": "YAML",
+      "contents": "One proposed operation, UI action mapping, types, null/error semantics, data gaps, and acceptance record."
+    },
+    {
+      "name": "success.json",
+      "format": "JSON",
+      "contents": "Two synthetic clinics consistent with the proposed response schema and machine filter."
+    },
+    {
+      "name": "empty.json",
+      "format": "JSON",
+      "contents": "A valid successful response containing no matches."
+    },
+    {
+      "name": "error.json",
+      "format": "JSON",
+      "contents": "The agreed error shape and retry guidance, separate from an empty result."
+    }
+  ],
+  "acceptance": [
+    "Every displayed or filtered field has provenance or an explicit unresolved data requirement.",
+    "The manifest defines parameter encoding, defaults, date/time units, pagination, and result ordering.",
+    "The examples conform to the same proposed contract and contain no personal data.",
+    "The frontend behavior for empty, failure, cancellation, and stale responses is explicit.",
+    "Hubert and the backend lead accept the same revision, or the unit ends with a clear decision request."
+  ],
+  "learning_check": "Explain why a successful empty response differs from a failed request and how the UI handles each.",
+  "handoff": "Attach the accepted contract to #46 and #53. Create separate frontend and backend implementation units with their owners."
+}

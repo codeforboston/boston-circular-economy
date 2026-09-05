@@ -102,6 +102,10 @@ an application failure.
 
 The pre-commit framework installs two hook stages from `.pre-commit-config.yaml`.
 
+Each hook uses a pre-commit Python environment and its `python` executable. This
+avoids requiring a system `python3` alias. The local runner resolves external commands
+through `PATH`, including Windows command launchers, and propagates nonzero exits.
+
 The commit stage checks prose-bearing changed files. It also runs routing tests when a
 routing, hook, or CI file changes.
 
@@ -241,9 +245,11 @@ or incident in a runbook when production recovery requires more than a new deplo
 
 ## Maintainer activation
 
-After merge, confirm one successful `CI` run on `main`. Configure `Submission record`,
-`Prose`, `Frontend`, `Server`, and `ETL` as required checks in the protected-main
-ruleset.
+Follow [the activation checklist](DELIVERY_ACTIVATION.md). After merge, confirm a
+successful `CI` run and deployment on `main`. Validate `Submission record` on a
+subsequent PR, because the submission workflow does not run on main pushes.
+Configure `Submission record`, `Prose`, `Frontend`, `Server`, and `ETL` as required
+checks in the protected-main ruleset after observing their results.
 
 Connect the repository in Codex settings. Confirm that it is team-enabled before you
 enable automatic review. Otherwise, use `@codex review` on each representative change.

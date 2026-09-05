@@ -1,0 +1,95 @@
+{
+  "manifest_version": 1,
+  "journey": "MVP M2: senior resident finds a textile repair clinic",
+  "owner_role": "Frontend work lead (Hubert)",
+  "github_issue": null,
+  "inputs": [
+    {
+      "reference": "https://docs.google.com/document/d/1eI7OL8zppM01br13fuhXvWKAKnKWhRBOJ45NMYenpHU/edit",
+      "purpose": "Prototype requirements M2.1 and M2.2, screens 5 and 6"
+    },
+    {
+      "reference": "https://patterns.boston.gov/",
+      "purpose": "Official Boston component and visual guidance"
+    },
+    {
+      "reference": "client/README.md",
+      "purpose": "Existing React, TypeScript, Vite, and TanStack Router boundaries"
+    }
+  ],
+  "constraints": [
+    "Use the current textile MVP, a 390-pixel mobile viewport, and Fleet conventions.",
+    "Treat the older television persona and technical prototypes as historical context.",
+    "Use two synthetic clinics. Do not infer that the backend supports the mock fields.",
+    "Separate source facts, AI suggestions, and unresolved decisions.",
+    "Do not implement production code, query paid APIs, collect personal data, or publish to Slack."
+  ],
+  "completion_record": {
+    "artifact_links": [],
+    "reviewed_by": null,
+    "review_date": null,
+    "accepted_revision": null
+  },
+  "id": "UI-002",
+  "title": "Write the clinic results screen specification",
+  "kind": "specification",
+  "status": "waiting_for_reviewed_input",
+  "risk": "Yellow",
+  "timebox_minutes": 90,
+  "reviewer_roles": [
+    "Frontend work lead",
+    "Product and design owners"
+  ],
+  "related_issues": [
+    "https://github.com/codeforboston/boston-circular-economy/issues/38"
+  ],
+  "depends_on": [
+    "UI-001"
+  ],
+  "objective": "Give a developer an explicit screen and interaction contract for results and filters.",
+  "in_scope": [
+    "Results and filter screens only",
+    "UI state and interaction tables",
+    "Screen manifest and acceptance examples"
+  ],
+  "out_of_scope": [
+    "Final visual styling",
+    "New product features",
+    "Implementing components or endpoints"
+  ],
+  "ai_steps": [
+    {
+      "step": "Brainstorm",
+      "prompt": "Use the accepted UI-001 note, the current MVP, and screen-manifest.template.yaml. Propose the smallest complete results/filter specification. List every user action, visible state, and data need. Distinguish MVP requirements from engineering proposals. Stop at a 250-word outline for my review."
+    },
+    {
+      "step": "Challenge",
+      "prompt": "Inspect the outline for ambiguous behavior. Trace opening filters, applying machines available, clearing filters, opening a clinic, and returning. Check loading, empty results, partial matches, missing data, and failures. Return at most five missing decisions with a source or concrete counterexample."
+    },
+    {
+      "step": "Produce",
+      "prompt": "Fill screen-manifest.yaml and write screen-spec.md in at most 800 words. Give stable IDs to components, actions, states, and acceptance cases. Reference the accepted inputs and actual design frames. Keep unknown decisions explicit and mark the manifest proposed until the human reviewers accept it."
+    }
+  ],
+  "deliverables": [
+    {
+      "name": "screen-manifest.yaml",
+      "format": "YAML",
+      "contents": "Completed screen template with component, state, action, data, and approval records."
+    },
+    {
+      "name": "screen-spec.md",
+      "format": "Markdown or linked Google Doc",
+      "contents": "At most 800 words plus an action/state table and testable acceptance examples."
+    }
+  ],
+  "acceptance": [
+    "The default result state displays two synthetic clinics with distinct machine availability.",
+    "Applying the machine filter leaves one clinic, and clearing it restores both.",
+    "The partial-match label and missing-data treatment are defined without inventing service guarantees.",
+    "Every action states its trigger, state change, navigation effect, and API need or local-only status.",
+    "Product/design confirm the interpretation and Hubert accepts the engineering handoff."
+  ],
+  "learning_check": "Trace one user action through input, state, visible result, and failure behavior.",
+  "handoff": "The accepted specification starts UI-003 and UI-005 in parallel."
+}

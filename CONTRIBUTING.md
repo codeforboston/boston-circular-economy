@@ -9,6 +9,11 @@ workflow is in [`docs/AI_DELIVERY_PLAYBOOK.md`](docs/AI_DELIVERY_PLAYBOOK.md). A
 assistance is optional. Every contributor owns and must understand their submitted
 change.
 
+The [frontend assignment catalog](docs/work-units/README.md) provides five small AI
+assignments with prompts and deliverables. The [mentor guide](docs/MENTOR_PILOT.md)
+defines checkpoints and handoffs. Check issue comments for existing claims before
+selecting work.
+
 ## Local quality checks
 
 Install the repository hooks once:
@@ -20,6 +25,11 @@ pre-commit install --hook-type pre-commit --hook-type pre-push
 
 The commit hook checks changed prose and routing policy changes. The push hook selects
 subsystem checks from the same path policy that CI uses.
+
+Pre-commit creates a Python environment for the hooks. A system `python3` alias is not
+required. The check runner resolves platform launchers, including Windows `npm.cmd`.
+Use Node.js from `.node-version` and uv 0.12.9 for the application checks. On Windows,
+use `python` instead of `python3` in standalone examples when Python is on `PATH`.
 
 Install locked dependencies and run every applicable check before requesting review:
 

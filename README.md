@@ -28,6 +28,10 @@ python3 -B .agents/skills/make-evidence-based-technical-case/scripts/check_prose
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) to select and claim a work unit. Follow the
 [`code change standard`](docs/CODE_CHANGE_STANDARD.md) when preparing a pull request.
+Use the [frontend assignment catalog](docs/work-units/README.md) for research, specifications,
+wireframes, design, and backend-call manifests. The [mentor guide](docs/MENTOR_PILOT.md)
+defines contributor checkpoints. Maintainers use the [activation checklist](docs/DELIVERY_ACTIVATION.md)
+to verify hosted checks, review, and deployment.
 
 Contributors using an AI coding assistant should read [`AGENTS.md`](AGENTS.md) and the
 proposed [`AI-assisted delivery playbook`](docs/AI_DELIVERY_PLAYBOOK.md). The

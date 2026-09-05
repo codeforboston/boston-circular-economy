@@ -87,6 +87,9 @@ before delegation. Model output remains advisory and never controls a CI result.
 
 Use the **Ready work unit** issue form. A work unit is ready when another contributor can understand it without private context.
 
+Use the [mentor pilot guide](MENTOR_PILOT.md) for candidate units, a short opening
+checkpoint, and prompts that help contributors explain the work themselves.
+
 Required fields are:
 
 - an observable outcome for a named user or system.
@@ -226,9 +229,10 @@ for event, failure, hook, routing, and deployment contracts.
 
 ### Maintainer activation step
 
-After this pilot PR merges, the five checks must complete successfully.
-A repository administrator should then add these checks to the **Protect Main Branch**
-ruleset:
+Follow the [activation checklist](DELIVERY_ACTIVATION.md). After merge, confirm main CI
+and deployment. Validate `Submission record` on a subsequent PR before requiring it.
+A main push cannot emit that pull-request status. An administrator then adds these
+contexts to the **Protect Main Branch** ruleset:
 
 - `Submission record`
 - `Prose`
@@ -360,6 +364,7 @@ The team should decide these during the pilot rather than encode them prematurel
 ## Project evidence used for this pilot
 
 - [Team proposal for human-owned, AI-assisted review](https://cfb-public.slack.com/archives/C0AFA66CE2W/p1784830048882729)
+- [Team norms for scoped work, review capacity, and durable records](https://docs.google.com/document/d/1v_cuc_hEcx9GzcsoE8GJv83o_qlVc3QX-LhdtlUGqHA/edit)
 - [Contributor question about how to request review](https://cfb-public.slack.com/archives/C0AFA66CE2W/p1785267759352939)
 - [Contributor request for asynchronous work](https://cfb-public.slack.com/archives/C0AFA66CE2W/p1788296095242299)
 - [Feature-prioritization work unit](https://github.com/codeforboston/boston-circular-economy/issues/45)

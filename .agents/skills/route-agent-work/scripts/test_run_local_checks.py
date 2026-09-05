@@ -1,6 +1,11 @@
 from __future__ import annotations
 
+import os
+import subprocess
+import sys
+import tempfile
 import unittest
+from pathlib import Path
 from unittest import mock
 
 from run_local_checks import (
@@ -10,6 +15,7 @@ from run_local_checks import (
     main,
     require_checked_out_commit,
     require_clean_worktree,
+    run,
 )
 
 
@@ -99,6 +105,33 @@ class LocalCheckRunnerTests(unittest.TestCase):
 
     def test_all_files_mode_does_not_resolve_a_base(self) -> None:
         self.assertEqual([], files_for_run(True, "missing/main", "HEAD"))
+
+    def test_missing_tool_fails_with_the_required_command_name(self) -> None:
+        with mock.patch("run_local_checks.shutil.which", return_value=None):
+            with self.assertRaisesRegex(FileNotFoundError, "not on PATH: missing-tool"):
+                run(["missing-tool", "--version"])
+
+    def test_failed_check_preserves_its_exit_code(self) -> None:
+        with self.assertRaises(subprocess.CalledProcessError) as failure:
+            run([sys.executable, "-c", "raise SystemExit(7)"])
+
+        self.assertEqual(7, failure.exception.returncode)
+
+    @unittest.skipUnless(os.name == "nt", "Windows command launchers")
+    def test_resolves_a_windows_cmd_launcher_from_path(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="hook launcher ") as temporary:
+            directory = Path(temporary)
+            (directory / "check-tool.cmd").write_text(
+                "@echo off\necho %1>result.txt\n", encoding="utf-8"
+            )
+            environment = {
+                "PATH": temporary + os.pathsep + os.environ.get("PATH", ""),
+                "PATHEXT": ".COM;.EXE;.BAT;.CMD",
+            }
+            with mock.patch.dict(os.environ, environment):
+                run(["check-tool", "verified"], cwd=directory)
+
+            self.assertEqual("verified", (directory / "result.txt").read_text().strip())
 
 
 if __name__ == "__main__":

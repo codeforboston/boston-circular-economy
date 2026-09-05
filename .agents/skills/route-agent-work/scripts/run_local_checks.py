@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -94,8 +95,14 @@ def files_for_run(
 
 
 def run(command: list[str], *, cwd: Path = REPOSITORY_ROOT) -> None:
-    print(f"+ {' '.join(command)}", flush=True)
-    subprocess.run(command, cwd=cwd, check=True)
+    """Resolve platform launchers and preserve check failures for the caller."""
+
+    executable = shutil.which(command[0])
+    if executable is None:
+        raise FileNotFoundError(f"required check tool is not on PATH: {command[0]}")
+    resolved_command = [executable, *command[1:]]
+    print(f"+ {' '.join(resolved_command)}", flush=True)
+    subprocess.run(resolved_command, cwd=cwd, check=True)
 
 
 def main(argv: list[str] | None = None) -> int:
