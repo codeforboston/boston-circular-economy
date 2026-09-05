@@ -211,7 +211,9 @@ pushes. Unaffected pull-request jobs report a successful skip under job conditio
 
 The deployment workflow listens for successful CI caused by a push to `main`. It
 downloads the tested client artifact from that CI run and deploys it to GitHub Pages.
-Pull-request runs cannot deploy.
+Pull-request runs cannot deploy. A tested commit must still equal current `main` before
+deployment, so an older rerun cannot replace a newer release. The workflow checks again
+after publication and reports whether a newer commit requires a forward deployment.
 
 All third-party GitHub Actions are pinned to full commit SHAs. Workflow tokens receive
 read-only repository access unless a job publishes the fixed submission status or

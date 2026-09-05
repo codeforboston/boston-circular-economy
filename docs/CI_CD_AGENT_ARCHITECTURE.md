@@ -115,9 +115,10 @@ range. When pre-commit requests all files without a commit range, the runner pre
 that request and runs every application check.
 
 The checks execute in the current worktree. The runner stops when the pushed commit is
-not checked out because a successful build of another commit would be false evidence.
-Push one checked-out branch at a time for exact local validation. CI validates the pull
-request head and remains the merge evidence of record.
+not checked out or the worktree is dirty. Either state would produce evidence for
+content outside the pushed commit. Push one clean, checked-out branch at a time for
+exact local validation. CI validates the pull request head and remains the merge
+evidence of record.
 
 The local hook does not run `npm ci` because that command replaces the local dependency
 tree. Contributors install locked dependencies before the hook runs. CI creates clean
@@ -209,7 +210,11 @@ explain ordinary behavior. This rule avoids comments that repeat implementation 
 ## Deployment
 
 The deployment workflow starts only after a successful `CI` workflow. Its condition also
-requires a push event on the `main` branch.
+requires a push event on `main` and requires the tested commit to equal the current
+default-branch commit. A final live-reference check rejects a run if `main` advances
+while the deployment job waits or prepares its artifact. A post-deploy check detects a
+race during publication. The successful CI for the newer commit then starts the next
+serialized deployment.
 
 The `Frontend` job builds and uploads `github-pages-client` during main-branch CI. The
 deployment workflow downloads that artifact by the originating workflow run identifier.
@@ -221,7 +226,10 @@ Pages and request an identity token.
 
 A failed CI run creates no deployment. A missing or expired artifact fails deployment.
 The previous Pages deployment remains the recovery point until another tested artifact
-succeeds.
+succeeds. The dispatch guard rejects an older rerun when a newer commit is already
+deployed. A commit that arrives during publication can make the active artifact briefly
+stale. The post-deploy guard reports that state, and the newer successful CI rolls it
+forward. Intentional rollback requires a separate guarded procedure.
 
 ## Change and failure records
 

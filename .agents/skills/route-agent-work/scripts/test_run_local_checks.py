@@ -9,6 +9,7 @@ from run_local_checks import (
     is_zero_oid,
     main,
     require_checked_out_commit,
+    require_clean_worktree,
 )
 
 
@@ -80,6 +81,21 @@ class LocalCheckRunnerTests(unittest.TestCase):
         require_checked_out_commit("1111111", "1111111")
         with self.assertRaisesRegex(ValueError, "push one checked-out branch"):
             require_checked_out_commit("2222222", "1111111")
+
+    @mock.patch("run_local_checks.subprocess.run")
+    def test_rejects_a_dirty_worktree(self, run: mock.Mock) -> None:
+        run.return_value.stdout = " M client/src/App.tsx\n"
+
+        with self.assertRaisesRegex(ValueError, "require a clean worktree"):
+            require_clean_worktree()
+
+        run.assert_called_once_with(
+            ["git", "status", "--porcelain=v1", "--untracked-files=all"],
+            cwd=mock.ANY,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
 
     def test_all_files_mode_does_not_resolve_a_base(self) -> None:
         self.assertEqual([], files_for_run(True, "missing/main", "HEAD"))

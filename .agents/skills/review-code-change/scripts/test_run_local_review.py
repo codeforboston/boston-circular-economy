@@ -308,6 +308,29 @@ class LocalReviewRunnerTests(unittest.TestCase):
         self.assertLess(first_live_read, pending_status)
         self.assertLess(final_live_read, final_status)
 
+    def test_deployment_rejects_a_superseded_main_artifact(self) -> None:
+        deployment = (ROOT / ".github/workflows/deploy.yml").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn(
+            "github.event.workflow_run.head_sha == github.sha",
+            deployment,
+        )
+        self.assertIn(
+            'gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main"',
+            deployment,
+        )
+        self.assertEqual(
+            2,
+            deployment.count(
+                'gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main"'
+            ),
+        )
+        self.assertIn('if [[ "$TESTED_SHA" != "$current_sha" ]]', deployment)
+        self.assertIn("Detect main advancing during deployment", deployment)
+        self.assertIn("will trigger a forward deployment", deployment)
+
 
 if __name__ == "__main__":
     unittest.main()

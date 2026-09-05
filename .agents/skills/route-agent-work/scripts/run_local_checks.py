@@ -53,6 +53,23 @@ def require_checked_out_commit(target: str, checked_out: str) -> None:
         )
 
 
+def require_clean_worktree() -> None:
+    """Reject local evidence that includes content outside the pushed commit."""
+
+    completed = subprocess.run(
+        ["git", "status", "--porcelain=v1", "--untracked-files=all"],
+        cwd=REPOSITORY_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    if completed.stdout:
+        raise ValueError(
+            "local push checks require a clean worktree; "
+            "commit, stash, or remove local changes before pushing"
+        )
+
+
 def resolve_commit(revision: str) -> str:
     completed = subprocess.run(
         ["git", "rev-parse", "--verify", f"{revision}^{{commit}}"],
@@ -99,6 +116,7 @@ def main(argv: list[str] | None = None) -> int:
         resolve_commit(arguments.head),
         resolve_commit("HEAD"),
     )
+    require_clean_worktree()
     policy = route_work.load_policy()
     force_all = arguments.force_all or hook_force_all
     files = files_for_run(force_all, arguments.base, arguments.head)

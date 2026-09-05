@@ -17,7 +17,8 @@ jobs:
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push' &&
-      github.event.workflow_run.head_branch == 'main'
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_sha == github.sha
     environment:
       name: github-pages
       url: ${{ steps.deploy-pages.outputs.page_url }}
@@ -44,6 +45,31 @@ jobs:
         uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
         with:
           path: ./client/dist
+      - name: Confirm tested commit is still current main
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TESTED_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          current_sha="$(
+            gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq .object.sha
+          )"
+          if [[ "$TESTED_SHA" != "$current_sha" ]]; then
+            echo "::error::A newer main commit superseded this tested artifact."
+            exit 1
+          fi
       - name: Deploy to GitHub Pages
         id: deploy-pages
         uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
+      - name: Detect main advancing during deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TESTED_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          current_sha="$(
+            gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq .object.sha
+          )"
+          if [[ "$TESTED_SHA" != "$current_sha" ]]; then
+            echo "::error::Main advanced while Pages was publishing this artifact."
+            echo "The successful CI for current main will trigger a forward deployment."
+            exit 1
+          fi
