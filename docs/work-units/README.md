@@ -39,7 +39,9 @@ prove that a design is correct or complete.
 
 The commit hook and CI validate each `ui-NNN.json` file against the schema. IDs must be
 unique and match their filenames. Dependencies must identify existing units and cannot
-form a cycle. CI also proves that the validator rejects the invalid files in `fixtures`.
+form a cycle. A unit can leave `waiting_for_reviewed_input` only after each prerequisite
+has an `accepted` status. CI also proves that the validator rejects the invalid files in
+`fixtures`.
 
 The [screen template](screen-manifest.template.yaml) describes the resulting UI
 contract: components, visible states, actions, data needs, and acceptance cases.

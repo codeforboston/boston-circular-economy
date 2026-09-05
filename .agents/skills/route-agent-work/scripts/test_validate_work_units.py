@@ -74,6 +74,59 @@ class WorkUnitValidationTests(unittest.TestCase):
         self.assertIn("dependency 'UI-999'", errors[0])
         self.assertIn("does not match a discovered work unit", errors[0])
 
+    def test_started_manifest_requires_accepted_dependencies(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            prerequisite = root / "ui-001.json"
+            dependent = root / "ui-002.json"
+            prerequisite.write_text(
+                '{"id": "UI-001", "status": "ready_for_research", '
+                '"depends_on": []}\n',
+                encoding="utf-8",
+            )
+            for status in (
+                "ready_for_research",
+                "claimed",
+                "in_review",
+                "needs_revision",
+                "accepted",
+            ):
+                with self.subTest(status=status):
+                    dependent.write_text(
+                        '{"id": "UI-002", '
+                        f'"status": "{status}", '
+                        '"depends_on": ["UI-001"]}\n',
+                        encoding="utf-8",
+                    )
+
+                    errors = manifest_identity_errors(
+                        [prerequisite, dependent]
+                    )
+
+                    self.assertEqual(1, len(errors))
+                    self.assertIn("requires dependency 'UI-001'", errors[0])
+                    self.assertIn("to be 'accepted'", errors[0])
+
+    def test_waiting_manifest_allows_unaccepted_dependencies(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            prerequisite = root / "ui-001.json"
+            dependent = root / "ui-002.json"
+            prerequisite.write_text(
+                '{"id": "UI-001", "status": "ready_for_research", '
+                '"depends_on": []}\n',
+                encoding="utf-8",
+            )
+            dependent.write_text(
+                '{"id": "UI-002", "status": "waiting_for_reviewed_input", '
+                '"depends_on": ["UI-001"]}\n',
+                encoding="utf-8",
+            )
+
+            errors = manifest_identity_errors([prerequisite, dependent])
+
+        self.assertEqual([], errors)
+
     def test_manifest_cannot_depend_on_itself(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "ui-005.json"

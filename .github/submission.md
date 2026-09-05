@@ -142,6 +142,7 @@ issue existed.
 - Resolve a shared review base and trusted-policy ref once.
 - Keep static protocol-header arguments outside reader-prose checks.
 - Scan `aria-roledescription` values in HTML and JSX.
+- Enforce accepted prerequisites before a dependent work unit can start.
 
 ## Challenge cases
 
@@ -253,6 +254,8 @@ issue existed.
 - CSP, Link, and content-type values remain machine syntax, while nearby messages remain
   subject to wording checks.
 - Author-defined ARIA role descriptions remain visible to wording checks.
+- A dependent unit cannot enter a started, review, revision, or accepted state while a
+  prerequisite remains unaccepted. The waiting state remains valid.
 - Red review stops for specialist and human escalation, including ETL credential and secret paths.
 
 ## Evidence
@@ -263,7 +266,7 @@ issue existed.
 | Server lint and build | Pass | Lint and build pass. Startup creates and closes a temporary SQLite database, and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
 | Technical prose and editorial style | Pass | Full repository scan and 158 communication and submission tests |
-| Routing policy | Pass | 42 routing, hook-context, manifest-integrity, and model-route tests |
+| Routing policy | Pass | 44 routing, hook-context, manifest-integrity, and model-route tests |
 | Review policy and model routing | Pass | 30 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation, schema validation, and commit-stage and push-stage runs |
 | Workflow syntax | Pass | Actionlint 1.7.11 and YAML parsing |
@@ -301,6 +304,7 @@ Examine multiline YAML quoted scalars, static template interpolation, and the
 password and authentication-token risk floor.
 Examine resolved-base reuse and programmatic CSS payload classification.
 Examine shared-ref resolution, protocol-header classification, and ARIA role descriptions.
+Examine prerequisite-state enforcement for dependent work units.
 Examine Python resource identifiers, heading termination, hook suffix coverage, and the
 Red workflow risk floor. Confirm the deployment reconcile step verifies the selected
 run has an unexpired client artifact before it marks the deployment ready. Confirm
