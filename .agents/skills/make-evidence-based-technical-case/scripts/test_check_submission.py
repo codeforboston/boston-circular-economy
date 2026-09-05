@@ -304,6 +304,14 @@ class CheckSubmissionTests(unittest.TestCase):
 
         self.assertEqual(check_submission.check_submission(body), [])
 
+    def test_escaped_evidence_pipe_stays_in_one_cell(self) -> None:
+        body = VALID_BODY.replace(
+            "| ETL tests | Pass | `uv run pytest` |",
+            r"| ETL tests | Pass | `uv run pytest \| tee log` |",
+        )
+
+        self.assertEqual(check_submission.check_submission(body), [])
+
     def test_work_unit_form_requires_an_evidence_selection(self) -> None:
         root = Path(__file__).resolve().parents[4]
         form = (root / ".github/ISSUE_TEMPLATE/work-unit.yml").read_text(

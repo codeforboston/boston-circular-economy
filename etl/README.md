@@ -26,7 +26,8 @@ Each pipeline has a **Querier** that fetches raw data. A **Normalizer** maps tha
 3. Implement [`BaseNormalizer`](src/etl/base/normalizer.py) in `normalizer.py`. Map each [`RawLocation`](src/etl/dtos.py) to a [`NormalizedLocation`](src/etl/dtos.py).
 4. Add tests under [`tests/`](tests/). Mirror the source path, such as `tests/sources/openstreetmap/test_pipeline.py`.
 
-See [`src/etl/sources/google_places/`](src/etl/sources/google_places/) for a reference implementation.
+Use the base contracts and an existing source directory as structural references. The
+source adapters are scaffolds, not executable reference implementations.
 
 ## Querier
 
@@ -50,8 +51,8 @@ The [`DataStore`](src/etl/base/data_store.py) provides persistent storage. All p
 
 Key behaviors:
 
-- **`write_source_snapshot()`** — writes a list of `NormalizedLocation` records to the database.
-  - **Update or Create** — `(data_source, data_source_id)` identifies each record. The store updates an existing record or inserts a missing record.
+- **`write_source_snapshot()`** — persists a complete snapshot for one source.
+  - **Replacement** — the supplied list replaces the prior snapshot. It is not a partial upsert.
   - **Source** — every record retains its `data_source` and `data_source_id`, which makes cross-source deduplication tractable later without requiring it now.
 
 ## Testing

@@ -135,14 +135,45 @@ def labeled_value(content: str, label: str) -> str | None:
     return values[0] if values else None
 
 
+def unescaped_pipe_positions(value: str) -> list[int]:
+    """Locate Markdown table separators and ignore escaped pipe characters."""
+
+    positions: list[int] = []
+    for index, character in enumerate(value):
+        if character != "|":
+            continue
+        backslashes = 0
+        cursor = index - 1
+        while cursor >= 0 and value[cursor] == "\\":
+            backslashes += 1
+            cursor -= 1
+        if backslashes % 2 == 0:
+            positions.append(index)
+    return positions
+
+
+def evidence_row_cells(line: str) -> list[str] | None:
+    """Parse one pipe-delimited evidence row when it has outer separators."""
+
+    stripped = line.strip()
+    separators = unescaped_pipe_positions(stripped)
+    if not separators or separators[0] != 0 or separators[-1] != len(stripped) - 1:
+        return None
+    cells: list[str] = []
+    start = 1
+    for separator in separators[1:]:
+        cells.append(stripped[start:separator].strip())
+        start = separator + 1
+    return cells
+
+
 def evidence_findings(content: str) -> list[SubmissionFinding]:
     findings: list[SubmissionFinding] = []
     rows: list[list[str]] = []
     for line in content.splitlines():
-        stripped = line.strip()
-        if not stripped.startswith("|") or not stripped.endswith("|"):
+        cells = evidence_row_cells(line)
+        if cells is None:
             continue
-        cells = [cell.strip() for cell in stripped.strip("|").split("|")]
         if all(set(cell) <= {"-", ":"} for cell in cells):
             continue
         rows.append(cells)
