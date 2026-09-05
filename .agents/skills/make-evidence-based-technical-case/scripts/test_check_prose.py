@@ -218,6 +218,46 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_ignores_javascript_module_specifiers(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.ts"
+            path.write_text(
+                'import { unlock } from "./unlock";\n'
+                'import /* load for its effects */ "./powerful";\n'
+                'export { value } from /* source */ "./robust";\n'
+                'const lazy = import /* defer */ ("./scalable");\n'
+                'const helper = require /* CommonJS */ ("./unlock-helper");\n'
+                "const lazyTemplate = import(`./powerful`);\n"
+                "const requiredTemplate = require(`./robust/${'feature'}`);\n"
+                "// from import require(\n"
+                'const message = "Unlock the potential.";\n',
+                encoding="utf-8",
+            )
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(9, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
+    def test_checks_reader_text_inside_module_template_expressions(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.ts"
+            path.write_text(
+                'const stringPath = import(`./${getMessage("Unlock the potential.")}`);\n'
+                "const commentPath = import(`./${(\n"
+                "  // Unlock the potential for maintainers.\n"
+                "  segment\n"
+                ")}/module`);\n",
+                encoding="utf-8",
+            )
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(1, "promotional cliche"), (3, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_checks_direct_jsx_text_but_not_component_identifiers(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.tsx"

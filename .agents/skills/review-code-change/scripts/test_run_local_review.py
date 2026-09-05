@@ -116,6 +116,27 @@ class LocalReviewRunnerTests(unittest.TestCase):
                 assessment = infer_minimum_risk([path], policy)
                 self.assertEqual("red", assessment["risk"])
 
+    def test_etl_authentication_path_requires_red_review(self) -> None:
+        paths = (
+            "etl/src/etl/sources/google_places/auth.py",
+            "etl/src/etl/sources/google_places/authentication.py",
+            "etl/src/etl/sources/google_places/credentials.py",
+            "etl/src/etl/sources/google_places/oauth.py",
+            "etl/src/etl/security/authorization.py",
+            "etl/src/etl/secrets/provider.py",
+            "etl/src/etl/user_session.py",
+        )
+        policy = load_risk_policy()
+
+        for path in paths:
+            with self.subTest(path=path):
+                assessment = infer_minimum_risk([path], policy)
+                self.assertEqual("red", assessment["risk"])
+                self.assertEqual(
+                    "red",
+                    effective_risk("green", str(assessment["risk"])),
+                )
+
     def test_critical_accessibility_path_requires_red_review(self) -> None:
         paths = (
             "client/src/accessibility/focus-trap.tsx",

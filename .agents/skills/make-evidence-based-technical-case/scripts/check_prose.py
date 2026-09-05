@@ -502,8 +502,8 @@ def mask_python_code(text: str) -> str:
     return "".join(output)
 
 
-def copy_js_string(text: str, output: list[str], start: int, quote: str) -> int:
-    """Copy one quoted JavaScript string and return the next source position."""
+def javascript_string_end(text: str, start: int, quote: str) -> int:
+    """Return the first source position after one JavaScript string."""
 
     index = start + 1
     while index < len(text):
@@ -516,12 +516,41 @@ def copy_js_string(text: str, output: list[str], start: int, quote: str) -> int:
         if quote != "`" and text[index] in "\r\n":
             break
         index += 1
-    copy_span(output, text, start, min(index, len(text)))
     return min(index, len(text))
 
 
-def mask_js_template(text: str, output: list[str], start: int) -> int:
-    """Copy template literal text while hiding interpolation expressions."""
+def copy_js_string(text: str, output: list[str], start: int, quote: str) -> int:
+    """Copy one quoted JavaScript string and return the next source position."""
+
+    end = javascript_string_end(text, start, quote)
+    copy_span(output, text, start, end)
+    return end
+
+
+def javascript_module_specifier(tokens: list[str]) -> bool:
+    """Return whether recent code tokens introduce a module specifier."""
+
+    return bool(
+        (tokens and tokens[-1] in {"from", "import"})
+        or (
+            len(tokens) >= 2
+            and tokens[-2] in {"import", "require"}
+            and tokens[-1] == "("
+        )
+    )
+
+
+def remember_javascript_token(tokens: list[str], token: str) -> None:
+    """Keep the small token window needed to classify the next string."""
+
+    tokens.append(token)
+    del tokens[:-4]
+
+
+def mask_js_template(
+    text: str, output: list[str], start: int, *, copy_literal: bool = True
+) -> int:
+    """Walk a template and optionally copy its literal text segments."""
 
     index = start + 1
     literal_start = start
@@ -530,19 +559,23 @@ def mask_js_template(text: str, output: list[str], start: int) -> int:
             index += 2
             continue
         if text.startswith("${", index):
-            copy_span(output, text, literal_start, index + 2)
+            if copy_literal:
+                copy_span(output, text, literal_start, index + 2)
             index = mask_javascript_code(text, output, index + 2, stop_at_brace=True)
             if index < len(text) and text[index] == "}":
-                copy_span(output, text, index, index + 1)
+                if copy_literal:
+                    copy_span(output, text, index, index + 1)
                 index += 1
             literal_start = index
             continue
         if text[index] == "`":
             index += 1
-            copy_span(output, text, literal_start, index)
+            if copy_literal:
+                copy_span(output, text, literal_start, index)
             return index
         index += 1
-    copy_span(output, text, literal_start, len(text))
+    if copy_literal:
+        copy_span(output, text, literal_start, len(text))
     return len(text)
 
 
@@ -644,6 +677,7 @@ def mask_javascript_code(
 
     index = start
     brace_depth = 0
+    tokens: list[str] = []
     while index < len(text):
         if text.startswith("//", index):
             end = text.find("\n", index)
@@ -659,10 +693,20 @@ def mask_javascript_code(
             continue
         character = text[index]
         if character in "'\"":
-            index = copy_js_string(text, output, index, character)
+            if javascript_module_specifier(tokens):
+                index = javascript_string_end(text, index, character)
+            else:
+                index = copy_js_string(text, output, index, character)
+            remember_javascript_token(tokens, "<string>")
             continue
         if character == "`":
-            index = mask_js_template(text, output, index)
+            index = mask_js_template(
+                text,
+                output,
+                index,
+                copy_literal=not javascript_module_specifier(tokens),
+            )
+            remember_javascript_token(tokens, "<template>")
             continue
         if character == "<" and javascript_expression_start(text, index):
             end = jsx_tag_end(text, index)
@@ -671,13 +715,25 @@ def mask_javascript_code(
                 stripped = text[index + 1 : end].strip()
                 if not stripped.startswith("/") and not stripped.endswith("/"):
                     index = mask_jsx_children(text, output, end + 1)
+                    remember_javascript_token(tokens, "<jsx>")
                     continue
+        if character.isalpha() or character in "_$":
+            end = index + 1
+            while end < len(text) and (
+                text[end].isalnum() or text[end] in "_$"
+            ):
+                end += 1
+            remember_javascript_token(tokens, text[index:end])
+            index = end
+            continue
         if stop_at_brace and character == "{":
             brace_depth += 1
         elif stop_at_brace and character == "}":
             if brace_depth == 0:
                 return index
             brace_depth -= 1
+        if not character.isspace():
+            remember_javascript_token(tokens, character)
         index += 1
     return index
 
