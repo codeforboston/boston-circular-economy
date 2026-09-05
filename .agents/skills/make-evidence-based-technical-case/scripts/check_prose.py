@@ -40,6 +40,7 @@ SCANNED_SUFFIXES = {
     ".yaml",
     ".yml",
 }
+SEMICOLON_SCANNED_SUFFIXES = {".css", ".html", ".jsx", ".tsx"}
 IGNORED_PARTS = {
     ".git",
     ".pytest_cache",
@@ -546,6 +547,11 @@ def editorial_findings(path: Path) -> list[Finding]:
             source_offset = source_offsets[match.start()]
             line = source_text.count("\n", 0, source_offset) + 1
             findings.append(Finding(path, line, name, match.group(0)))
+    if suffix in SEMICOLON_SCANNED_SUFFIXES:
+        for match in re.finditer(r";", text):
+            source_offset = source_offsets[match.start()]
+            line = source_text.count("\n", 0, source_offset) + 1
+            findings.append(Finding(path, line, "semicolon", "semicolon in prose"))
     return findings
 
 
@@ -561,7 +567,7 @@ def collapse_logical_joins(text: str, source: str) -> tuple[str, list[int]]:
         escaped_line_end = source[index] == "\\" and (
             index + 1 < len(source) and source[index + 1] in "\r\n"
         )
-        removable_separator = source[index].isspace() or source[index] in "'\""
+        removable_separator = source[index].isspace() or source[index] in "'\"+"
         if character == LOGICAL_JOIN and (removable_separator or escaped_line_end):
             continue
         logical_text.append(character)
@@ -1820,6 +1826,41 @@ def copy_jsx_inner_html_expression(
     )
 
 
+def join_static_jsx_expression_literals(
+    text: str, output: list[str], start: int, end: int
+) -> None:
+    """Join literals when a complete JSX expression is static string addition."""
+
+    spans: list[tuple[int, int]] = []
+    index = start
+    expect_literal = True
+    while index < end:
+        while index < end and text[index].isspace():
+            index += 1
+        if index >= end:
+            break
+        if expect_literal:
+            delimiter = text[index]
+            if delimiter not in "'\"":
+                return
+            literal_end = javascript_string_end(text, index, delimiter)
+            if literal_end > end or text[literal_end - 1] != delimiter:
+                return
+            spans.append((index, literal_end))
+            index = literal_end
+            expect_literal = False
+            continue
+        if text[index] != "+":
+            return
+        index += 1
+        expect_literal = True
+    if expect_literal or len(spans) < 2:
+        return
+    for previous, current in zip(spans, spans[1:]):
+        for position in range(previous[1] - 1, current[0] + 1):
+            output[position] = LOGICAL_JOIN
+
+
 def copy_jsx_tag_literals(text: str, output: list[str], start: int, end: int) -> None:
     """Keep reader-facing JSX attributes while hiding implementation metadata."""
 
@@ -1858,15 +1899,23 @@ def copy_jsx_tag_literals(text: str, output: list[str], start: int, end: int) ->
             if not reader_facing:
                 mask_span(output, text, value_start, cursor)
         elif delimiter == "{":
+            expression_start = value_start + 1
             closing = mask_javascript_code(
                 text,
                 output,
-                value_start + 1,
+                expression_start,
                 stop_at_brace=True,
             )
             cursor = closing + 1 if closing < len(text) else closing
             if not reader_facing:
                 mask_span(output, text, value_start, cursor)
+            else:
+                join_static_jsx_expression_literals(
+                    text,
+                    output,
+                    expression_start,
+                    closing,
+                )
             if attribute_name == "dangerouslysetinnerhtml":
                 copy_jsx_inner_html_expression(
                     text,
@@ -1885,7 +1934,16 @@ def mask_jsx_children(text: str, output: list[str], start: int) -> int:
     depth = 1
     while index < len(text):
         if text[index] == "{":
-            index = mask_javascript_code(text, output, index + 1, stop_at_brace=True)
+            expression_start = index + 1
+            index = mask_javascript_code(
+                text, output, expression_start, stop_at_brace=True
+            )
+            join_static_jsx_expression_literals(
+                text,
+                output,
+                expression_start,
+                index,
+            )
             if index < len(text) and text[index] == "}":
                 index += 1
             continue

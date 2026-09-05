@@ -633,6 +633,23 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_joins_static_jsx_expression_literals(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.tsx"
+            path.write_text(
+                "export default <p>{'Don' + \"'t deploy; wait.\"}</p>;\n"
+                "const label = <div aria-label={'Don' + \"'t deploy.\"} />;\n"
+                "const dynamic = <p>{'Don' + value + \"'t deploy.\"}</p>;\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(1, "contraction"), (2, "contraction"), (1, "semicolon")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_checks_export_default_jsx_text(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.tsx"
@@ -715,7 +732,7 @@ class ProseCheckerTests(unittest.TestCase):
             findings = editorial_findings(path)
 
         self.assertEqual(
-            [(1, "contraction"), (2, "contraction")],
+            [(1, "contraction"), (2, "contraction"), (3, "semicolon")],
             [(finding.line, finding.rule) for finding in findings],
         )
 
