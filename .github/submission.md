@@ -114,6 +114,7 @@ issue existed.
 - Scan values on visible HTML input types while excluding hidden and choice-control values.
 - Exclude Python file and path arguments from reader prose while retaining ordinary messages.
 - Exclude patterns passed to recognized Python regular-expression APIs from reader prose.
+- Exclude SQL passed through recognizable Python database receivers from reader prose.
 - Treat only inline-link labels as substantive submission content while preserving visible autolinks.
 - Accept zero to three spaces before submission headings while masking four-space code blocks.
 - Exclude quoted JavaScript property keys from prose while continuing to scan their values.
@@ -229,6 +230,7 @@ issue existed.
 - Submit and text-input values fail editorial checks, while hidden-input values remain machine data.
 - Python path constructors, file calls, path joins, and path composition remain outside prose checks.
 - Python regular-expression patterns remain machine input while ordinary messages remain visible.
+- Python database operations remain machine input while unrelated `execute` calls and messages remain visible.
 - An empty Markdown link cannot satisfy a rationale field, while a visible autolink can.
 - A submission heading with three leading spaces passes, while a four-space heading remains code.
 - A quoted JavaScript object key remains inert, while a reader-facing value still fails.
@@ -303,7 +305,7 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass. Startup creates and closes a temporary SQLite database, and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 167 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 168 communication and submission tests |
 | Routing policy | Pass | 44 routing, hook-context, manifest-integrity, and model-route tests |
 | Review policy and model routing | Pass | 34 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation, schema validation, and commit-stage and push-stage runs |
@@ -356,7 +358,10 @@ Examine Python path-variable and path-method propagation.
 Examine destructive `destroy` and `remove` routing.
 Examine Python resource identifiers, heading termination, hook suffix coverage, and the
 Red workflow risk floor. Examine Python regular-expression pattern classification and
-verb-named authentication and authorization routing. Confirm the deployment reconcile step verifies the selected
+Python database-operation classification. Examine verb-named authentication and
+authorization routing.
+
+Confirm the deployment reconcile step verifies the selected
 run has an unexpired client artifact before it marks the deployment ready. Confirm
 the Pages concurrency group serializes qualifying runs without cancellation. Confirm
 artifact selection carries tested client output through non-client commits. Confirm

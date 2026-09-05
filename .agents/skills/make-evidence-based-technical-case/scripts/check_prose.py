@@ -1273,6 +1273,83 @@ def python_regular_expression_pattern_spans(
     return sorted(set(spans))
 
 
+def python_database_operation_spans(
+    text: str, offsets: list[int]
+) -> list[tuple[int, int]]:
+    """Locate static SQL passed through recognizable database receivers."""
+
+    try:
+        syntax_tree = ast.parse(text)
+    except SyntaxError:
+        return []
+
+    lines = text.splitlines(keepends=True)
+
+    def source_offset(line: int, byte_column: int) -> int:
+        line_prefix = lines[line - 1].encode("utf-8")[:byte_column]
+        character_column = len(line_prefix.decode("utf-8"))
+        return offsets[line - 1] + character_column
+
+    def string_span(node: ast.AST) -> tuple[int, int] | None:
+        if not isinstance(node, (ast.Constant, ast.JoinedStr)):
+            return None
+        if isinstance(node, ast.Constant) and not isinstance(node.value, (str, bytes)):
+            return None
+        if node.end_lineno is None or node.end_col_offset is None:
+            return None
+        return (
+            source_offset(node.lineno, node.col_offset),
+            source_offset(node.end_lineno, node.end_col_offset),
+        )
+
+    receiver_names = {
+        "con",
+        "conn",
+        "connection",
+        "cursor",
+        "database",
+        "db",
+        "engine",
+        "pool",
+        "session",
+        "statement",
+    }
+
+    def database_receiver(node: ast.AST) -> bool:
+        if isinstance(node, ast.Name):
+            return node.id.casefold() in receiver_names
+        if isinstance(node, ast.Attribute):
+            return node.attr.casefold() in receiver_names
+        return bool(
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr.casefold() == "cursor"
+            and database_receiver(node.func.value)
+        )
+
+    database_methods = {"execute", "executemany", "executescript"}
+    spans: list[tuple[int, int]] = []
+    for node in ast.walk(syntax_tree):
+        if not (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr.casefold() in database_methods
+            and database_receiver(node.func.value)
+        ):
+            continue
+        candidates = list(node.args[:1])
+        if not candidates:
+            candidates.extend(
+                keyword.value
+                for keyword in node.keywords
+                if keyword.arg in {"operation", "query", "sql", "statement"}
+            )
+        spans.extend(
+            span for candidate in candidates if (span := string_span(candidate))
+        )
+    return sorted(set(spans))
+
+
 def python_resource_identifier_spans(
     text: str, offsets: list[int]
 ) -> list[tuple[int, int]]:
@@ -1626,6 +1703,7 @@ def mask_python_code(text: str) -> str:
             python_mapping_key_spans(text, offsets)
             + python_environment_key_spans(text, offsets)
             + python_regular_expression_pattern_spans(text, offsets)
+            + python_database_operation_spans(text, offsets)
             + python_resource_identifier_spans(text, offsets)
             + python_command_argument_spans(text, offsets)
             + token_mapping_key_spans(tokens, offsets)

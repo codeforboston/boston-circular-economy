@@ -1385,6 +1385,28 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_ignores_python_database_operations(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "database.py"
+            path.write_text(
+                'connection.execute("CREATE TABLE places (id TEXT); '
+                'INSERT INTO places VALUES (\'1\');")\n'
+                'cursor.executemany(operation="INSERT INTO places VALUES (?);", '
+                "seq_of_parameters=rows)\n"
+                'database.executescript("DELETE FROM places; VACUUM;")\n'
+                'connection.cursor().execute("SELECT id FROM places; SELECT 1;")\n'
+                'task.execute("Unlock the potential.")\n'
+                'reader_message = "Do not deploy; wait."\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(5, "promotional cliche"), (6, "semicolon")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_checks_components_after_a_path_variable_is_reassigned(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.py"
