@@ -230,6 +230,11 @@ The deployment workflow starts only after a successful push-triggered `CI` workf
 The job resolves live `main` and selects a successful push-CI run for that exact commit.
 It then downloads the artifact by the selected run identifier.
 
+Only successful push-CI completions on `main` share the canceling deployment concurrency
+group. Pull request, manual, and failed CI completions receive groups unique to their
+workflow-run identifiers. They skip reconciliation without canceling an active Pages
+publication.
+
 A stale rerun therefore selects current tested `main`, not its own artifact. If current
 CI is incomplete, the reconciliation stops without an error. Completion of current CI
 starts another reconciliation. A final live-reference check rejects the selected run if

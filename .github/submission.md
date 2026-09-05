@@ -58,6 +58,10 @@ issue existed.
 - Two pull requests at one head commit validate the same record and receive the same result.
 - A missing or unchanged `.github/submission.md` fails before success is published.
 - Module paths and workflow commands remain outside prose checks while reader-facing strings and comments remain inside.
+- Action references remain outside prose checks while action names, nested values, and comments remain inside.
+- Uncommitted review routing unions staged, unstaged, and untracked paths before applying the risk floor.
+- Unrelated CI completions cannot cancel an active qualifying Pages deployment.
+- List-contained code examples cannot satisfy or invalidate submission fields.
 - Red review stops for specialist and human escalation, including ETL credential and secret paths.
 
 ## Evidence
@@ -67,9 +71,9 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | `npm run lint -w server` and `npm run build -w server` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 76 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 82 communication and submission tests |
 | Routing policy | Pass | 32 routing and hook-context tests, policy validation, and model-route samples |
-| Review policy and model routing | Pass | 20 local-runner tests and independent delivery challenges |
+| Review policy and model routing | Pass | 21 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation plus commit-stage and push-stage runs |
 | Workflow syntax | Pass | Actionlint 1.7.11 and YAML parsing |
 | Hosted pull-request CI | Not run | Hosted CI starts after this record enters the commit |

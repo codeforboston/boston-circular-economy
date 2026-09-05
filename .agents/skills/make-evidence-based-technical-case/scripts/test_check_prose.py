@@ -469,6 +469,69 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_ignores_action_references_but_checks_nested_values(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / ".github/workflows/example.yml"
+            path.parent.mkdir(parents=True)
+            path.write_text(
+                "jobs:\n"
+                "  check:\n"
+                "    steps:\n"
+                "    - uses: example/unlock@v1 # Pinned dependency.\n"
+                "    - name: Unlock the potential.\n"
+                "      uses: example/unlock@v1\n"
+                "      with:\n"
+                "        uses: Unlock the potential.\n"
+                "      env:\n"
+                "        uses: Unlock the potential.\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [
+                (5, "promotional cliche"),
+                (8, "promotional cliche"),
+                (10, "promotional cliche"),
+            ],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
+    def test_ignores_flow_step_commands_but_checks_nested_values(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / ".github/workflows/example.yml"
+            path.parent.mkdir(parents=True)
+            path.write_text(
+                "jobs:\n"
+                "  inline:\n"
+                "    steps: [{uses: example/unlock@v1}, {run: echo# Unlock the potential.}]\n"
+                "  multiline:\n"
+                "    steps: &items [\n"
+                "      {uses: example/unlock@v1}, # Unlock the potential. ' comment.\n"
+                "      {run: Unlock the potential.},\n"
+                "      {uses: example/action@v1, with: {uses: Unlock the potential.}}\n"
+                "    ]\n"
+                "  block:\n"
+                "    steps:\n"
+                "      - &step {run: Unlock the potential.}\n"
+                "      - {uses: example/action@v1, with: {uses: Unlock the potential.}}\n"
+                "      - {uses: example/action@v1, env: {uses: Unlock the potential.}}\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [
+                (6, "promotional cliche"),
+                (8, "promotional cliche"),
+                (13, "promotional cliche"),
+                (14, "promotional cliche"),
+            ],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_rejects_contractions_and_long_markdown_sentences(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.md"

@@ -9,7 +9,14 @@ permissions:
   contents: read
 
 concurrency:
-  group: deploy-to-github-pages
+  group: >-
+    ${{
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      'deploy-to-github-pages' ||
+      format('deploy-ignored-{0}', github.event.workflow_run.id)
+    }}
   cancel-in-progress: true
 
 jobs:

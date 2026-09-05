@@ -220,6 +220,10 @@ cannot deploy. A tested commit must still equal current `main` before deployment
 older rerun cannot select its own artifact. The workflow checks again after publication
 and reports whether a newer commit requires a forward deployment.
 
+Only successful main-push completions share the canceling deployment group. Other CI
+completions use isolated groups, skip reconciliation, and cannot cancel an active Pages
+publication.
+
 All third-party GitHub Actions are pinned to full commit SHAs. Workflow tokens receive
 read-only repository access unless a job publishes the fixed submission status or
 deploys through Pages. The submission workflow can write commit statuses but cannot

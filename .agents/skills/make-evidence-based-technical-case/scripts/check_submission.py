@@ -83,8 +83,10 @@ EVIDENCE_HEADER = ("Check", "Result", "Evidence or reason not run")
 ALLOWED_EVIDENCE_RESULTS = {"pass", "fail", "not run", "not affected"}
 SECTION_HEADING = re.compile(r"(?m)^##\s+(.+?)\s*$")
 TRAILING_HEADING_MARKS = re.compile(r"[ \t]+#+[ \t]*$")
-FENCE_START = re.compile(r"^[ ]{0,3}(`{3,}|~{3,})[^\r\n]*$")
-INDENTED_CODE = re.compile(r"^(?: {4}|\t)")
+FENCE_START = re.compile(r"(`{3,}|~{3,})[^\r\n]*$")
+LIST_ITEM_START = re.compile(
+    r"^(?P<indent>[ \t]*)(?:[-+*]|\d{1,9}[.)])(?P<spacing>[ \t]+)"
+)
 EMPTY_MARKDOWN_LINE = re.compile(
     r"(?m)^[ \t]*(?:(?:[-+*]|\d{1,9}[.)])(?:[ \t]+\[[ xX]\])?|"
     r"(?:[*_-][ \t]*){3,}|>+|#{1,6})[ \t]*$"
@@ -159,35 +161,132 @@ def has_meaningful_section_content(content: str) -> bool:
     return any(character.isalnum() for character in without_empty_markdown)
 
 
+def strip_blockquote_markers(content: str, *, container_indent: int = 0) -> str:
+    """Remove quote controls after a container's indentation."""
+
+    prefix_end = 0
+    indentation = 0
+    while prefix_end < len(content) and indentation < container_indent:
+        character = content[prefix_end]
+        if character == " ":
+            indentation += 1
+        elif character == "\t":
+            indentation += 4 - (indentation % 4)
+        else:
+            return content
+        prefix_end += 1
+    if indentation != container_indent:
+        return content
+
+    prefix = content[:prefix_end]
+    remainder = content[prefix_end:]
+    while marker := BLOCKQUOTE_MARKER.match(remainder):
+        marker_text = marker.group(0)
+        leading_spaces = marker_text.index(">")
+        remainder = (" " * leading_spaces) + remainder[marker.end() :]
+    return prefix + remainder
+
+
 def mask_markdown_code_blocks(body: str) -> str:
     """Hide Markdown code blocks so examples cannot satisfy record fields."""
 
     output: list[str] = []
     fence_character: str | None = None
     fence_length = 0
+    fence_container_indent = 0
+    list_indents: list[tuple[int, int]] = []
     for line in body.splitlines(keepends=True):
         content = line.rstrip("\r\n")
-        container_content = content
-        while marker := BLOCKQUOTE_MARKER.match(container_content):
-            container_content = container_content[marker.end() :]
-        if fence_character is None:
-            if INDENTED_CODE.match(container_content):
-                output.append("".join("\n" if value == "\n" else " " for value in line))
+        container_content = strip_blockquote_markers(content)
+        indentation_text = container_content[
+            : len(container_content) - len(container_content.lstrip(" \t"))
+        ]
+        indentation = len(indentation_text.expandtabs(4))
+
+        if fence_character is not None:
+            fence_content = strip_blockquote_markers(
+                container_content,
+                container_indent=fence_container_indent,
+            )
+            fence_stripped = fence_content.lstrip()
+            if (
+                fence_container_indent > 0
+                and container_content.strip()
+                and indentation < fence_container_indent
+            ):
+                fence_character = None
+                fence_length = 0
+                fence_container_indent = 0
+            else:
+                relative_indent = indentation - fence_container_indent
+                if 0 <= relative_indent <= 3 and re.fullmatch(
+                    rf"{re.escape(fence_character)}{{{fence_length},}}[ \t]*",
+                    fence_stripped,
+                ):
+                    fence_character = None
+                    fence_length = 0
+                    fence_container_indent = 0
+                output.append(
+                    "".join("\n" if value == "\n" else " " for value in line)
+                )
                 continue
-            match = FENCE_START.match(container_content)
-            if match is None:
-                output.append(line)
-                continue
-            marker = match.group(1)
+
+        list_item = LIST_ITEM_START.match(container_content)
+        if list_item is not None:
+            marker_indent = len(list_item.group("indent").expandtabs(4))
+            while list_indents and marker_indent <= list_indents[-1][0]:
+                list_indents.pop()
+            content_indent = len(
+                container_content[: list_item.end()].expandtabs(4)
+            )
+            list_indents.append((marker_indent, content_indent))
+        elif content.strip():
+            while list_indents and indentation < list_indents[-1][1]:
+                list_indents.pop()
+
+        container_indent = list_indents[-1][1] if list_indents else 0
+        relative_indent = indentation - container_indent
+        if list_item is not None:
+            fence_candidate = strip_blockquote_markers(
+                container_content[list_item.end() :]
+            )
+            candidate_indent = len(
+                fence_candidate[
+                    : len(fence_candidate) - len(fence_candidate.lstrip(" \t"))
+                ].expandtabs(4)
+            )
+            opening_fence = (
+                FENCE_START.match(fence_candidate.lstrip())
+                if candidate_indent <= 3
+                else None
+            )
+        else:
+            fence_candidate = strip_blockquote_markers(
+                container_content,
+                container_indent=container_indent,
+            )
+            opening_fence = (
+                FENCE_START.match(fence_candidate.lstrip())
+                if 0 <= relative_indent <= 3
+                else None
+            )
+        if opening_fence is not None:
+            marker = opening_fence.group(1)
             fence_character = marker[0]
             fence_length = len(marker)
-        elif re.fullmatch(
-            rf"[ ]{{0,3}}{re.escape(fence_character)}{{{fence_length},}}[ \t]*",
-            container_content,
-        ):
-            fence_character = None
-            fence_length = 0
-        output.append("".join("\n" if value == "\n" else " " for value in line))
+            fence_container_indent = container_indent
+            output.append(
+                "".join("\n" if value == "\n" else " " for value in line)
+            )
+            continue
+
+        code_indent = (list_indents[-1][1] + 4) if list_indents else 4
+        if list_item is None and indentation >= code_indent:
+            output.append(
+                "".join("\n" if value == "\n" else " " for value in line)
+            )
+            continue
+        output.append(line)
     return "".join(output)
 
 

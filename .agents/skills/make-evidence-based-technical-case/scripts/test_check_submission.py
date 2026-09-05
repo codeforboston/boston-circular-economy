@@ -379,6 +379,59 @@ class CheckSubmissionTests(unittest.TestCase):
 
         self.assertEqual(check_submission.check_submission(body), [])
 
+    def test_list_contained_fence_does_not_scan_html(self) -> None:
+        body = VALID_BODY.replace(
+            "- Empty input returns an empty result.",
+            "- Empty input returns an empty result.\n"
+            "  - ~~~~html\n"
+            "    <div>Example only.</div>\n"
+            "    ~~~~\n"
+            "- Visible evidence remains.",
+        )
+
+        self.assertEqual(check_submission.check_submission(body), [])
+
+    def test_nested_list_quote_fence_does_not_scan_html(self) -> None:
+        body = VALID_BODY.replace(
+            "- Empty input returns an empty result.",
+            "- Parent case.\n"
+            "  - > ~~~~html\n"
+            "    > <div>Example only.</div>\n"
+            "    > ~~~~\n"
+            "    Visible evidence remains.",
+        )
+
+        masked = check_submission.mask_markdown_code_blocks(body)
+
+        self.assertNotIn("Example only", masked)
+        self.assertIn("Visible evidence remains", masked)
+        self.assertEqual(check_submission.check_submission(body), [])
+
+    def test_list_contained_fence_cannot_supply_a_missing_section(self) -> None:
+        body = VALID_BODY.replace(
+            "## Claim\n\nResidents can find services under the stated data limits.",
+            "- ```markdown\n"
+            "  ## Claim\n"
+            "  Residents can find services.\n"
+            "  ```",
+        )
+
+        rules = [finding.rule for finding in check_submission.check_submission(body)]
+
+        self.assertIn("missing-section", rules)
+
+    def test_unclosed_list_fence_ends_when_the_list_dedents(self) -> None:
+        body = VALID_BODY.replace(
+            "- Empty input returns an empty result.",
+            "- ```text\n"
+            "  Example only; the fence is intentionally unclosed.",
+        )
+
+        masked = check_submission.mask_markdown_code_blocks(body)
+
+        self.assertNotIn("Example only", masked)
+        self.assertIn("## Evidence", masked)
+
     def test_indented_code_cannot_satisfy_submission_fields(self) -> None:
         body = "\n".join(
             line if line.startswith("## ") or not line else f"    {line}"
@@ -387,7 +440,7 @@ class CheckSubmissionTests(unittest.TestCase):
 
         rules = [finding.rule for finding in check_submission.check_submission(body)]
 
-        self.assertIn("missing-label", rules)
+        self.assertIn("empty-section", rules)
         self.assertIn("accountability", rules)
 
     def test_code_inside_a_blockquote_cannot_fill_a_section(self) -> None:

@@ -120,20 +120,23 @@ def changed_files(
             if value
         ]
 
-    tracked = subprocess.run(
-        [
-            "git",
-            "diff",
-            "--no-renames",
-            "--name-only",
-            "--diff-filter=ACDMRTUXB",
-            "-z",
-            "HEAD",
-        ],
-        cwd=repository,
-        check=True,
-        capture_output=True,
-    )
+    tracked_outputs: list[bytes] = []
+    for comparison in (["--cached"], []):
+        tracked = subprocess.run(
+            [
+                "git",
+                "diff",
+                *comparison,
+                "--no-renames",
+                "--name-only",
+                "--diff-filter=ACDMRTUXB",
+                "-z",
+            ],
+            cwd=repository,
+            check=True,
+            capture_output=True,
+        )
+        tracked_outputs.append(tracked.stdout)
     untracked = subprocess.run(
         ["git", "ls-files", "--others", "--exclude-standard", "-z"],
         cwd=repository,
@@ -143,7 +146,7 @@ def changed_files(
     return sorted(
         {
             value.decode("utf-8", errors="surrogateescape")
-            for value in (tracked.stdout + untracked.stdout).split(b"\0")
+            for value in (b"".join(tracked_outputs) + untracked.stdout).split(b"\0")
             if value
         }
     )

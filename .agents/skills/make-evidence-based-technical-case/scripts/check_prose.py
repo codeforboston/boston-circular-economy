@@ -757,8 +757,32 @@ def unquoted_index(text: str, target: str) -> int | None:
     return None
 
 
-def split_config_comment(text: str) -> tuple[str, str]:
-    comment = unquoted_index(text, "#")
+def yaml_comment_indicator(text: str, index: int, *, value_start: int = 0) -> bool:
+    """Return whether a hash starts a YAML comment at this offset."""
+
+    return text[index] == "#" and (
+        index == value_start or index == 0 or text[index - 1].isspace()
+    )
+
+
+def yaml_comment_index(text: str, start: int = 0, end: int | None = None) -> int | None:
+    """Find a YAML comment indicator outside quoted scalar text."""
+
+    limit = len(text) if end is None else end
+    index = start
+    while index < limit:
+        character = text[index]
+        if character in "'\"":
+            index = skip_yaml_quoted_scalar(text, index, limit)
+            continue
+        if yaml_comment_indicator(text, index, value_start=start):
+            return index
+        index += 1
+    return None
+
+
+def split_config_comment(text: str, *, yaml: bool = False) -> tuple[str, str]:
+    comment = yaml_comment_index(text) if yaml else unquoted_index(text, "#")
     return (text, "") if comment is None else (text[:comment], text[comment:])
 
 
@@ -808,6 +832,133 @@ def mask_inline_mapping_keys(
         index += 1
 
 
+def skip_yaml_quoted_scalar(text: str, start: int, end: int) -> int:
+    """Return the first offset after one YAML quoted scalar."""
+
+    quote = text[start]
+    index = start + 1
+    while index < end:
+        if quote == '"' and text[index] == "\\":
+            index += 2
+            continue
+        if text[index] == quote:
+            if quote == "'" and index + 1 < end and text[index + 1] == "'":
+                index += 2
+                continue
+            return index + 1
+        index += 1
+    return end
+
+
+def skip_yaml_space_and_comments(text: str, start: int, end: int) -> int:
+    """Skip YAML whitespace and full comment suffixes."""
+
+    index = start
+    while index < end:
+        while index < end and text[index].isspace():
+            index += 1
+        if index >= end or text[index] != "#":
+            return index
+        newline = text.find("\n", index, end)
+        index = end if newline == -1 else newline + 1
+    return index
+
+
+def skip_yaml_node_properties(text: str, start: int, end: int) -> int:
+    """Skip anchors and tags that precede a YAML flow collection."""
+
+    index = skip_yaml_space_and_comments(text, start, end)
+    while index < end and text[index] in "&!":
+        index += 1
+        while index < end and not text[index].isspace() and text[index] not in "[{}],":
+            index += 1
+        index = skip_yaml_space_and_comments(text, index, end)
+    return index
+
+
+def mask_action_flow_step_values(
+    text: str,
+    start: int,
+    end: int,
+) -> list[tuple[int, int]]:
+    """Locate direct run and uses values in flow-style action steps."""
+
+    index = skip_yaml_node_properties(text, start, end)
+    if index >= end or text[index] not in "[{":
+        return []
+
+    map_ranges: list[tuple[int, int]] = []
+    containers: list[tuple[str, int | None]] = []
+    pairs = {"[": "]", "{": "}"}
+    root_started = False
+    while index < end:
+        character = text[index]
+        if character in "'\"":
+            index = skip_yaml_quoted_scalar(text, index, end)
+            continue
+        if yaml_comment_indicator(text, index):
+            newline = text.find("\n", index, end)
+            index = end if newline == -1 else newline + 1
+            continue
+        if character in pairs:
+            root_started = True
+            map_start = index if character == "{" and not any(
+                closing == "}" for closing, _ in containers
+            ) else None
+            containers.append((pairs[character], map_start))
+        elif containers and character == containers[-1][0]:
+            closing, map_start = containers.pop()
+            if closing == "}" and map_start is not None:
+                map_ranges.append((map_start + 1, index))
+            if root_started and not containers:
+                break
+        index += 1
+
+    value_spans: list[tuple[int, int]] = []
+    for map_start, map_end in map_ranges:
+        entries: list[tuple[int, int]] = []
+        entry_start = map_start
+        containers = []
+        index = map_start
+        while index < map_end:
+            character = text[index]
+            if character in "'\"":
+                index = skip_yaml_quoted_scalar(text, index, map_end)
+                continue
+            if (
+                character == "#" and yaml_comment_indicator(text, index)
+            ):
+                newline = text.find("\n", index, map_end)
+                index = map_end if newline == -1 else newline + 1
+                continue
+            if character in pairs:
+                containers.append((pairs[character], None))
+            elif containers and character == containers[-1][0]:
+                containers.pop()
+            elif character == "," and not containers:
+                entries.append((entry_start, index))
+                entry_start = index + 1
+            index += 1
+        entries.append((entry_start, map_end))
+
+        for entry_start, entry_end in entries:
+            entry_start = skip_yaml_space_and_comments(
+                text,
+                entry_start,
+                entry_end,
+            )
+            separator = unquoted_index(text[entry_start:entry_end], ":")
+            if separator is None:
+                continue
+            separator += entry_start
+            key = yaml_mapping_key(text[entry_start:separator], separator - entry_start)
+            if key in {"run", "uses"}:
+                comment = yaml_comment_index(text, separator + 1, entry_end)
+                value_end = entry_end if comment is None else comment
+                value_spans.append((separator + 1, value_end))
+    return value_spans
+
+
 def yaml_mapping_key(code: str, separator: int) -> str:
     """Return a normalized key for one block-style YAML mapping entry."""
 
@@ -841,9 +992,10 @@ def mask_yaml_code(text: str, *, mask_actions_commands: bool = False) -> str:
     steps_indent: int | None = None
     step_sequence_indent: int | None = None
     step_mapping_indent: int | None = None
+    action_flow_value_spans: list[tuple[int, int]] = []
     for line in text.splitlines(keepends=True):
         body = line.rstrip("\r\n")
-        code, comment = split_config_comment(body)
+        code, comment = split_config_comment(body, yaml=True)
         indentation = len(code) - len(code.lstrip(" "))
         if block_indent is not None and code.strip() and indentation <= block_indent:
             block_indent = None
@@ -893,7 +1045,9 @@ def mask_yaml_code(text: str, *, mask_actions_commands: bool = False) -> str:
                     step_mapping_indent = indentation
 
                 copy_value = not (
-                    mask_actions_commands and direct_step_key and key == "run"
+                    mask_actions_commands
+                    and direct_step_key
+                    and key in {"run", "uses"}
                 )
                 if copy_value:
                     copy_span(output, text, offset + value_start, offset + len(code))
@@ -904,6 +1058,20 @@ def mask_yaml_code(text: str, *, mask_actions_commands: bool = False) -> str:
                         offset + len(code),
                         ":",
                     )
+                if mask_actions_commands and (
+                    (key == "steps" and not sequence_item)
+                    or (direct_step_key and sequence_item)
+                ):
+                    flow_start = offset + (
+                        value_start
+                        if key == "steps"
+                        else code.index("-") + 1
+                    )
+                    action_flow_value_spans.extend(mask_action_flow_step_values(
+                        text,
+                        flow_start,
+                        len(text),
+                    ))
                 if yaml_block_scalar(code[value_start:]):
                     block_indent = indentation
                     copy_block = copy_value
@@ -925,6 +1093,8 @@ def mask_yaml_code(text: str, *, mask_actions_commands: bool = False) -> str:
             comment_start = len(code)
             copy_span(output, text, offset + comment_start, offset + len(body))
         offset += len(line)
+    for value_start, value_end in action_flow_value_spans:
+        mask_span(output, text, value_start, value_end)
     return "".join(output)
 
 

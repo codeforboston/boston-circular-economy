@@ -259,6 +259,40 @@ class LocalReviewRunnerTests(unittest.TestCase):
         self.assertNotIn("--base", command)
         self.assertNotIn("-", command)
 
+    def test_uncommitted_scope_keeps_staged_paths_restored_in_worktree(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            repository = Path(directory)
+            subprocess.run(["git", "init", "-q"], cwd=repository, check=True)
+            subprocess.run(
+                ["git", "config", "user.email", "review@example.invalid"],
+                cwd=repository,
+                check=True,
+            )
+            subprocess.run(
+                ["git", "config", "user.name", "Review test"],
+                cwd=repository,
+                check=True,
+            )
+            auth_file = repository / "server/src/auth.ts"
+            auth_file.parent.mkdir(parents=True)
+            original = "export const mode = 'public';\n"
+            auth_file.write_text(original, encoding="utf-8")
+            subprocess.run(["git", "add", "."], cwd=repository, check=True)
+            subprocess.run(
+                ["git", "commit", "-qm", "Add auth module"],
+                cwd=repository,
+                check=True,
+            )
+            auth_file.write_text("export const mode = 'admin';\n", encoding="utf-8")
+            subprocess.run(["git", "add", str(auth_file)], cwd=repository, check=True)
+            auth_file.write_text(original, encoding="utf-8")
+
+            files = changed_files("HEAD", "uncommitted", repository=repository)
+            assessment = infer_minimum_risk(files, load_risk_policy())
+
+        self.assertEqual(["server/src/auth.ts"], files)
+        self.assertEqual("red", assessment["risk"])
+
     def test_red_review_requires_escalation(self) -> None:
         completed = subprocess.run(
             [
@@ -372,6 +406,16 @@ class LocalReviewRunnerTests(unittest.TestCase):
         )
 
         self.assertNotIn("github.event.workflow_run.head_sha == github.sha", deployment)
+        self.assertNotIn("  group: deploy-to-github-pages\n", deployment)
+        self.assertIn("github.event.workflow_run.conclusion == 'success'", deployment)
+        self.assertIn("github.event.workflow_run.event == 'push'", deployment)
+        self.assertIn("github.event.workflow_run.head_branch == 'main'", deployment)
+        self.assertIn("'deploy-to-github-pages'", deployment)
+        self.assertIn(
+            "format('deploy-ignored-{0}', github.event.workflow_run.id)",
+            deployment,
+        )
+        self.assertIn("cancel-in-progress: true", deployment)
         self.assertIn("Resolve the successful CI run for current main", deployment)
         self.assertIn('actions/workflows/ci.yml/runs"', deployment)
         self.assertIn('-f head_sha="$current_sha"', deployment)
