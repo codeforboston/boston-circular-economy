@@ -58,6 +58,21 @@ class ProseCheckerTests(unittest.TestCase):
 
         self.assertEqual([], findings)
 
+    def test_inline_code_closes_with_a_matching_backtick_run(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.md"
+            path.write_text(
+                "Use ``don't`` as the literal token.\n"
+                "Do not write ```Unlock ``the`` potential.```\n",
+                encoding="utf-8",
+            )
+
+            editorial = editorial_findings(path)
+            sentence = markdown_findings(path, load_profile(DEFAULT_PROFILE))
+
+        self.assertEqual([], editorial)
+        self.assertEqual([], sentence)
+
     def test_shorter_inner_fence_does_not_close_a_longer_outer_fence(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.md"

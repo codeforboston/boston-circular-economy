@@ -67,7 +67,7 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | `npm run lint -w server` and `npm run build -w server` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 75 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 76 communication and submission tests |
 | Routing policy | Pass | 32 routing and hook-context tests, policy validation, and model-route samples |
 | Review policy and model routing | Pass | 20 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation plus commit-stage and push-stage runs |

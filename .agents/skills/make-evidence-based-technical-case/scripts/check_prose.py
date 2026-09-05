@@ -53,7 +53,6 @@ TEMPORAL_EXEMPT_NAMES = {
 
 WORD = re.compile(r"[A-Za-z0-9]+(?:[-'][A-Za-z0-9]+)*")
 SENTENCE_END = re.compile(r"(?<=[.!?])(?:\s+|$)")
-INLINE_CODE = re.compile(r"`[^`]*`")
 LIST_ITEM_START = re.compile(
     r"^(?P<indent>[ \t]*)(?:[-+*]|\d{1,9}[.)])(?P<spacing>[ \t]+)"
 )
@@ -212,7 +211,6 @@ def prose_files(inputs: list[Path]) -> list[Path]:
 
 def plain_markdown(line: str) -> str:
     text = IMAGE.sub("", line)
-    text = INLINE_CODE.sub(" IDENTIFIER ", text)
     text = LINK.sub(r"\1", text)
     text = URL.sub(" URL ", text)
     text = re.sub(r"^\s*(?:[-+*]|\d+[.)])\s+", "", text)
@@ -994,6 +992,44 @@ def mask_source_code(path: Path, text: str) -> str:
     return text
 
 
+def mask_inline_code(line: str) -> str:
+    """Hide code spans whose closing backtick run matches the opener."""
+
+    output = list(line)
+    cursor = 0
+    while cursor < len(line):
+        opening_start = line.find("`", cursor)
+        if opening_start < 0:
+            break
+        opening_end = opening_start
+        while opening_end < len(line) and line[opening_end] == "`":
+            opening_end += 1
+        delimiter_length = opening_end - opening_start
+
+        search = opening_end
+        closing_end: int | None = None
+        while search < len(line):
+            closing_start = line.find("`", search)
+            if closing_start < 0:
+                break
+            run_end = closing_start
+            while run_end < len(line) and line[run_end] == "`":
+                run_end += 1
+            if run_end - closing_start == delimiter_length:
+                closing_end = run_end
+                break
+            search = run_end
+
+        if closing_end is None:
+            cursor = opening_end
+            continue
+        for index in range(opening_start, closing_end):
+            if output[index] not in "\r\n":
+                output[index] = " "
+        cursor = closing_end
+    return "".join(output)
+
+
 def mask_markdown_code(text: str) -> str:
     """Hide Markdown code while preserving offsets and line numbers."""
 
@@ -1052,7 +1088,7 @@ def mask_markdown_code(text: str) -> str:
         if list_item is None and indentation >= code_indent:
             output.append("".join("\n" if char == "\n" else " " for char in line))
             continue
-        output.append(INLINE_CODE.sub(lambda match: " " * len(match.group(0)), line))
+        output.append(mask_inline_code(line))
     return "".join(output)
 
 
