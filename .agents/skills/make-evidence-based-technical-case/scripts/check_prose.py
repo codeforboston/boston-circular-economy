@@ -274,15 +274,16 @@ def markdown_findings(path: Path, profile: dict[str, object]) -> list[Finding]:
 
     findings: list[Finding] = []
     paragraph: list[tuple[int, str]] = []
-    in_fence = False
     in_frontmatter = False
 
     def flush() -> None:
         findings.extend(paragraph_findings(path, paragraph, profile))
         paragraph.clear()
 
-    for number, raw_line in enumerate(
-        path.read_text(encoding="utf-8").splitlines(), start=1
+    source_text = path.read_text(encoding="utf-8")
+    masked_lines = mask_markdown_code(source_text).splitlines()
+    for number, (raw_line, checked_line) in enumerate(
+        zip(source_text.splitlines(), masked_lines, strict=True), start=1
     ):
         stripped = raw_line.strip()
         if number == 1 and stripped == "---":
@@ -291,15 +292,11 @@ def markdown_findings(path: Path, profile: dict[str, object]) -> list[Finding]:
         if in_frontmatter:
             in_frontmatter = stripped != "---"
             continue
-        if stripped.startswith(("```", "~~~")):
-            in_fence = not in_fence
-            flush()
-            continue
-        if in_fence or not eligible_markdown_line(raw_line):
+        if not eligible_markdown_line(checked_line):
             flush()
             continue
 
-        text = plain_markdown(raw_line)
+        text = plain_markdown(checked_line)
         if not text:
             flush()
             continue

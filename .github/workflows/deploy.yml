@@ -13,12 +13,51 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  reconcile:
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push' &&
-      github.event.workflow_run.head_branch == 'main' &&
-      github.event.workflow_run.head_sha == github.sha
+      github.event.workflow_run.head_branch == 'main'
+    permissions:
+      actions: read
+      contents: read
+    outputs:
+      ready: ${{ steps.source.outputs.ready }}
+      run_id: ${{ steps.source.outputs.run_id }}
+      sha: ${{ steps.source.outputs.sha }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Resolve the successful CI run for current main
+        id: source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          current_sha="$(
+            gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq .object.sha
+          )"
+          run_id="$(
+            gh api -X GET \
+              "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs" \
+              -f branch=main \
+              -f event=push \
+              -f status=success \
+              -f head_sha="$current_sha" \
+              -f per_page=1 \
+              --jq '.workflow_runs[0].id // empty'
+          )"
+          if [[ -z "$run_id" ]]; then
+            echo "::notice::Current main has no successful push CI artifact yet."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+          echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
+          echo "sha=$current_sha" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: reconcile
+    if: needs.reconcile.outputs.ready == 'true'
     environment:
       name: github-pages
       url: ${{ steps.deploy-pages.outputs.page_url }}
@@ -36,7 +75,7 @@ jobs:
           name: github-pages-client
           path: client/dist
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: ${{ github.event.workflow_run.id }}
+          run-id: ${{ needs.reconcile.outputs.run_id }}
       - name: Verify tested client artifact
         run: test -f client/dist/index.html
       - name: Configure Pages
@@ -48,7 +87,7 @@ jobs:
       - name: Confirm tested commit is still current main
         env:
           GH_TOKEN: ${{ github.token }}
-          TESTED_SHA: ${{ github.event.workflow_run.head_sha }}
+          TESTED_SHA: ${{ needs.reconcile.outputs.sha }}
         run: |
           current_sha="$(
             gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq .object.sha
@@ -63,7 +102,7 @@ jobs:
       - name: Detect main advancing during deployment
         env:
           GH_TOKEN: ${{ github.token }}
-          TESTED_SHA: ${{ github.event.workflow_run.head_sha }}
+          TESTED_SHA: ${{ needs.reconcile.outputs.sha }}
         run: |
           current_sha="$(
             gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq .object.sha

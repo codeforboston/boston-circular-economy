@@ -74,6 +74,22 @@ class ProseCheckerTests(unittest.TestCase):
 
         self.assertEqual([], findings)
 
+    def test_sentence_checks_honor_the_longer_outer_fence(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.md"
+            path.write_text(
+                "````markdown\n"
+                "```text\n"
+                "don't scan this code\n"
+                "```\n"
+                "````\n",
+                encoding="utf-8",
+            )
+
+            findings = markdown_findings(path, load_profile(DEFAULT_PROFILE))
+
+        self.assertEqual([], findings)
+
     def test_four_space_marker_does_not_close_a_top_level_fence(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.md"

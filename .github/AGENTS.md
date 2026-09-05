@@ -20,9 +20,11 @@ This file adds review rules for workflows and repository automation. Apply the r
   event triggers, route conditions, and upstream job results before reporting a missing
   artifact.
 - Flag a deployment that can publish an older successful rerun after `main` advances.
-  Safe path: compare the tested commit with current `main` at dispatch and again before
-  deployment. Revalidate after publication so a detected race points to the next tested
-  forward deployment. Put intentional rollback in a separate, human-approved path.
+  Safe path: treat the completion event as a reconciliation signal. Resolve current
+  `main`, select its successful push-CI artifact, and compare that commit with live
+  `main` before deployment. Revalidate after publication so a detected race points to
+  the next tested forward deployment. Put intentional rollback in a separate,
+  human-approved path.
 
 ### Required check continuity
 

@@ -267,6 +267,12 @@ class LocalReviewRunnerTests(unittest.TestCase):
         self.assertNotIn("edited", ci_workflow)
         self.assertNotIn("github.event.action != 'edited'", ci_workflow)
         self.assertIn(
+            "ci-${{ github.workflow }}-${{ github.event_name }}-${{",
+            ci_workflow,
+        )
+        self.assertIn("github.event.pull_request.number || github.sha }}", ci_workflow)
+        self.assertIn("cancel-in-progress: true", ci_workflow)
+        self.assertIn(
             "types: [opened, reopened, synchronize, edited]",
             submission_workflow,
         )
@@ -308,21 +314,25 @@ class LocalReviewRunnerTests(unittest.TestCase):
         self.assertLess(first_live_read, pending_status)
         self.assertLess(final_live_read, final_status)
 
-    def test_deployment_rejects_a_superseded_main_artifact(self) -> None:
+    def test_deployment_reconciles_to_current_tested_main(self) -> None:
         deployment = (ROOT / ".github/workflows/deploy.yml").read_text(
             encoding="utf-8"
         )
 
-        self.assertIn(
-            "github.event.workflow_run.head_sha == github.sha",
-            deployment,
-        )
+        self.assertNotIn("github.event.workflow_run.head_sha == github.sha", deployment)
+        self.assertIn("Resolve the successful CI run for current main", deployment)
+        self.assertIn('actions/workflows/ci.yml/runs"', deployment)
+        self.assertIn('-f head_sha="$current_sha"', deployment)
+        self.assertIn("-f status=success", deployment)
+        self.assertIn("ready=false", deployment)
+        self.assertIn("run-id: ${{ needs.reconcile.outputs.run_id }}", deployment)
+        self.assertEqual(2, deployment.count("needs.reconcile.outputs.sha"))
         self.assertIn(
             'gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main"',
             deployment,
         )
         self.assertEqual(
-            2,
+            3,
             deployment.count(
                 'gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main"'
             ),

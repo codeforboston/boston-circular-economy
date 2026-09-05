@@ -66,9 +66,13 @@ The required check names are `Submission record`, `Prose`, `Frontend`, `Server`,
 `ETL`. A job-level condition reports a successful skip when its subsystem is not
 affected.
 
+The CI concurrency key includes the event kind and the pull request number or exact
+commit. Pull-request revisions can cancel their predecessor. Each main-branch commit
+uses a distinct group, so an older rerun cannot evict CI for the current commit.
+
 The submission workflow has a separate pull-request concurrency group. A description
-edit cancels only an older submission check. It cannot cancel code CI or publish
-replacement application contexts.
+edit joins that serialized group. It cannot cancel code CI or publish replacement
+application contexts.
 
 The read-only `pull_request_target` workflow runs from the default branch and checks
 out only the base revision. It treats pull request metadata as data and never executes
@@ -213,16 +217,21 @@ explain ordinary behavior. This rule avoids comments that repeat implementation 
 
 ## Deployment
 
-The deployment workflow starts only after a successful `CI` workflow. Its condition also
-requires a push event on `main` and requires the tested commit to equal the current
-default-branch commit. A final live-reference check rejects a run if `main` advances
-while the deployment job waits or prepares its artifact. A post-deploy check detects a
-race during publication. The successful CI for the newer commit then starts the next
-serialized deployment.
+The deployment workflow starts only after a successful push-triggered `CI` workflow on
+`main`. The completion event is a reconciliation signal, not the artifact identity.
+The job resolves live `main` and selects a successful push-CI run for that exact commit.
+It then downloads the artifact by the selected run identifier.
+
+A stale rerun therefore selects current tested `main`, not its own artifact. If current
+CI is incomplete, the reconciliation stops without an error. Completion of current CI
+starts another reconciliation. A final live-reference check rejects the selected run if
+`main` advances while the job waits or prepares its artifact. A post-deploy check
+detects a race during publication. The successful CI for the newer commit then starts
+the next serialized deployment.
 
 The `Frontend` job builds and uploads `github-pages-client` during main-branch CI. The
-deployment workflow downloads that artifact by the originating workflow run identifier.
-It does not rebuild the client.
+deployment workflow downloads that artifact from the successful run selected for live
+`main`. It does not rebuild the client.
 
 The deploy job verifies `client/dist/index.html`, packages the Pages artifact, and uses
 the Pages environment. Its token can read Actions and repository contents. It can write
@@ -230,10 +239,10 @@ Pages and request an identity token.
 
 A failed CI run creates no deployment. A missing or expired artifact fails deployment.
 The previous Pages deployment remains the recovery point until another tested artifact
-succeeds. The dispatch guard rejects an older rerun when a newer commit is already
-deployed. A commit that arrives during publication can make the active artifact briefly
-stale. The post-deploy guard reports that state, and the newer successful CI rolls it
-forward. Intentional rollback requires a separate guarded procedure.
+succeeds. A stale completion cannot select its own older artifact. A commit that arrives
+during publication can make the active artifact briefly stale. The post-deploy guard
+reports that state, and the newer successful CI rolls it forward. Intentional rollback
+requires a separate guarded procedure.
 
 ## Change and failure records
 

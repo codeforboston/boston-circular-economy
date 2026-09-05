@@ -420,6 +420,24 @@ class CheckSubmissionTests(unittest.TestCase):
             )
             self.assertEqual(check_submission.body_from_event(path), VALID_BODY)
 
+    def test_disclaimed_or_quoted_attestation_fails(self) -> None:
+        replacements = (
+            f"I cannot attest to this sentence: {ACCOUNTABILITY}",
+            f"> {ACCOUNTABILITY}",
+            f'"{ACCOUNTABILITY}"',
+            f"~~{ACCOUNTABILITY}~~",
+        )
+        for replacement in replacements:
+            with self.subTest(replacement=replacement):
+                body = VALID_BODY.replace(ACCOUNTABILITY, replacement)
+
+                rules = [
+                    finding.rule
+                    for finding in check_submission.check_submission(body)
+                ]
+
+                self.assertIn("accountability", rules)
+
 
 if __name__ == "__main__":
     unittest.main()

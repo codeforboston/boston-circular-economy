@@ -51,6 +51,9 @@ ACCOUNTABILITY = (
     "I read and understand the submitted diff. I verified the evidence above and "
     "remain accountable for the change."
 )
+ACCOUNTABILITY_PARAGRAPH = re.compile(
+    rf"(?m)^[ \t]*{re.escape(ACCOUNTABILITY)}[ \t]*$"
+)
 ISSUE_REFERENCE = re.compile(r"(?im)^\s*(?:closes|fixes|resolves)\s+#\d+\s*$")
 ISSUE_EXCEPTION = re.compile(r"(?im)^\s*issue exception:\s*\S.+$")
 SELECTED_AI_BOX = re.compile(r"(?im)^\s*-\s*\[[xX]]\s+(.+?)\s*$")
@@ -318,7 +321,7 @@ def check_submission(body: str) -> list[SubmissionFinding]:
     evidence_key = normalize_section_name("Evidence")
     if evidence_key in sections:
         findings.extend(evidence_findings(sections[evidence_key]))
-    if ACCOUNTABILITY not in record:
+    if ACCOUNTABILITY_PARAGRAPH.search(record) is None:
         findings.append(
             SubmissionFinding("accountability", "include the submitter attestation")
         )
