@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import io
 import re
 import sys
@@ -464,11 +465,50 @@ def copy_python_string(text: str, output: list[str], start: int, end: int) -> No
     copy_span(output, text, content_end, end)
 
 
+def python_mapping_key_spans(text: str, offsets: list[int]) -> list[tuple[int, int]]:
+    """Locate string-like dictionary keys, which are executable metadata."""
+
+    try:
+        syntax_tree = ast.parse(text)
+    except SyntaxError:
+        return []
+
+    lines = text.splitlines(keepends=True)
+
+    def source_offset(line: int, byte_column: int) -> int:
+        line_prefix = lines[line - 1].encode("utf-8")[:byte_column]
+        character_column = len(line_prefix.decode("utf-8"))
+        return offsets[line - 1] + character_column
+
+    spans: list[tuple[int, int]] = []
+    for node in ast.walk(syntax_tree):
+        if not isinstance(node, ast.Dict):
+            continue
+        for key in node.keys:
+            if key is None or not isinstance(key, (ast.Constant, ast.JoinedStr)):
+                continue
+            if isinstance(key, ast.Constant) and not isinstance(
+                key.value, (str, bytes)
+            ):
+                continue
+            if key.end_lineno is None or key.end_col_offset is None:
+                continue
+            spans.append(
+                (
+                    source_offset(key.lineno, key.col_offset),
+                    source_offset(key.end_lineno, key.end_col_offset),
+                )
+            )
+    return sorted(spans)
+
+
 def mask_python_code(text: str) -> str:
     """Keep Python comments and string text, but hide executable identifiers."""
 
     output = list(blank_like(text))
     offsets = line_offsets(text)
+    mapping_key_spans = python_mapping_key_spans(text, offsets)
+    mapping_key_index = 0
     fstring_start = getattr(tokenize, "FSTRING_START", None)
     fstring_middle = getattr(tokenize, "FSTRING_MIDDLE", None)
     fstring_end = getattr(tokenize, "FSTRING_END", None)
@@ -477,6 +517,18 @@ def mask_python_code(text: str) -> str:
         for token in tokenize.generate_tokens(io.StringIO(text).readline):
             start = position_offset(offsets, token.start)
             end = position_offset(offsets, token.end)
+            while (
+                mapping_key_index < len(mapping_key_spans)
+                and mapping_key_spans[mapping_key_index][1] <= start
+            ):
+                mapping_key_index += 1
+            inside_mapping_key = (
+                mapping_key_index < len(mapping_key_spans)
+                and mapping_key_spans[mapping_key_index][0] <= start
+                and end <= mapping_key_spans[mapping_key_index][1]
+            )
+            if inside_mapping_key:
+                continue
             if fstring_start is not None and token.type == fstring_start:
                 fstring_depth += 1
                 if fstring_depth == 1:

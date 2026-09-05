@@ -113,6 +113,12 @@ jobs:
         run: npm run lint -w client
       - name: Build client
         run: npm run build -w client
+      - name: Verify generated client files are current
+        run: |
+          if test -n "$(git status --porcelain=v1 --untracked-files=all -- client)"; then
+            git status --short -- client
+            exit 1
+          fi
       - name: Save tested client artifact
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

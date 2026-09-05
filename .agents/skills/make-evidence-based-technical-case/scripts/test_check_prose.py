@@ -394,6 +394,27 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_ignores_python_mapping_keys_but_checks_string_values(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.py"
+            path.write_text(
+                'unicode_keys = {"café": 1, "unlock": value}\n'
+                "payload = {\n"
+                '    "unlock": value,\n'
+                '    f"robust-{kind}": value,\n'
+                '    b"scalable": value,\n'
+                '    "label": "Unlock the potential.",\n'
+                "}\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(6, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_ignores_yaml_and_toml_keys_but_checks_values_and_comments(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             yaml_path = Path(directory) / "example.yaml"
