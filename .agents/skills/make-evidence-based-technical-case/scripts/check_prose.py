@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import ast
 import io
+import json
 import re
 import sys
 import tokenize
@@ -19,6 +20,7 @@ SCANNED_SUFFIXES = {
     ".cjs",
     ".js",
     ".jsx",
+    ".json",
     ".md",
     ".mjs",
     ".py",
@@ -502,51 +504,118 @@ def python_mapping_key_spans(text: str, offsets: list[int]) -> list[tuple[int, i
     return sorted(spans)
 
 
+def token_mapping_key_spans(
+    tokens: list[tokenize.TokenInfo], offsets: list[int]
+) -> list[tuple[int, int]]:
+    """Recover string-key spans when incomplete Python has no syntax tree."""
+
+    ignored = {
+        tokenize.COMMENT,
+        tokenize.DEDENT,
+        tokenize.INDENT,
+        tokenize.NEWLINE,
+        tokenize.NL,
+    }
+    fstring_start = getattr(tokenize, "FSTRING_START", None)
+    fstring_end = getattr(tokenize, "FSTRING_END", None)
+    spans: list[tuple[int, int]] = []
+
+    def previous_significant(index: int) -> int:
+        index -= 1
+        while index >= 0 and tokens[index].type in ignored:
+            index -= 1
+        return index
+
+    for colon_index, token in enumerate(tokens):
+        if token.type != tokenize.OP or token.string != ":":
+            continue
+        end_index = previous_significant(colon_index)
+        if end_index < 0:
+            continue
+
+        start_index = end_index
+        if tokens[end_index].type == tokenize.STRING:
+            while True:
+                candidate = previous_significant(start_index)
+                if candidate < 0 or tokens[candidate].type != tokenize.STRING:
+                    break
+                start_index = candidate
+        elif fstring_end is not None and tokens[end_index].type == fstring_end:
+            depth = 1
+            candidate = end_index
+            while depth and candidate > 0:
+                candidate -= 1
+                if tokens[candidate].type == fstring_end:
+                    depth += 1
+                elif tokens[candidate].type == fstring_start:
+                    depth -= 1
+            if depth:
+                continue
+            start_index = candidate
+        else:
+            continue
+
+        spans.append(
+            (
+                position_offset(offsets, tokens[start_index].start),
+                position_offset(offsets, tokens[end_index].end),
+            )
+        )
+    return sorted(spans)
+
+
 def mask_python_code(text: str) -> str:
     """Keep Python comments and string text, but hide executable identifiers."""
 
     output = list(blank_like(text))
     offsets = line_offsets(text)
-    mapping_key_spans = python_mapping_key_spans(text, offsets)
+    tokens: list[tokenize.TokenInfo] = []
+    try:
+        tokens.extend(tokenize.generate_tokens(io.StringIO(text).readline))
+    except (IndentationError, tokenize.TokenError):
+        # Keep the tokens produced before an incomplete construct stopped parsing.
+        pass
+    mapping_key_spans = sorted(
+        set(
+            python_mapping_key_spans(text, offsets)
+            + token_mapping_key_spans(tokens, offsets)
+        )
+    )
     mapping_key_index = 0
     fstring_start = getattr(tokenize, "FSTRING_START", None)
     fstring_middle = getattr(tokenize, "FSTRING_MIDDLE", None)
     fstring_end = getattr(tokenize, "FSTRING_END", None)
     fstring_depth = 0
-    try:
-        for token in tokenize.generate_tokens(io.StringIO(text).readline):
-            start = position_offset(offsets, token.start)
-            end = position_offset(offsets, token.end)
-            while (
-                mapping_key_index < len(mapping_key_spans)
-                and mapping_key_spans[mapping_key_index][1] <= start
-            ):
-                mapping_key_index += 1
-            inside_mapping_key = (
-                mapping_key_index < len(mapping_key_spans)
-                and mapping_key_spans[mapping_key_index][0] <= start
-                and end <= mapping_key_spans[mapping_key_index][1]
-            )
-            if inside_mapping_key:
-                continue
-            if fstring_start is not None and token.type == fstring_start:
-                fstring_depth += 1
-                if fstring_depth == 1:
-                    copy_span(output, text, start, end)
-            elif fstring_middle is not None and token.type == fstring_middle:
-                if fstring_depth == 1:
-                    copy_span(output, text, start, end)
-            elif fstring_end is not None and token.type == fstring_end:
-                if fstring_depth == 1:
-                    copy_span(output, text, start, end)
-                fstring_depth -= 1
-            elif token.type == tokenize.STRING and fstring_depth == 0:
-                copy_python_string(text, output, start, end)
-            elif token.type == tokenize.COMMENT and fstring_depth == 0:
+    for token in tokens:
+        start = position_offset(offsets, token.start)
+        end = position_offset(offsets, token.end)
+        while (
+            mapping_key_index < len(mapping_key_spans)
+            and mapping_key_spans[mapping_key_index][1] <= start
+        ):
+            mapping_key_index += 1
+        inside_mapping_key = (
+            mapping_key_index < len(mapping_key_spans)
+            and mapping_key_spans[mapping_key_index][0] <= start
+            and end <= mapping_key_spans[mapping_key_index][1]
+        )
+        if inside_mapping_key:
+            continue
+        if fstring_start is not None and token.type == fstring_start:
+            fstring_depth += 1
+            if fstring_depth == 1:
                 copy_span(output, text, start, end)
-    except (IndentationError, tokenize.TokenError):
-        # Preserve recognized reader text without falling back to raw identifiers.
-        pass
+        elif fstring_middle is not None and token.type == fstring_middle:
+            if fstring_depth == 1:
+                copy_span(output, text, start, end)
+        elif fstring_end is not None and token.type == fstring_end:
+            if fstring_depth == 1:
+                copy_span(output, text, start, end)
+            fstring_depth -= 1
+        elif token.type == tokenize.STRING and fstring_depth == 0:
+            copy_python_string(text, output, start, end)
+        elif token.type == tokenize.COMMENT and fstring_depth == 0:
+            copy_span(output, text, start, end)
     return "".join(output)
 
 
@@ -835,9 +904,7 @@ def mask_javascript_code(
                     continue
         if character.isalpha() or character in "_$":
             end = index + 1
-            while end < len(text) and (
-                text[end].isalnum() or text[end] in "_$"
-            ):
+            while end < len(text) and (text[end].isalnum() or text[end] in "_$"):
                 end += 1
             remember_javascript_token(tokens, text[index:end])
             index = end
@@ -1020,9 +1087,12 @@ def mask_action_flow_step_values(
             continue
         if character in pairs:
             root_started = True
-            map_start = index if character == "{" and not any(
-                closing == "}" for closing, _ in containers
-            ) else None
+            map_start = (
+                index
+                if character == "{"
+                and not any(closing == "}" for closing, _ in containers)
+                else None
+            )
             containers.append((pairs[character], map_start))
         elif containers and character == containers[-1][0]:
             closing, map_start = containers.pop()
@@ -1043,9 +1113,7 @@ def mask_action_flow_step_values(
             if character in "'\"":
                 index = skip_yaml_quoted_scalar(text, index, map_end)
                 continue
-            if (
-                character == "#" and yaml_comment_indicator(text, index)
-            ):
+            if character == "#" and yaml_comment_indicator(text, index):
                 newline = text.find("\n", index, map_end)
                 index = map_end if newline == -1 else newline + 1
                 continue
@@ -1095,8 +1163,7 @@ def yaml_block_scalar(value: str) -> bool:
     while tokens and tokens[0].startswith(("&", "!")):
         tokens.pop(0)
     return bool(
-        tokens
-        and re.fullmatch(r"[|>](?:[1-9][+-]?|[+-][1-9]?|[+-]?)", tokens[0])
+        tokens and re.fullmatch(r"[|>](?:[1-9][+-]?|[+-][1-9]?|[+-]?)", tokens[0])
     )
 
 
@@ -1163,9 +1230,7 @@ def mask_yaml_code(text: str, *, mask_actions_commands: bool = False) -> str:
                     step_mapping_indent = indentation
 
                 copy_value = not (
-                    mask_actions_commands
-                    and direct_step_key
-                    and key in {"run", "uses"}
+                    mask_actions_commands and direct_step_key and key in {"run", "uses"}
                 )
                 if copy_value:
                     copy_span(output, text, offset + value_start, offset + len(code))
@@ -1181,15 +1246,15 @@ def mask_yaml_code(text: str, *, mask_actions_commands: bool = False) -> str:
                     or (direct_step_key and sequence_item)
                 ):
                     flow_start = offset + (
-                        value_start
-                        if key == "steps"
-                        else code.index("-") + 1
+                        value_start if key == "steps" else code.index("-") + 1
                     )
-                    action_flow_value_spans.extend(mask_action_flow_step_values(
-                        text,
-                        flow_start,
-                        len(text),
-                    ))
+                    action_flow_value_spans.extend(
+                        mask_action_flow_step_values(
+                            text,
+                            flow_start,
+                            len(text),
+                        )
+                    )
                 if yaml_block_scalar(code[value_start:]):
                     block_indent = indentation
                     copy_block = copy_value
@@ -1253,6 +1318,100 @@ def mask_toml_code(text: str) -> str:
     return "".join(output)
 
 
+JSON_TOKEN = re.compile(r'"(?:\\.|[^"\\])*"|[{}\[\]:,]')
+JSON_PROSE_FIELDS = {
+    "acceptance",
+    "constraints",
+    "contents",
+    "format",
+    "handoff",
+    "in_scope",
+    "journey",
+    "learning_check",
+    "objective",
+    "out_of_scope",
+    "owner_role",
+    "prompt",
+    "purpose",
+    "reviewer_roles",
+    "title",
+}
+
+
+def assignment_manifest_json(path: Path) -> bool:
+    """Return whether a JSON file contains one reader-facing work assignment."""
+
+    parts = path.parts
+    in_work_units = any(
+        parts[index : index + 2] == ("docs", "work-units")
+        for index in range(len(parts) - 1)
+    )
+    return in_work_units and re.fullmatch(r"ui-[0-9]{3}\.json", path.name) is not None
+
+
+def mask_assignment_json(text: str) -> str:
+    """Keep reader-facing assignment values while hiding JSON controls and metadata."""
+
+    try:
+        json.loads(text)
+    except json.JSONDecodeError:
+        return text
+
+    output = list(blank_like(text))
+    containers: list[dict[str, object]] = []
+
+    def value_is_prose() -> bool:
+        if not containers:
+            return False
+        container = containers[-1]
+        inherited = bool(container["prose"])
+        if container["kind"] == "array":
+            return inherited
+        key = container["key"]
+        return inherited or isinstance(key, str) and key in JSON_PROSE_FIELDS
+
+    for token in JSON_TOKEN.finditer(text):
+        value = token.group(0)
+        if value == "{":
+            containers.append(
+                {
+                    "kind": "object",
+                    "key": None,
+                    "prose": value_is_prose(),
+                    "waiting_for_key": True,
+                }
+            )
+        elif value == "[":
+            containers.append(
+                {
+                    "kind": "array",
+                    "key": None,
+                    "prose": value_is_prose(),
+                    "waiting_for_key": False,
+                }
+            )
+        elif value in {"}", "]"}:
+            if containers:
+                containers.pop()
+        elif value == ",":
+            if containers and containers[-1]["kind"] == "object":
+                containers[-1]["key"] = None
+                containers[-1]["waiting_for_key"] = True
+        elif value == ":":
+            if containers and containers[-1]["kind"] == "object":
+                containers[-1]["waiting_for_key"] = False
+        elif value.startswith('"'):
+            if (
+                containers
+                and containers[-1]["kind"] == "object"
+                and containers[-1]["waiting_for_key"]
+            ):
+                containers[-1]["key"] = json.loads(value)
+            elif value_is_prose():
+                copy_span(output, text, token.start(), token.end())
+    return "".join(output)
+
+
 def github_actions_yaml(path: Path) -> bool:
     """Return whether a YAML path defines a GitHub workflow or action."""
 
@@ -1277,6 +1436,10 @@ def mask_source_code(path: Path, text: str) -> str:
         return mask_yaml_code(text, mask_actions_commands=github_actions_yaml(path))
     if suffix == ".toml":
         return mask_toml_code(text)
+    if suffix == ".json":
+        if assignment_manifest_json(path):
+            return mask_assignment_json(text)
+        return blank_like(text)
     return text
 
 

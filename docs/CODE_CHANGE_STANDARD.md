@@ -33,16 +33,20 @@ The submission record must contain:
 Select exactly one Green, Yellow, or Red lane in `Risk and scope`. Keep all seven
 standard `Evidence` rows. Use Pass, Fail, Not run, or Not affected for each result.
 
-The `Submission record` job checks the required sections, labels, risk lane, issue
+The `Submission record v1` job checks the required sections, labels, risk lane, issue
 reference, AI disclosure, and submitter attestation. The `Prose` CI job checks selected
 language rules in repository files.
 
-`Submission record` is a commit status, so its evidence must also belong to the commit.
+`Submission record v1` is a commit status, so its evidence must also belong to the commit.
 The trusted workflow fetches `.github/submission.md` from the exact head as inert data
 and requires its blob to differ from the head's first parent. The final head commit must
 therefore update the record. Two pull requests at one head use the same record and
 receive the same result, even when their bases differ. Human approval remains a
 separate judgment because a cosmetic edit can satisfy the blob check.
+
+The v1 context freezes its trusted workflow and checker semantics. Change the context
+version before changing either boundary. Migrate the protected-branch rule, then retire
+the earlier context after active pull requests use the new policy.
 
 CI cannot decide whether the stated rationale is true or complete. The contributor and
 human reviewer must compare the explanation with the implementation and evidence.

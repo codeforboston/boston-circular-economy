@@ -12,7 +12,7 @@ at `32a4650af13f927fad78bc89206a738796807277`.
 |---|---|---|
 | Repository and coordination | `codeforboston/boston-circular-economy` and [#circular-economy](https://cfb-public.slack.com/archives/C0AFA66CE2W) | Recheck claims before assigning work |
 | Code checks | [CI run 33932942639](https://github.com/codeforboston/boston-circular-economy/actions/runs/33932942639) passed routing, prose, frontend, server, and ETL jobs | Successful CI on the merged main commit |
-| Submission status | Versioned workflow and local validator | A subsequent PR must emit `Submission record` from the main-branch policy |
+| Submission status | Versioned workflow and local validator | A subsequent PR must emit `Submission record v1` from the main-branch policy |
 | Required checks | [Ruleset 12887631](https://github.com/codeforboston/boston-circular-economy/rules/12887631) requires human approval but has no required-status rule | Admin adds and reads back the five required contexts |
 | Deployment | Main contains the earlier Pages workflow | The tested main artifact reaches Pages through the replacement workflow |
 | Agent review | Local runner and managed-review instructions exist | Observe a completed review on a representative PR |
@@ -29,18 +29,18 @@ not prove GitHub event delivery or status permissions.
 4. Confirm `Deploy to GitHub Pages` downloads that CI run's `github-pages-client` artifact.
 5. Check the published page and record the CI run, deployment run, commit, and artifact identifiers.
 6. Open the first agreed work unit as a draft PR from the merged `main`.
-7. Update `.github/submission.md` in the final head commit, then confirm `Submission record` succeeds.
+7. Update `.github/submission.md` in the final head commit, then confirm `Submission record v1` succeeds.
 8. An administrator adds the five contexts to `Protect Main Branch` and reads back the rule.
 9. Require branches to be up to date, then verify the merge box requires those contexts and the existing human approval.
 10. Configure managed review and observe one completed review before declaring that integration active.
 
 `Submission` responds to pull request events, not main pushes. Do not wait for
-`Submission record` on the pilot's main-branch CI run. It first becomes available
+`Submission record v1` on the pilot's main-branch CI run. It first becomes available
 on a subsequent PR after the trusted policy enters `main`.
 
 Require these exact context names:
 
-- `Submission record`
+- `Submission record v1`
 - `Prose`
 - `Frontend`
 - `Server`
@@ -68,11 +68,11 @@ defect before human review.
 
 | Exercise | Expected observation |
 |---|---|
-| Remove one required field from `.github/submission.md`, commit, then restore it in another commit | `Submission record` fails and later succeeds on the respective revisions |
+| Remove one required field from `.github/submission.md`, commit, then restore it in another commit | `Submission record v1` fails and later succeeds on the respective revisions |
 | Edit only the PR description | No submission or application result changes because the record belongs to the commit |
 | Open two pull requests at the same head commit | Both use the same committed record and receive the same submission result |
 | Give those pull requests different base commits | Both retain the same head-bound submission result |
-| Leave `.github/submission.md` unchanged from the head's first parent | `Submission record` fails before publishing success |
+| Leave `.github/submission.md` unchanged from the head's first parent | `Submission record v1` fails before publishing success |
 | Push a documented lint violation, then repair it | The affected application job fails and succeeds on the respective revisions |
 | Open a docs-only PR after the pilot merges | Named application jobs skip successfully and prose still runs |
 | Inspect a PR CI run | It publishes no Pages artifact or deployment |

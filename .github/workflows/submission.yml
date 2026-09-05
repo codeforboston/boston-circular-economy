@@ -1,7 +1,8 @@
 name: Submission
 
-# The validated record is part of the head commit. A shared head therefore has one
-# record and one correct commit-scoped result, independent of pull request metadata.
+# Version 1 is immutable. A change to its validation semantics requires a new status
+# context and a protected-branch migration. This rule prevents checker revisions from
+# publishing different results to one shared head commit.
 
 on:
   pull_request_target:
@@ -19,7 +20,7 @@ concurrency:
 
 jobs:
   record:
-    name: Submission policy
+    name: Submission policy v1
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -27,7 +28,7 @@ jobs:
         if: github.event_name == 'pull_request_target'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.pull_request.base.sha }}
+          ref: ${{ github.workflow_sha }}
           persist-credentials: false
       - name: Set up Python
         if: github.event_name == 'pull_request_target'
@@ -39,7 +40,7 @@ jobs:
         id: check
         continue-on-error: true
         env:
-          CONTEXT: Submission record
+          CONTEXT: Submission record v1
           EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
@@ -93,7 +94,7 @@ jobs:
         continue-on-error: true
         env:
           CHECK_OUTCOME: ${{ steps.check.outcome }}
-          CONTEXT: Submission record
+          CONTEXT: Submission record v1
           EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}

@@ -95,9 +95,7 @@ def effective_risk(declared: str, inferred: str) -> str:
     return max((declared, inferred), key=RISK_ORDER.__getitem__)
 
 
-def changed_files(
-    base: str, scope: str, *, repository: Path = ROOT
-) -> list[str]:
+def changed_files(base: str, scope: str, *, repository: Path = ROOT) -> list[str]:
     """Return review paths, including both sides of cross-path renames."""
 
     if scope == "branch":

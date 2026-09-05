@@ -6,8 +6,7 @@
     ".github/pull_request_template.md",
     "CONTRIBUTING.md",
     "README.md",
-    "docs/*.md",
-    "docs/**/*.md"
+    "docs/**"
   ],
   "yellow_paths": [
     ".agents/**",

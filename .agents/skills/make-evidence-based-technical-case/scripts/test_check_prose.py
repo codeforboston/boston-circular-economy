@@ -77,11 +77,7 @@ class ProseCheckerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.md"
             path.write_text(
-                "````markdown\n"
-                "```text\n"
-                "unlock the potential\n"
-                "```\n"
-                "````\n",
+                "````markdown\n```text\nunlock the potential\n```\n````\n",
                 encoding="utf-8",
             )
 
@@ -93,11 +89,7 @@ class ProseCheckerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.md"
             path.write_text(
-                "````markdown\n"
-                "```text\n"
-                "don't scan this code\n"
-                "```\n"
-                "````\n",
+                "````markdown\n```text\ndon't scan this code\n```\n````\n",
                 encoding="utf-8",
             )
 
@@ -109,10 +101,7 @@ class ProseCheckerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.md"
             path.write_text(
-                "```text\n"
-                "    ```\n"
-                "Unlock the potential.\n"
-                "```\n",
+                "```text\n    ```\nUnlock the potential.\n```\n",
                 encoding="utf-8",
             )
 
@@ -124,10 +113,7 @@ class ProseCheckerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.md"
             path.write_text(
-                "- Example:\n\n"
-                "  ```text\n"
-                "  Unlock the potential.\n"
-                "  ```\n",
+                "- Example:\n\n  ```text\n  Unlock the potential.\n  ```\n",
                 encoding="utf-8",
             )
 
@@ -139,9 +125,7 @@ class ProseCheckerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.md"
             path.write_text(
-                "- ~~~text\n"
-                "  don't scan this example\n"
-                "  ~~~\n",
+                "- ~~~text\n  don't scan this example\n  ~~~\n",
                 encoding="utf-8",
             )
 
@@ -172,9 +156,7 @@ class ProseCheckerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.md"
             path.write_text(
-                "Example output:\n\n"
-                "    unlock the potential\n"
-                "\trobust and scalable\n",
+                "Example output:\n\n    unlock the potential\n\trobust and scalable\n",
                 encoding="utf-8",
             )
 
@@ -210,8 +192,7 @@ class ProseCheckerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.md"
             path.write_text(
-                "- Result:\n"
-                "    Unlock the potential.\n",
+                "- Result:\n    Unlock the potential.\n",
                 encoding="utf-8",
             )
 
@@ -294,7 +275,7 @@ class ProseCheckerTests(unittest.TestCase):
             path.write_text(
                 'app.get("/unlock", handler);\n'
                 'router.post("powerful", handler);\n'
-                'const route = createFileRoute(`/robust/${routeId}`);\n'
+                "const route = createFileRoute(`/robust/${routeId}`);\n"
                 'const url = "https://example.com/scalable";\n'
                 'const title = "Unlock the potential.";\n'
                 'export const link = <a href="/unlock">Unlock the potential.</a>;\n',
@@ -412,6 +393,56 @@ class ProseCheckerTests(unittest.TestCase):
 
         self.assertEqual(
             [(6, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
+    def test_incomplete_python_masks_mapping_keys_and_checks_reader_text(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.py"
+            path.write_text(
+                "payload = {\n"
+                '    "unlock": value,\n'
+                '    f"robust-{kind}": value,\n'
+                '    b"scalable": value,\n'
+                '    "nested": {"unlock": value},\n'
+                '    "label": "Unlock the potential.",\n'
+                "    # Unlock the potential for maintainers.\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [
+                (6, "promotional cliche"),
+                (7, "promotional cliche"),
+            ],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
+    def test_scans_assignment_json_values_but_not_machine_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            work_units = Path(directory) / "docs" / "work-units"
+            work_units.mkdir(parents=True)
+            path = work_units / "ui-999.json"
+            path.write_text(
+                "{\n"
+                '  "id": "UI-999",\n'
+                '  "status": "robust",\n'
+                '  "reference": "/unlock",\n'
+                '  "objective": "Unlock the potential for residents.",\n'
+                '  "constraints": ["Do not use a game-changing claim."]\n'
+                "}\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [
+                (5, "promotional cliche"),
+                (6, "promotional cliche"),
+            ],
             [(finding.line, finding.rule) for finding in findings],
         )
 

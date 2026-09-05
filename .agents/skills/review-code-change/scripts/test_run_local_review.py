@@ -228,6 +228,13 @@ class LocalReviewRunnerTests(unittest.TestCase):
 
         self.assertEqual("green", assessment["risk"])
 
+    def test_documentation_manifest_keeps_green_review(self) -> None:
+        assessment = infer_minimum_risk(
+            ["docs/work-units/ui-001.json"], load_risk_policy()
+        )
+
+        self.assertEqual("green", assessment["risk"])
+
     def test_cross_boundary_rename_reviews_both_paths(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             repository = Path(directory)
@@ -372,8 +379,8 @@ class LocalReviewRunnerTests(unittest.TestCase):
             "types: [opened, reopened, synchronize]",
             submission_workflow,
         )
-        self.assertIn("name: Submission policy", submission_workflow)
-        self.assertIn("CONTEXT: Submission record", submission_workflow)
+        self.assertIn("name: Submission policy v1", submission_workflow)
+        self.assertEqual(2, submission_workflow.count("CONTEXT: Submission record v1"))
         self.assertNotIn("merge_group:", submission_workflow)
         self.assertIn(
             "group: submission-${{ github.event.pull_request.head.sha",
@@ -381,10 +388,8 @@ class LocalReviewRunnerTests(unittest.TestCase):
         )
         self.assertIn("pull_request_target:", submission_workflow)
         self.assertNotIn("\n  pull_request:\n", submission_workflow)
-        self.assertIn(
-            "ref: ${{ github.event.pull_request.base.sha }}",
-            submission_workflow,
-        )
+        self.assertIn("ref: ${{ github.workflow_sha }}", submission_workflow)
+        self.assertNotIn("github.event.pull_request.base.sha", submission_workflow)
         self.assertIn("persist-credentials: false", submission_workflow)
         self.assertIn("pull-requests: read", submission_workflow)
         self.assertIn("statuses: write", submission_workflow)
@@ -407,7 +412,9 @@ class LocalReviewRunnerTests(unittest.TestCase):
             "contents/.github/submission.md?ref=$HEAD_PARENT_SHA",
             submission_workflow,
         )
-        self.assertIn("contents/.github/submission.md?ref=$HEAD_SHA", submission_workflow)
+        self.assertIn(
+            "contents/.github/submission.md?ref=$HEAD_SHA", submission_workflow
+        )
         self.assertIn("check_submission_freshness.py", submission_workflow)
         self.assertIn("--print-first-parent", submission_workflow)
         self.assertIn("--parent-record-json", submission_workflow)
@@ -431,9 +438,7 @@ class LocalReviewRunnerTests(unittest.TestCase):
         self.assertLess(final_live_read, final_status)
 
     def test_deployment_reconciles_to_current_tested_main(self) -> None:
-        deployment = (ROOT / ".github/workflows/deploy.yml").read_text(
-            encoding="utf-8"
-        )
+        deployment = (ROOT / ".github/workflows/deploy.yml").read_text(encoding="utf-8")
 
         self.assertNotIn("github.event.workflow_run.head_sha == github.sha", deployment)
         self.assertNotIn("  group: deploy-to-github-pages\n", deployment)
@@ -459,9 +464,7 @@ class LocalReviewRunnerTests(unittest.TestCase):
         )
         self.assertEqual(
             3,
-            deployment.count(
-                'gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main"'
-            ),
+            deployment.count('gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main"'),
         )
         self.assertIn('if [[ "$TESTED_SHA" != "$current_sha" ]]', deployment)
         self.assertIn("Detect main advancing during deployment", deployment)

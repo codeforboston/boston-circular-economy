@@ -19,9 +19,9 @@ issue existed.
 
 ## Decision explanation
 
-- Why this design: One versioned path policy selects checks for local hooks and CI. A committed record makes the submission result a property of the reviewed commit. The server workspace declares the dependency owned by its database module.
-- Why not the closest alternative: A mutable pull request body can differ between pull requests that share one commit status. Omitting SQLite leaves the server's clean-install contract incomplete.
-- Trade-off accepted: The final head commit must update one versioned record. Native SQLite adds a platform dependency and expands the locked dependency graph.
+- Why this design: One versioned path policy selects checks for local hooks and CI. A committed record and immutable status version make submission results commit-bound. The server workspace declares the dependency owned by its database module.
+- Why not the closest alternative: A mutable pull request body can differ between pull requests that share one status. Reusing a status context across checker revisions can also conflict. Omitting SQLite leaves the server's clean-install contract incomplete.
+- Trade-off accepted: The final head commit must update one versioned record. A submission-policy change requires a new status context and branch-rule migration. Native SQLite adds a platform dependency.
 - Revisit when: Use a PR-scoped check when the repository plan supports one. Revisit SQLite when the server selects its production persistence design.
 
 ## Code quality
@@ -45,6 +45,7 @@ issue existed.
 - Add a tested changed-file router that fails closed for unknown paths and policy changes.
 - Add local commit and push hooks that consume the same routing policy.
 - Add a committed submission record for rationale, alternatives, risk, evidence, and accountability.
+- Version the trusted submission status and bind helper checkout to the exact workflow revision.
 - Add code-change standards for ownership, failure, recovery, and refactor boundaries.
 - Add capability defaults for deterministic tools, Luna, Terra, Sol, specialists, and humans.
 - Add self-explanatory implementation and independent review skills.
@@ -54,6 +55,7 @@ issue existed.
 - Add the pinned ETL lint toolchain and format existing ETL code without changing its data contracts.
 - Deploy the exact client artifact produced by successful main-branch CI.
 - Import and extend the Library of Context communication layer with Toulmin and ASD-STE100-aligned guidance.
+- Scan reader-facing assignment-manifest values while excluding machine-only JSON metadata.
 
 ## Challenge cases
 
@@ -63,12 +65,16 @@ issue existed.
 - Pull-request CI cannot satisfy the deployment condition.
 - A mutable pull request description cannot alter the committed submission result.
 - Two pull requests at one head commit receive the same result, even when their bases differ.
+- Different trusted checker revisions cannot publish to the same versioned submission context.
 - A missing record or one inherited from the head's first parent fails before success is published.
 - Module paths and workflow commands remain outside prose checks while reader-facing strings and comments remain inside.
 - Action references remain outside prose checks while action names, nested values, and comments remain inside.
 - JavaScript route paths remain outside prose checks while reader-facing strings remain inside.
 - Python mapping keys remain outside prose checks while string values remain inside.
+- Incomplete Python keeps plain, formatted, byte, and nested mapping keys outside prose checks.
+- Assignment JSON checks reader-facing values while paths, identifiers, and status values remain outside the scan.
 - Authentication and security workflow paths require Red review.
+- Documentation manifests retain the Green review route.
 - Destructive utilities outside source directories require Red review, while fixture data remains Yellow.
 - Uncommitted review routing unions staged, unstaged, and untracked paths before applying the risk floor.
 - Unrelated CI completions cannot cancel an active qualifying Pages deployment.
@@ -87,9 +93,9 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass; startup creates temporary SQLite and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 95 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 97 communication and submission tests |
 | Routing policy | Pass | 34 routing and hook-context tests, policy validation, and model-route samples |
-| Review policy and model routing | Pass | 22 local-runner tests and independent delivery challenges |
+| Review policy and model routing | Pass | 23 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation plus commit-stage and push-stage runs |
 | Workflow syntax | Pass | Actionlint 1.7.11 and YAML parsing |
 | Hosted pull-request CI | Not run | Hosted CI starts after this record enters the commit |
@@ -108,8 +114,8 @@ I read and understand the submitted diff. I verified the evidence above and rema
 
 ## Review focus and uncertainty
 
-Review the first-parent record boundary, native SQLite lockfile changes, path mapping,
-evidence threshold, model defaults, and protected-branch activation steps.
+Review the versioned first-parent record boundary, native SQLite lockfile changes, path
+mapping, evidence threshold, model defaults, and protected-branch activation steps.
 
 The repository has not observed the submission workflow from `main`. A repository
 administrator must configure the named required checks only after the hosted evidence

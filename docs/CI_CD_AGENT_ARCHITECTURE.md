@@ -57,13 +57,13 @@ remain pending.
 | Job | Selection | Result |
 |---|---|---|
 | `Route changes` | Always | Tests the policy and classifies the diff. |
-| `Submission record` | Always | Checks the committed `.github/submission.md` without changing application contexts. |
+| `Submission record v1` | Always | Checks the committed `.github/submission.md` without changing application contexts. |
 | `Prose` | Always | Checks repository prose and review policy. |
 | `Frontend` | Routed | Installs locked npm dependencies, then lints and builds the client. |
 | `Server` | Routed | Installs locked npm dependencies, then lints and builds the server. |
 | `ETL` | Routed | Installs the locked uv environment, then runs Ruff and pytest. |
 
-The required check names are `Submission record`, `Prose`, `Frontend`, `Server`, and
+The required check names are `Submission record v1`, `Prose`, `Frontend`, `Server`, and
 `ETL`. A job-level condition reports a successful skip when its subsystem is not
 affected.
 
@@ -76,7 +76,7 @@ cannot cancel code CI or publish replacement application contexts. Pull requests
 share a head commit join the same serialized group.
 
 The read-only `pull_request_target` workflow runs from the default branch and checks
-out only the base revision. The trusted checker comes from that base. The workflow
+out the exact trusted workflow revision through `github.workflow_sha`. The workflow
 fetches the exact head commit metadata and selects its first parent. It then fetches
 `.github/submission.md` from that parent and the exact head through the Contents API.
 It validates both responses, requires different blob identifiers, and decodes the head
@@ -96,8 +96,12 @@ GitHub commit statuses belong to a commit, not to one pull request. The input re
 has that same identity. Two pull requests at one head commit share one result, even
 when their base commits differ. Mutable pull request text does not affect the status.
 
+The `Submission record v1` context freezes its workflow and checker semantics. A change
+to either boundary requires a new versioned context and a protected-branch migration.
+An old workflow revision can then write only its retired context.
+
 This status gate is not yet merge-queue compatible. The current workflow does not
-handle `merge_group` or publish `Submission record` on the temporary merge-group
+handle `merge_group` or publish `Submission record v1` on the temporary merge-group
 commit. Keep merge queues disabled while this context is required. Add and test that
 event path before the team enables a merge queue.
 
@@ -219,7 +223,7 @@ Every pull request follows `docs/CODE_CHANGE_STANDARD.md`. The record includes t
 evidence, reasoning, selected design, rejected alternative, and limits. It also includes
 the comprehension path, refactor boundary, and review question.
 
-The `Submission record` job enforces the required structure in the exact head revision.
+The `Submission record v1` job enforces the required structure in the exact head revision.
 The `Prose` job enforces selected language rules in repository files. Human review
 decides whether the stated why and why-not match the code and evidence.
 
@@ -271,9 +275,9 @@ or incident in a runbook when production recovery requires more than a new deplo
 ## Maintainer activation
 
 Follow [the activation checklist](DELIVERY_ACTIVATION.md). After merge, confirm a
-successful `CI` run and deployment on `main`. Validate `Submission record` on a
+successful `CI` run and deployment on `main`. Validate `Submission record v1` on a
 subsequent PR, because the submission workflow does not run on main pushes.
-Configure `Submission record`, `Prose`, `Frontend`, `Server`, and `ETL` as required
+Configure `Submission record v1`, `Prose`, `Frontend`, `Server`, and `ETL` as required
 checks in the protected-main ruleset after observing their results. Require branches to
 be up to date before merge so a base change forces a new head and submission result.
 
@@ -281,7 +285,7 @@ Connect the repository in Codex settings. Confirm that it is team-enabled before
 enable automatic review. Otherwise, use `@codex review` on each representative change.
 
 Keep the approval, last-push approval, resolved-thread, squash-merge, deletion, and
-non-fast-forward protections. Do not enable a merge queue while `Submission record` is
+non-fast-forward protections. Do not enable a merge queue while `Submission record v1` is
 required. The application checks support merge groups, but the submission gate does not.
 
 Review routing paths, model defaults, false positives, CI minutes, and model usage after

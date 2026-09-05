@@ -204,7 +204,7 @@ each pull request head revision. Its concurrency group cannot cancel code CI.
 
 | Check | Evidence |
 |---|---|
-| `Submission / Submission record` | Committed reasoning fields, evidence, and accountability for the exact head revision |
+| `Submission / Submission record v1` | Committed reasoning fields, evidence, and accountability for the exact head revision |
 | `CI / Prose` | Selected language rules, editorial patterns, and high-signal AI cliché checks |
 | `CI / Frontend` | Client lint and production build |
 | `CI / Server` | Server lint and TypeScript build |
@@ -236,11 +236,11 @@ for event, failure, hook, routing, and deployment contracts.
 ### Maintainer activation step
 
 Follow the [activation checklist](DELIVERY_ACTIVATION.md). After merge, confirm main CI
-and deployment. Validate `Submission record` on a subsequent PR before requiring it.
+and deployment. Validate `Submission record v1` on a subsequent PR before requiring it.
 A main push cannot emit that pull-request status. An administrator then adds these
 contexts to the **Protect Main Branch** ruleset:
 
-- `Submission record`
+- `Submission record v1`
 - `Prose`
 - `Frontend`
 - `Server`
@@ -313,12 +313,15 @@ The default scope reviews the current tracked state against the base. Add
 `--scope uncommitted` to review staged, unstaged, and untracked work without branch
 history. The runner forces a read-only Codex sandbox.
 
-The `Submission record` job enforces the committed evidence structure. Its read-only
-`pull_request_target` workflow runs from the default branch and checks out only the base
-revision. The trusted workflow reads the exact head commit and its first parent. It
-fetches `.github/submission.md` from both commits, requires different blob identifiers,
-and decodes the head file as inert data. It never runs pull request code. A status-only
-token publishes the result on the pull request head.
+The `Submission record v1` job enforces the committed evidence structure. Its read-only
+`pull_request_target` workflow runs from the default branch. It checks out the exact
+trusted workflow revision through `github.workflow_sha`.
+
+The workflow reads the head
+commit and its first parent. It fetches `.github/submission.md` from both commits,
+requires different blob identifiers, and decodes the head file as inert data. It never
+runs pull request code. A status-only token publishes the result on the pull request
+head.
 
 The workflow becomes active for subsequent pull requests after this pilot enters
 `main`.
@@ -326,9 +329,13 @@ The workflow becomes active for subsequent pull requests after this pilot enters
 The workflow confirms the live pull request head before validation and immediately
 before it publishes a result. Its head-commit concurrency group serializes status
 writers without canceling an active writer. A manually canceled or stale run publishes
-no final status. Two pull requests at one head use the same committed record and
-share the same commit status, even when their bases differ. Mutable pull request text
-cannot change it. The final head commit must update the record from its first parent.
+no final status.
+
+Version 1 freezes the validation semantics for its named context. A
+validation change requires a new context and a protected-branch migration. Two pull
+requests at one head therefore share one result, even when their bases differ. Mutable
+pull request text cannot change it. The final head commit must update the record from
+its first parent.
 
 Keep merge queues disabled while this status is required. The current workflow does not
 handle `merge_group` or publish the context on the temporary merge-group commit.
