@@ -373,6 +373,55 @@ class CheckSubmissionTests(unittest.TestCase):
             details,
         )
 
+    def test_missing_documentation_selection_fails(self) -> None:
+        body = VALID_BODY.replace(
+            "- [x] No documentation change is needed",
+            "- [ ] No documentation change is needed\n"
+            "- [ ] I updated the relevant README, `AGENTS.md`, decision record, or runbook\n"
+            "- [ ] I recorded a follow-up issue for remaining work",
+        )
+
+        details = [
+            finding.detail for finding in check_submission.check_submission(body)
+        ]
+
+        self.assertIn("select at least one documentation option", details)
+
+    def test_unrelated_documentation_selection_fails(self) -> None:
+        body = VALID_BODY.replace(
+            "- [x] No documentation change is needed",
+            "- [ ] No documentation change is needed\n"
+            "- [x] I considered the documentation",
+        )
+
+        details = [
+            finding.detail for finding in check_submission.check_submission(body)
+        ]
+
+        self.assertIn("select at least one documentation option", details)
+        self.assertIn(
+            "remove selected options outside the three supported choices",
+            details,
+        )
+
+    def test_no_documentation_change_conflicts_with_changed_documentation(
+        self,
+    ) -> None:
+        body = VALID_BODY.replace(
+            "- [x] No documentation change is needed",
+            "- [x] No documentation change is needed\n"
+            "- [x] I updated the relevant README, `AGENTS.md`, decision record, or runbook",
+        )
+
+        details = [
+            finding.detail for finding in check_submission.check_submission(body)
+        ]
+
+        self.assertIn(
+            "do not combine no documentation change with another choice",
+            details,
+        )
+
     def test_empty_evidence_cell_fails(self) -> None:
         body = VALID_BODY.replace(
             "| ETL tests | Pass | `uv run pytest` |", "| ETL tests | | |"

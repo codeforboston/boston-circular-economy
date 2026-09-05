@@ -63,6 +63,11 @@ AI_DISCLOSURE_OPTIONS = (
     "AI assisted with implementation or tests",
     "AI assisted with review or challenge",
 )
+DOCUMENTATION_OPTIONS = (
+    "No documentation change is needed",
+    "I updated the relevant README, `AGENTS.md`, decision record, or runbook",
+    "I recorded a follow-up issue for remaining work",
+)
 PLACEHOLDER = re.compile(r"<!--.*?-->", re.DOTALL)
 REQUIRED_EVIDENCE_CHECKS = (
     "Client lint and build",
@@ -333,6 +338,49 @@ def check_submission(body: str) -> list[SubmissionFinding]:
             SubmissionFinding(
                 "ai-disclosure",
                 "do not combine no substantial assistance with an AI-assisted choice",
+            )
+        )
+    documentation_section = sections.get(
+        normalize_section_name("Documentation and learning"), ""
+    )
+    selected_documentation_options = [
+        " ".join(match.group(1).split()).casefold()
+        for match in SELECTED_AI_BOX.finditer(documentation_section)
+    ]
+    supported_documentation_options = {
+        option.casefold() for option in DOCUMENTATION_OPTIONS
+    }
+    selected_supported_documentation_options = {
+        option
+        for option in selected_documentation_options
+        if option in supported_documentation_options
+    }
+    if documentation_section and not selected_supported_documentation_options:
+        findings.append(
+            SubmissionFinding(
+                "documentation-disclosure",
+                "select at least one documentation option",
+            )
+        )
+    if any(
+        option not in supported_documentation_options
+        for option in selected_documentation_options
+    ):
+        findings.append(
+            SubmissionFinding(
+                "documentation-disclosure",
+                "remove selected options outside the three supported choices",
+            )
+        )
+    no_documentation_change = DOCUMENTATION_OPTIONS[0].casefold()
+    if (
+        no_documentation_change in selected_supported_documentation_options
+        and len(selected_supported_documentation_options) > 1
+    ):
+        findings.append(
+            SubmissionFinding(
+                "documentation-disclosure",
+                "do not combine no documentation change with another choice",
             )
         )
     evidence_key = normalize_section_name("Evidence")
