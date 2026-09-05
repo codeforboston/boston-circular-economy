@@ -1650,6 +1650,58 @@ def remember_javascript_token(tokens: list[str], token: str) -> None:
     del tokens[:-4]
 
 
+def static_javascript_string_expression(
+    text: str, start: int, end: int
+) -> str | None:
+    """Return the value of a string-only JavaScript addition expression."""
+
+    parts: list[str] = []
+    index = start
+    expect_literal = True
+    while index < end:
+        while index < end and text[index].isspace():
+            index += 1
+        if index >= end:
+            break
+        if expect_literal:
+            delimiter = text[index]
+            if delimiter not in "'\"`":
+                return None
+            literal_end = javascript_string_end(text, index, delimiter)
+            if literal_end > end or text[literal_end - 1] != delimiter:
+                return None
+            raw_value = text[index + 1 : literal_end - 1]
+            if delimiter == "`" and "${" in raw_value:
+                return None
+            parts.append(decode_javascript_text(raw_value))
+            index = literal_end
+            expect_literal = False
+            continue
+        if text[index] != "+":
+            return None
+        index += 1
+        expect_literal = True
+    if expect_literal or not parts:
+        return None
+    return "".join(parts)
+
+
+def copy_joined_rendered_text(
+    output: list[str], source: str, start: int, end: int, rendered: str
+) -> None:
+    """Copy rendered text and mark all non-rendered source syntax for removal."""
+
+    output[start:end] = [LOGICAL_JOIN] * (end - start)
+    cursor = start
+    for character in rendered:
+        while cursor < end and source[cursor] in "\r\n":
+            cursor += 1
+        if cursor >= end:
+            return
+        output[cursor] = " " if character.isspace() else character
+        cursor += 1
+
+
 def mask_js_template(
     text: str,
     output: list[str],
@@ -1667,17 +1719,32 @@ def mask_js_template(
             index += 2
             continue
         if text.startswith("${", index):
+            interpolation_start = index
             if copy_literal:
                 copy_decoded_javascript_text(text, output, literal_start, index)
-            index = mask_javascript_code(
+            expression_start = index + 2
+            expression_end = mask_javascript_code(
                 text,
                 output,
-                index + 2,
+                expression_start,
                 stop_at_brace=True,
                 parse_jsx=parse_jsx,
             )
-            if index < len(text) and text[index] == "}":
-                index += 1
+            index = expression_end
+            if expression_end < len(text) and text[expression_end] == "}":
+                if copy_literal:
+                    static_value = static_javascript_string_expression(
+                        text, expression_start, expression_end
+                    )
+                    if static_value is not None:
+                        copy_joined_rendered_text(
+                            output,
+                            text,
+                            interpolation_start,
+                            expression_end + 1,
+                            static_value,
+                        )
+                index = expression_end + 1
             literal_start = index
             continue
         if text[index] == "`":
@@ -2064,34 +2131,10 @@ def join_static_jsx_expression_literals(
 ) -> None:
     """Join literals when a complete JSX expression is static string addition."""
 
-    spans: list[tuple[int, int]] = []
-    index = start
-    expect_literal = True
-    while index < end:
-        while index < end and text[index].isspace():
-            index += 1
-        if index >= end:
-            break
-        if expect_literal:
-            delimiter = text[index]
-            if delimiter not in "'\"":
-                return
-            literal_end = javascript_string_end(text, index, delimiter)
-            if literal_end > end or text[literal_end - 1] != delimiter:
-                return
-            spans.append((index, literal_end))
-            index = literal_end
-            expect_literal = False
-            continue
-        if text[index] != "+":
-            return
-        index += 1
-        expect_literal = True
-    if expect_literal or len(spans) < 2:
+    static_value = static_javascript_string_expression(text, start, end)
+    if static_value is None:
         return
-    for previous, current in zip(spans, spans[1:]):
-        for position in range(previous[1] - 1, current[0] + 1):
-            output[position] = LOGICAL_JOIN
+    copy_joined_rendered_text(output, text, start, end, static_value)
 
 
 def join_javascript_literal_additions(text: str, output: list[str]) -> None:
@@ -2511,6 +2554,24 @@ def yaml_quote_starts_node(text: str, start: int, index: int) -> bool:
     return not prefix or prefix[-1] in "[{,:-?"
 
 
+def multiline_yaml_quoted_scalar_end(
+    text: str, start: int, line_end: int
+) -> int | None:
+    """Return a quoted scalar end when its value continues after this line."""
+
+    index = start
+    while index < line_end:
+        quote = text[index]
+        if quote not in "'\"" or not yaml_quote_starts_node(text, start, index):
+            index += 1
+            continue
+        scalar_end = skip_yaml_quoted_scalar(text, index, len(text))
+        if scalar_end > line_end:
+            return scalar_end
+        index = scalar_end
+    return None
+
+
 def copy_yaml_reader_value(output: list[str], text: str, start: int, end: int) -> None:
     """Copy one YAML value and decode its quoted reader-facing scalars."""
 
@@ -2683,9 +2744,21 @@ def mask_yaml_code(text: str, *, mask_actions_commands: bool = False) -> str:
     jobs_indent: int | None = None
     job_indent: int | None = None
     job_mapping_indent: int | None = None
+    quoted_scalar_end: int | None = None
     action_flow_value_spans: list[tuple[int, int]] = []
     for line in text.splitlines(keepends=True):
         body = line.rstrip("\r\n")
+        body_end = offset + len(body)
+        if quoted_scalar_end is not None and offset < quoted_scalar_end:
+            if quoted_scalar_end <= body_end:
+                comment_start = yaml_comment_index(
+                    text, quoted_scalar_end, body_end
+                )
+                if comment_start is not None:
+                    copy_span(output, text, comment_start, body_end)
+            offset += len(line)
+            continue
+        quoted_scalar_end = None
         code, comment = split_config_comment(body, yaml=True)
         indentation = len(code) - len(code.lstrip(" "))
         if block_indent is not None and code.strip() and indentation <= block_indent:
@@ -2722,6 +2795,14 @@ def mask_yaml_code(text: str, *, mask_actions_commands: bool = False) -> str:
             separator = unquoted_index(code, ":")
             if separator is not None:
                 value_start = separator + 1
+                value_end = offset + len(code)
+                quoted_scalar_end = multiline_yaml_quoted_scalar_end(
+                    text,
+                    offset + value_start,
+                    value_end,
+                )
+                if quoted_scalar_end is not None:
+                    value_end = quoted_scalar_end
                 key = yaml_mapping_key(code, separator)
                 direct_step_key = bool(
                     steps_indent is not None
@@ -2768,13 +2849,13 @@ def mask_yaml_code(text: str, *, mask_actions_commands: bool = False) -> str:
                         output,
                         text,
                         offset + value_start,
-                        offset + len(code),
+                        value_end,
                     )
                     mask_inline_mapping_keys(
                         text,
                         output,
                         offset + value_start,
-                        offset + len(code),
+                        value_end,
                         ":",
                     )
                 if mask_actions_commands and (
@@ -2804,17 +2885,25 @@ def mask_yaml_code(text: str, *, mask_actions_commands: bool = False) -> str:
                     job_mapping_indent = None
             elif code.lstrip().startswith("- "):
                 value_start = code.index("-") + 2
+                value_end = offset + len(code)
+                quoted_scalar_end = multiline_yaml_quoted_scalar_end(
+                    text,
+                    offset + value_start,
+                    value_end,
+                )
+                if quoted_scalar_end is not None:
+                    value_end = quoted_scalar_end
                 copy_yaml_reader_value(
                     output,
                     text,
                     offset + value_start,
-                    offset + len(code),
+                    value_end,
                 )
                 mask_inline_mapping_keys(
                     text,
                     output,
                     offset + value_start,
-                    offset + len(code),
+                    value_end,
                     ":",
                 )
         if comment:

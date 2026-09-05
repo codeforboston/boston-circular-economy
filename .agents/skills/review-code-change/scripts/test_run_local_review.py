@@ -91,6 +91,35 @@ class LocalReviewRunnerTests(unittest.TestCase):
                     effective_risk("green", str(assessment["risk"])),
                 )
 
+    def test_password_and_authentication_token_paths_require_red_review(self) -> None:
+        paths = (
+            "client/src/pages/reset-password.tsx",
+            "client/src/security/token.ts",
+            "client/src/security/refresh-token.ts",
+            "etl/src/etl/security/password.py",
+            "etl/src/etl/security/access_token.py",
+            "server/src/password.ts",
+            "server/src/token.ts",
+            "server/src/security/auth-token.ts",
+        )
+        policy = load_risk_policy()
+
+        for path in paths:
+            with self.subTest(path=path):
+                assessment = infer_minimum_risk([path], policy)
+                self.assertEqual("red", assessment["risk"])
+                self.assertEqual(
+                    "red",
+                    effective_risk("green", str(assessment["risk"])),
+                )
+
+    def test_design_token_path_keeps_yellow_review(self) -> None:
+        assessment = infer_minimum_risk(
+            ["client/src/styles/design-tokens.ts"], load_risk_policy()
+        )
+
+        self.assertEqual("yellow", assessment["risk"])
+
     def test_every_workflow_requires_red_review(self) -> None:
         paths = (
             ".github/workflows/ci.yml",
@@ -262,7 +291,6 @@ class LocalReviewRunnerTests(unittest.TestCase):
 
     def test_non_destructive_reset_or_fixture_path_keeps_yellow_review(self) -> None:
         paths = (
-            "client/src/pages/reset-password.tsx",
             "client/src/pages/account/reset-preferences.tsx",
             "server/tests/fixtures/purge-response.json",
             "etl/tests/fixtures/reset-data.json",

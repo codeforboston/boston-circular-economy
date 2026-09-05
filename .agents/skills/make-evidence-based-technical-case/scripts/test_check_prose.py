@@ -828,6 +828,24 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_joins_fully_static_template_interpolation_output(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.js"
+            path.write_text(
+                'const empty = `Don${""}\\u0027t deploy.`;\n'
+                'const text = `Don${"\\u0027"}t deploy.`;\n'
+                'const space = `Don${" "}t deploy.`;\n'
+                'const dynamic = `Don${value}\\u0027t deploy.`;\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(1, "contraction"), (2, "contraction")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_checks_export_default_jsx_text(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.tsx"
@@ -1272,6 +1290,24 @@ class ProseCheckerTests(unittest.TestCase):
 
         self.assertEqual(
             [(1, "contraction"), (2, "contraction")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
+    def test_preserves_multiline_yaml_quoted_scalar_content(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.yaml"
+            path.write_text(
+                'name: "Safe\n'
+                '  Unlock the potential."\n'
+                "message: 'Safe\n"
+                "  Don''t deploy.'\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(4, "contraction"), (2, "promotional cliche")],
             [(finding.line, finding.rule) for finding in findings],
         )
 

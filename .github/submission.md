@@ -134,6 +134,9 @@ issue existed.
 - Scan an unclosed Markdown front-matter region as visible prose.
 - Scan deliverable names in work-unit manifests as reader-facing assignment prose.
 - Join adjacent inline HTML, SVG, and raw-Markdown text before wording checks.
+- Preserve reader prose in multiline quoted YAML scalars.
+- Join output from string-only JavaScript template interpolations.
+- Route password and authentication-token handlers to Red review.
 
 ## Challenge cases
 
@@ -232,6 +235,10 @@ issue existed.
 - A prohibited contraction split by inline markup or a comment remains visible, while
   separate rendered blocks remain distinct.
 - A work-unit deliverable name cannot carry prohibited assignment wording.
+- A multiline quoted YAML value cannot hide reader-facing wording on a continuation line.
+- A static template interpolation cannot split a prohibited contraction.
+- Password and authentication-token handlers require Red review, while design-token
+  files retain the normal application route.
 - Red review stops for specialist and human escalation, including ETL credential and secret paths.
 
 ## Evidence
@@ -241,9 +248,9 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass. Startup creates and closes a temporary SQLite database, and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 153 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 155 communication and submission tests |
 | Routing policy | Pass | 42 routing, hook-context, manifest-integrity, and model-route tests |
-| Review policy and model routing | Pass | 27 local-runner tests and independent delivery challenges |
+| Review policy and model routing | Pass | 29 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation, schema validation, and commit-stage and push-stage runs |
 | Workflow syntax | Pass | Actionlint 1.7.11 and YAML parsing |
 | Hosted pull-request CI | Not run | Hosted CI starts after this record enters the commit |
@@ -276,6 +283,8 @@ Examine trusted-base local review execution and standalone SVG reader-text bound
 Examine semicolon coverage and multiline HTML suppression in Markdown.
 Examine database-operation string classification and front-matter closure detection.
 Examine deliverable-name classification and adjacent rendered-text source mapping.
+Examine multiline YAML quoted scalars, static template interpolation, and the
+password and authentication-token risk floor.
 Examine Python resource identifiers, heading termination, hook suffix coverage, and the
 Red workflow risk floor. Confirm the deployment reconcile step verifies the selected
 run has an unexpired client artifact before it marks the deployment ready. Confirm
