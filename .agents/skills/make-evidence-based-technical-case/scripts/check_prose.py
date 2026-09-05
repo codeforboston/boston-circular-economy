@@ -567,7 +567,9 @@ def collapse_logical_joins(text: str, source: str) -> tuple[str, list[int]]:
         escaped_line_end = source[index] == "\\" and (
             index + 1 < len(source) and source[index + 1] in "\r\n"
         )
-        removable_separator = source[index].isspace() or source[index] in "'\"+"
+        removable_separator = (
+            source[index].isspace() or source[index] in "'\"`+rRuUbBfF"
+        )
         if character == LOGICAL_JOIN and (removable_separator or escaped_line_end):
             continue
         logical_text.append(character)
@@ -1199,7 +1201,96 @@ def mask_python_code(text: str) -> str:
             copy_python_string(text, output, start, end)
         elif token.type == tokenize.COMMENT and fstring_depth == 0:
             copy_span(output, text, start, end)
+    join_python_string_tokens(text, output, tokens, offsets, hidden_string_spans)
     return "".join(output)
+
+
+def join_python_string_tokens(
+    text: str,
+    output: list[str],
+    tokens: list[tokenize.TokenInfo],
+    offsets: list[int],
+    hidden_string_spans: list[tuple[int, int]],
+) -> None:
+    """Join visible Python string tokens linked implicitly or with addition."""
+
+    literal_spans: list[tuple[int, int, int, int]] = []
+    fstring_start = getattr(tokenize, "FSTRING_START", None)
+    fstring_end = getattr(tokenize, "FSTRING_END", None)
+    fstring_middle = getattr(tokenize, "FSTRING_MIDDLE", None)
+    token_index = 0
+    while token_index < len(tokens):
+        token = tokens[token_index]
+        start = position_offset(offsets, token.start)
+        end = position_offset(offsets, token.end)
+        if token.type == tokenize.STRING:
+            hidden = any(
+                hidden_start <= start and end <= hidden_end
+                for hidden_start, hidden_end in hidden_string_spans
+            )
+            match = PYTHON_STRING_START.match(token.string)
+            if hidden or match is None:
+                token_index += 1
+                continue
+            delimiter = match.group(2)
+            content_start = start + match.end()
+            content_end = (
+                end - len(delimiter) if token.string.endswith(delimiter) else end
+            )
+            literal_spans.append((token_index, token_index, content_start, content_end))
+            token_index += 1
+            continue
+        if fstring_start is None or token.type != fstring_start:
+            token_index += 1
+            continue
+        depth = 1
+        static = True
+        closing_index = token_index + 1
+        while closing_index < len(tokens) and depth:
+            candidate = tokens[closing_index]
+            if candidate.type == fstring_start:
+                depth += 1
+                static = False
+            elif fstring_end is not None and candidate.type == fstring_end:
+                depth -= 1
+            elif depth == 1 and candidate.type != fstring_middle:
+                static = False
+            closing_index += 1
+        if depth:
+            return
+        closing_token_index = closing_index - 1
+        closing_token = tokens[closing_token_index]
+        group_end = position_offset(offsets, closing_token.end)
+        hidden = any(
+            hidden_start <= start and group_end <= hidden_end
+            for hidden_start, hidden_end in hidden_string_spans
+        )
+        if static and not hidden:
+            literal_spans.append(
+                (
+                    token_index,
+                    closing_token_index,
+                    end,
+                    position_offset(offsets, closing_token.start),
+                )
+            )
+        token_index = closing_index
+
+    ignored_separators = {tokenize.NL, tokenize.INDENT, tokenize.DEDENT}
+    for previous, current in zip(literal_spans, literal_spans[1:]):
+        separators = tokens[previous[1] + 1 : current[0]]
+        additions = [
+            token
+            for token in separators
+            if token.type == tokenize.OP and token.string == "+"
+        ]
+        if len(additions) > 1 or any(
+            token.type not in ignored_separators and token not in additions
+            for token in separators
+        ):
+            continue
+        for position in range(previous[3], current[2]):
+            output[position] = LOGICAL_JOIN
 
 
 def javascript_string_end(text: str, start: int, quote: str) -> int:
@@ -1859,6 +1950,46 @@ def join_static_jsx_expression_literals(
     for previous, current in zip(spans, spans[1:]):
         for position in range(previous[1] - 1, current[0] + 1):
             output[position] = LOGICAL_JOIN
+
+
+def join_javascript_literal_additions(text: str, output: list[str]) -> None:
+    """Join visible static literals linked directly by JavaScript addition."""
+
+    previous_span: tuple[int, int] | None = None
+    index = 0
+    while index < len(text):
+        delimiter = text[index]
+        if delimiter not in "'\"`" or output[index] not in {" ", LOGICAL_JOIN}:
+            index += 1
+            continue
+        if delimiter == "`":
+            literal_end = javascript_string_end(text, index, delimiter)
+            static = "${" not in text[index + 1 : literal_end - 1]
+            if not static:
+                previous_span = None
+                index += 1
+                continue
+        else:
+            literal_end = javascript_string_end(text, index, delimiter)
+        if literal_end <= index + 1:
+            index += 1
+            continue
+        content_end = literal_end - 1
+        copied = any(
+            output[position] not in {" ", "\t", "\r", "\n", LOGICAL_JOIN}
+            for position in range(index + 1, content_end)
+        )
+        current_span = (index, literal_end) if copied else None
+        if current_span is not None and previous_span is not None:
+            separator = text[previous_span[1] : current_span[0]]
+            if re.fullmatch(r"(?:\s|\\\r?\n)*\+(?:\s|\\\r?\n)*", separator):
+                for position in range(previous_span[1] - 1, current_span[0] + 1):
+                    output[position] = LOGICAL_JOIN
+            else:
+                previous_span = None
+        if current_span is not None:
+            previous_span = current_span
+        index = literal_end
 
 
 def copy_jsx_tag_literals(text: str, output: list[str], start: int, end: int) -> None:
@@ -2992,6 +3123,7 @@ def mask_source_code(path: Path, text: str) -> str:
             output,
             parse_jsx=suffix != ".ts",
         )
+        join_javascript_literal_additions(text, output)
         return "".join(output)
     if suffix == ".html":
         return mask_html_code(text)

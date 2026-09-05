@@ -120,6 +120,8 @@ issue existed.
 - Scan human-readable `aria-valuetext` in HTML and JSX.
 - Scan visible Markdown blockquotes and semicolons in headings.
 - Join static JSX expression literals before checking rendered wording.
+- Join ordinary JavaScript literal additions before checking rendered wording.
+- Join implicit and added Python reader strings before checking rendered wording.
 - Apply the semicolon rule to reader-facing HTML, CSS, and JSX source text.
 
 ## Challenge cases
@@ -207,6 +209,7 @@ issue existed.
 - Human-readable ARIA value text remains subject to the prose policy.
 - Visible blockquote text and heading semicolons remain subject to the prose policy.
 - Static JSX string addition cannot split a prohibited contraction across literals.
+- Static JavaScript and Python string expressions cannot split prohibited wording.
 - Red review stops for specialist and human escalation, including ETL credential and secret paths.
 
 ## Evidence
@@ -216,7 +219,7 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass. Startup creates and closes a temporary SQLite database, and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 143 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 145 communication and submission tests |
 | Routing policy | Pass | 42 routing, hook-context, manifest-integrity, and model-route tests |
 | Review policy and model routing | Pass | 25 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation, schema validation, and commit-stage and push-stage runs |
@@ -245,7 +248,7 @@ classification, escaped-line source mapping, JSX character references, and stati
 object-literal spreads. Examine CSS generated content and static HTML injection. Examine
 human-readable ARIA value text, visible blockquotes, heading semicolons, and work-unit
 dependency integrity. Examine static JSX string addition and source semicolon handling.
-Examine
+Examine ordinary JavaScript additions and adjacent Python reader strings. Examine
 element-specific HTML and JSX attributes, React children, and JavaScript property keys.
 Examine Python resource identifiers, heading termination, hook suffix coverage, and the
 Red workflow risk floor. Confirm the deployment reconcile step verifies the selected

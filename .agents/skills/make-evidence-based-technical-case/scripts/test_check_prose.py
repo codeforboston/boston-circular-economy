@@ -650,6 +650,23 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_joins_static_javascript_literal_additions(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.js"
+            path.write_text(
+                'const message = "Don" + "\'t deploy.";\n'
+                'const template = "Don" + `\'t deploy.`;\n'
+                'const dynamic = "Don" + value + "\'t deploy.";\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(1, "contraction"), (2, "contraction")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_checks_export_default_jsx_text(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.tsx"
@@ -830,6 +847,24 @@ class ProseCheckerTests(unittest.TestCase):
                 'unicode_message = "Don\\u0027t proceed."\n'
                 'formatted = f"Don\\x27t proceed, {name}."\n'
                 'raw_message = r"Don\\x27t proceed."\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(1, "contraction"), (2, "contraction"), (3, "contraction")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
+    def test_joins_adjacent_python_reader_strings(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.py"
+            path.write_text(
+                'implicit = "Don" "\'t deploy."\n'
+                'addition = "Don" + "\'t deploy."\n'
+                'formatted = f"Don" f"\'t deploy."\n'
+                'dynamic = f"Don{name}" f"\'t deploy."\n',
                 encoding="utf-8",
             )
 
