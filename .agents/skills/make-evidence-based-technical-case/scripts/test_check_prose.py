@@ -200,12 +200,14 @@ class ProseCheckerTests(unittest.TestCase):
     def test_rejects_contractions_in_markdown_headings(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.md"
-            path.write_text("# Don't deploy\n", encoding="utf-8")
+            path.write_text(
+                "# Don't deploy\n## Do not deploy; wait.\n", encoding="utf-8"
+            )
 
             findings = markdown_findings(path, load_profile(DEFAULT_PROFILE))
 
         self.assertEqual(
-            [(1, "contraction")],
+            [(1, "contraction"), (2, "semicolon")],
             [(finding.line, finding.rule) for finding in findings],
         )
 
@@ -370,6 +372,18 @@ class ProseCheckerTests(unittest.TestCase):
             findings = editorial_findings(path)
 
         self.assertEqual([], findings)
+
+    def test_checks_visible_prose_inside_nested_blockquotes(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.md"
+            path.write_text("> > Don't deploy; wait.\n", encoding="utf-8")
+
+            findings = markdown_findings(path, load_profile(DEFAULT_PROFILE))
+
+        self.assertEqual(
+            [(1, "semicolon"), (1, "contraction")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
 
     def test_checks_rendered_prose_in_an_indented_list_continuation(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

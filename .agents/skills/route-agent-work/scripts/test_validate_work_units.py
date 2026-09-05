@@ -74,6 +74,38 @@ class WorkUnitValidationTests(unittest.TestCase):
         self.assertIn("dependency 'UI-999'", errors[0])
         self.assertIn("does not match a discovered work unit", errors[0])
 
+    def test_manifest_cannot_depend_on_itself(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ui-005.json"
+            path.write_text(
+                '{"id": "UI-005", "depends_on": ["UI-005"]}\n',
+                encoding="utf-8",
+            )
+
+            errors = manifest_identity_errors([path])
+
+        self.assertEqual(1, len(errors))
+        self.assertIn("UI-005 -> UI-005", errors[0])
+
+    def test_manifest_dependency_graph_must_be_acyclic(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            first = root / "ui-005.json"
+            second = root / "ui-006.json"
+            first.write_text(
+                '{"id": "UI-005", "depends_on": ["UI-006"]}\n',
+                encoding="utf-8",
+            )
+            second.write_text(
+                '{"id": "UI-006", "depends_on": ["UI-005"]}\n',
+                encoding="utf-8",
+            )
+
+            errors = manifest_identity_errors([first, second])
+
+        self.assertEqual(1, len(errors))
+        self.assertIn("UI-005 -> UI-006 -> UI-005", errors[0])
+
 
 if __name__ == "__main__":
     unittest.main()

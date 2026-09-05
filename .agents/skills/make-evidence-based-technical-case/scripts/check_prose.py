@@ -72,6 +72,7 @@ IMAGE = re.compile(r"!\[([^]]*)]\([^)]+\)")
 LINK = re.compile(r"\[([^]]+)]\([^)]+\)")
 URL = re.compile(r"https?://\S+")
 MARKDOWN_ATX_HEADING = re.compile(r"^[ ]{0,3}#{1,6}(?:[ \t]+|$)")
+MARKDOWN_BLOCKQUOTE_PREFIX = re.compile(r"^[ ]{0,3}(?:>[ \t]?[ ]{0,3})+")
 MARKDOWN_LINK_DEFINITION = re.compile(
     r"(?m)^[ ]{0,3}\[[^]\r\n]+]:[ \t]*(?P<destination><[^>\r\n]*>|\S+)"
 )
@@ -365,11 +366,17 @@ def eligible_markdown_line(line: str) -> bool:
     stripped = line.strip()
     if not stripped:
         return False
-    if stripped.startswith(("#", ">", "<!--", "-->", "<svg", "</svg")):
+    if stripped.startswith(("#", "<!--", "-->", "<svg", "</svg")):
         return False
     if stripped.startswith("[") and "]:" in stripped:
         return False
     return not ("|" in stripped and stripped.count("|") >= 2)
+
+
+def markdown_blockquote_content(line: str) -> str:
+    """Remove leading blockquote controls while retaining the visible text."""
+
+    return MARKDOWN_BLOCKQUOTE_PREFIX.sub("", line, count=1)
 
 
 def paragraph_findings(
@@ -436,9 +443,15 @@ def markdown_findings(path: Path, profile: dict[str, object]) -> list[Finding]:
         if in_frontmatter:
             in_frontmatter = stripped != "---"
             continue
-        if MARKDOWN_ATX_HEADING.match(checked_line):
+        raw_content = markdown_blockquote_content(raw_line)
+        checked_content = markdown_blockquote_content(checked_line)
+        if MARKDOWN_ATX_HEADING.match(checked_content):
             flush()
-            heading_text = plain_markdown(checked_line)
+            heading_text = plain_markdown(checked_content)
+            if not bool(profile["permit_semicolon_in_prose"]) and ";" in heading_text:
+                findings.append(
+                    Finding(path, number, "semicolon", "semicolon in prose")
+                )
             if not bool(profile["permit_contractions_in_prose"]) and CONTRACTION.search(
                 heading_text
             ):
@@ -446,9 +459,9 @@ def markdown_findings(path: Path, profile: dict[str, object]) -> list[Finding]:
                     Finding(path, number, "contraction", "contraction in prose")
                 )
             continue
-        if "|" in checked_line and checked_line.count("|") >= 2:
+        if "|" in checked_content and checked_content.count("|") >= 2:
             flush()
-            table_text = plain_markdown(checked_line)
+            table_text = plain_markdown(checked_content)
             if not bool(profile["permit_semicolon_in_prose"]) and ";" in table_text:
                 findings.append(
                     Finding(path, number, "semicolon", "semicolon in prose")
@@ -460,11 +473,11 @@ def markdown_findings(path: Path, profile: dict[str, object]) -> list[Finding]:
                     Finding(path, number, "contraction", "contraction in prose")
                 )
             continue
-        if not eligible_markdown_line(checked_line):
+        if not eligible_markdown_line(checked_content):
             flush()
             continue
 
-        text = plain_markdown(checked_line)
+        text = plain_markdown(checked_content)
         if not text:
             flush()
             continue
@@ -482,7 +495,7 @@ def markdown_findings(path: Path, profile: dict[str, object]) -> list[Finding]:
             if re.search(rf"\b{re.escape(term.casefold())}\b", lowered):
                 findings.append(Finding(path, number, "vague-term", term))
 
-        if re.match(r"^\d+[.)]\s+", raw_line.lstrip()):
+        if re.match(r"^\d+[.)]\s+", raw_content.lstrip()):
             maximum = int(profile["procedural_sentence_max_words"])
             for sentence in SENTENCE_END.split(text):
                 count = len(WORD.findall(sentence))
@@ -498,7 +511,7 @@ def markdown_findings(path: Path, profile: dict[str, object]) -> list[Finding]:
 
         paragraph.append((number, text))
         boundary = stripped.endswith((".", "!", "?", ":"))
-        boundary = boundary or raw_line.lstrip().startswith(("- ", "* ", "+ "))
+        boundary = boundary or raw_content.lstrip().startswith(("- ", "* ", "+ "))
         if boundary:
             flush()
     flush()

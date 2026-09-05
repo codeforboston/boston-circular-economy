@@ -20,6 +20,47 @@ def manifest_paths(directory: Path = WORK_UNIT_DIRECTORY) -> list[Path]:
     return sorted(directory.glob("ui-[0-9][0-9][0-9].json"))
 
 
+def dependency_cycle_errors(
+    paths_by_id: dict[str, Path], dependency_graph: dict[str, list[str]]
+) -> list[str]:
+    """Return stable errors for dependency cycles, including self-dependencies."""
+
+    errors: list[str] = []
+    state: dict[str, str] = {}
+    stack: list[str] = []
+    stack_positions: dict[str, int] = {}
+    reported_cycles: set[frozenset[str]] = set()
+
+    def visit(manifest_id: str) -> None:
+        state[manifest_id] = "visiting"
+        stack_positions[manifest_id] = len(stack)
+        stack.append(manifest_id)
+        for dependency in dependency_graph.get(manifest_id, []):
+            if dependency not in dependency_graph:
+                continue
+            if state.get(dependency) is None:
+                visit(dependency)
+                continue
+            if state[dependency] != "visiting":
+                continue
+            cycle = stack[stack_positions[dependency] :] + [dependency]
+            cycle_key = frozenset(cycle[:-1])
+            if cycle_key in reported_cycles:
+                continue
+            reported_cycles.add(cycle_key)
+            errors.append(
+                f"{paths_by_id[cycle[0]]}: dependency cycle: {' -> '.join(cycle)}"
+            )
+        stack.pop()
+        stack_positions.pop(manifest_id)
+        state[manifest_id] = "visited"
+
+    for manifest_id in dependency_graph:
+        if state.get(manifest_id) is None:
+            visit(manifest_id)
+    return errors
+
+
 def manifest_identity_errors(manifests: list[Path]) -> list[str]:
     """Check that versioned filenames, IDs, and dependencies identify known units."""
 
@@ -50,16 +91,22 @@ def manifest_identity_errors(manifests: list[Path]) -> list[str]:
         else:
             paths_by_id[manifest_id] = path
             payloads_by_id[manifest_id] = payload
+    dependency_graph: dict[str, list[str]] = {}
     for manifest_id, payload in payloads_by_id.items():
         dependencies = payload.get("depends_on")
         if not isinstance(dependencies, list):
             continue
-        for dependency in dependencies:
-            if isinstance(dependency, str) and dependency not in paths_by_id:
+        string_dependencies = [
+            dependency for dependency in dependencies if isinstance(dependency, str)
+        ]
+        dependency_graph[manifest_id] = string_dependencies
+        for dependency in string_dependencies:
+            if dependency not in paths_by_id:
                 errors.append(
                     f"{paths_by_id[manifest_id]}: dependency {dependency!r} "
                     "does not match a discovered work unit"
                 )
+    errors.extend(dependency_cycle_errors(paths_by_id, dependency_graph))
     return errors
 
 

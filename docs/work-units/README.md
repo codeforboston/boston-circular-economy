@@ -37,8 +37,9 @@ AI prompts, deliverables, checks, reviewer, and handoff. The
 [schema](manifest.schema.json) validates that structure. Schema validity does not
 prove that a design is correct or complete.
 
-The commit hook and CI validate each `ui-NNN.json` file against the schema. CI also
-proves that the validator rejects the intentionally incomplete file in `fixtures`.
+The commit hook and CI validate each `ui-NNN.json` file against the schema. IDs must be
+unique and match their filenames. Dependencies must identify existing units and cannot
+form a cycle. CI also proves that the validator rejects the invalid files in `fixtures`.
 
 The [screen template](screen-manifest.template.yaml) describes the resulting UI
 contract: components, visible states, actions, data needs, and acceptance cases.
@@ -46,8 +47,9 @@ It is a draft template. Empty fields require decisions before implementation.
 
 Keep product research and design originals in the project Drive or approved Figma
 file. Keep assignment manifests and engineering decisions in GitHub. For an accepted
-unit, record at least one artifact link, the reviewer, the review date, and the accepted
-revision in the issue and completion record.
+unit, record at least one nonblank artifact link. Record the reviewer, review date, and
+accepted revision in the issue and completion record. Each value must contain
+substantive text.
 
 ## Contributor instructions
 
