@@ -103,6 +103,45 @@ HTML_READER_VALUE_INPUT_TYPES = {
     "url",
 }
 HTML_SUPPRESSED_ELEMENTS = {"code", "pre", "script", "style", "template"}
+HTML_TEXT_BOUNDARY_ELEMENTS = {
+    "address",
+    "article",
+    "aside",
+    "blockquote",
+    "br",
+    "dd",
+    "details",
+    "dialog",
+    "div",
+    "dl",
+    "dt",
+    "fieldset",
+    "figcaption",
+    "figure",
+    "footer",
+    "form",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "header",
+    "hgroup",
+    "hr",
+    "li",
+    "main",
+    "nav",
+    "ol",
+    "p",
+    "pre",
+    "section",
+    "table",
+    "td",
+    "th",
+    "tr",
+    "ul",
+}
 SVG_READER_TEXT_ELEMENTS = {"desc", "text", "title"}
 HTML_ATTRIBUTE = re.compile(
     r"""(?P<name>[A-Za-z_:][-A-Za-z0-9_:.]*)[ \t\r\n]*=[ \t\r\n]*"""
@@ -261,6 +300,7 @@ def prose_files(inputs: list[Path]) -> list[Path]:
 
 def plain_markdown(line: str) -> str:
     text = mask_html_code(mask_markdown_reference_controls(line))
+    text = text.replace(LOGICAL_JOIN, "")
     text = IMAGE.sub(r"\1", text)
     text = LINK.sub(r"\1", text)
     text = URL.sub(" URL ", text)
@@ -567,18 +607,14 @@ LOGICAL_JOIN = "\0"
 
 
 def collapse_logical_joins(text: str, source: str) -> tuple[str, list[int]]:
-    """Remove escaped physical line endings and retain their source offsets."""
+    """Remove non-rendered separators and retain visible text source offsets."""
 
+    if len(text) != len(source):
+        raise ValueError("masked prose must preserve source offsets")
     logical_text: list[str] = []
     source_offsets: list[int] = []
     for index, character in enumerate(text):
-        escaped_line_end = source[index] == "\\" and (
-            index + 1 < len(source) and source[index + 1] in "\r\n"
-        )
-        removable_separator = (
-            source[index].isspace() or source[index] in "'\"`+rRuUbBfF"
-        )
-        if character == LOGICAL_JOIN and (removable_separator or escaped_line_end):
+        if character == LOGICAL_JOIN:
             continue
         logical_text.append(character)
         source_offsets.append(index)
@@ -623,21 +659,39 @@ class ReaderFacingHtmlParser(HTMLParser):
         self.reader_text_elements = reader_text_elements
         self.reader_text_ancestors: list[str] = []
         self.suppressed_elements: list[str] = []
+        self.previous_text_end: int | None = None
 
     def current_offset(self) -> int:
         line, column = self.getpos()
         return self.offsets[line - 1] + column
 
-    def expose_current(self, value: str) -> None:
+    def expose_current_text(self, value: str) -> None:
         start = self.current_offset()
+        if self.previous_text_end is not None and (
+            not value or not value[0].isspace()
+        ):
+            for position in range(self.previous_text_end, start):
+                self.output[position] = LOGICAL_JOIN
         copy_span(self.output, self.source, start, start + len(value))
+        self.previous_text_end = (
+            None if value and value[-1].isspace() else start + len(value)
+        )
+
+    def mark_text_boundary(self) -> None:
+        """Prevent prose matching across a rendered block or hidden element."""
+
+        self.previous_text_end = None
 
     def expose_attributes(self, names: set[str]) -> None:
         raw_tag = self.get_starttag_text()
         tag_start = self.current_offset()
+        exposed = False
         for match in HTML_ATTRIBUTE.finditer(raw_tag):
             if match.group("name").casefold() not in names:
                 continue
+            if not exposed:
+                self.mark_text_boundary()
+                exposed = True
             value_group = next(
                 group
                 for group in ("double", "single", "bare")
@@ -650,10 +704,13 @@ class ReaderFacingHtmlParser(HTMLParser):
                 tag_start + value_start,
                 tag_start + value_end,
             )
+        if exposed:
+            self.mark_text_boundary()
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         normalized_tag = tag.casefold()
         if normalized_tag in HTML_SUPPRESSED_ELEMENTS:
+            self.mark_text_boundary()
             self.suppressed_elements.append(normalized_tag)
             return
         if not self.suppressed_elements:
@@ -661,7 +718,14 @@ class ReaderFacingHtmlParser(HTMLParser):
                 self.reader_text_elements is not None
                 and normalized_tag in self.reader_text_elements
             ):
+                if not self.reader_text_ancestors:
+                    self.mark_text_boundary()
                 self.reader_text_ancestors.append(normalized_tag)
+            elif (
+                self.reader_text_elements is None
+                and normalized_tag in HTML_TEXT_BOUNDARY_ELEMENTS
+            ):
+                self.mark_text_boundary()
             reader_attributes = set(HTML_READER_ATTRIBUTES)
             attributes = {
                 name.casefold(): value for name, value in attrs if value is not None
@@ -689,6 +753,7 @@ class ReaderFacingHtmlParser(HTMLParser):
                 - self.suppressed_elements[::-1].index(normalized_tag)
             )
             del self.suppressed_elements[matching_index:]
+            self.mark_text_boundary()
             return
         if normalized_tag in self.reader_text_ancestors:
             matching_index = (
@@ -697,6 +762,13 @@ class ReaderFacingHtmlParser(HTMLParser):
                 - self.reader_text_ancestors[::-1].index(normalized_tag)
             )
             del self.reader_text_ancestors[matching_index:]
+            if not self.reader_text_ancestors:
+                self.mark_text_boundary()
+        elif (
+            self.reader_text_elements is None
+            and normalized_tag in HTML_TEXT_BOUNDARY_ELEMENTS
+        ):
+            self.mark_text_boundary()
 
     def exposes_text(self) -> bool:
         return not self.suppressed_elements and (
@@ -705,15 +777,15 @@ class ReaderFacingHtmlParser(HTMLParser):
 
     def handle_data(self, data: str) -> None:
         if self.exposes_text():
-            self.expose_current(data)
+            self.expose_current_text(data)
 
     def handle_entityref(self, name: str) -> None:
         if self.exposes_text():
-            self.expose_current(f"&{name};")
+            self.expose_current_text(f"&{name};")
 
     def handle_charref(self, name: str) -> None:
         if self.exposes_text():
-            self.expose_current(f"&#{name};")
+            self.expose_current_text(f"&#{name};")
 
 
 def mask_html_code(
@@ -3071,6 +3143,7 @@ JSON_PROSE_FIELDS = {
     "in_scope",
     "journey",
     "learning_check",
+    "name",
     "objective",
     "out_of_scope",
     "owner_role",

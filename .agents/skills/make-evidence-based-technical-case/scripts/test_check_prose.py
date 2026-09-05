@@ -525,6 +525,41 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_joins_adjacent_inline_html_text_for_each_document_format(self) -> None:
+        cases = {
+            "index.html": "<span>Don</span><!-- join --><span>'t deploy.</span>\n",
+            "map.svg": (
+                "<svg><text><tspan>Don</tspan><!-- join -->"
+                "<tspan>'t deploy.</tspan></text></svg>\n"
+            ),
+            "example.md": "<span>Don</span><!-- join --><span>'t deploy.</span>\n",
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            for name, content in cases.items():
+                with self.subTest(name=name):
+                    path = Path(directory) / name
+                    path.write_text(content, encoding="utf-8")
+                    findings = editorial_findings(path)
+                    if path.suffix == ".md":
+                        findings += markdown_findings(
+                            path, load_profile(DEFAULT_PROFILE)
+                        )
+                    self.assertIn(
+                        (1, "contraction"),
+                        {(finding.line, finding.rule) for finding in findings},
+                    )
+
+    def test_does_not_join_html_text_across_rendered_blocks(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "index.html"
+            path.write_text("<p>Don</p><p>'t deploy.</p>\n", encoding="utf-8")
+
+            findings = editorial_findings(path)
+
+        self.assertNotIn(
+            "contraction", {finding.rule for finding in findings}
+        )
+
     def test_checks_standalone_svg_reader_text_only(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "map.svg"
@@ -1141,6 +1176,23 @@ class ProseCheckerTests(unittest.TestCase):
                 (6, "promotional cliche"),
                 (7, "promotional cliche"),
             ],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
+    def test_scans_deliverable_names_as_assignment_prose(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            work_units = Path(directory) / "docs" / "work-units"
+            work_units.mkdir(parents=True)
+            path = work_units / "ui-999.json"
+            path.write_text(
+                '{"deliverables": [{"name": "Unlock the potential."}]}\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(1, "promotional cliche")],
             [(finding.line, finding.rule) for finding in findings],
         )
 
