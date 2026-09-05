@@ -27,6 +27,7 @@
   "red_paths": [
     ".agents/skills/make-evidence-based-technical-case/scripts/check_submission.py",
     ".agents/skills/make-evidence-based-technical-case/scripts/check_submission_freshness.py",
+    ".github/actions/**",
     ".github/workflows/**",
     "client/**/auth.*",
     "client/**/auth/**",

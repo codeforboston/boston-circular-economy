@@ -165,6 +165,22 @@ class LocalReviewRunnerTests(unittest.TestCase):
             issue_template,
         )
 
+    def test_local_github_action_requires_red_review(self) -> None:
+        paths = (
+            ".github/actions/publish-status/action.yml",
+            ".github/actions/publish-status/dist/index.js",
+        )
+        policy = load_risk_policy()
+
+        for path in paths:
+            with self.subTest(path=path):
+                assessment = infer_minimum_risk([path], policy)
+                self.assertEqual("red", assessment["risk"])
+                self.assertEqual(
+                    "red",
+                    effective_risk("green", str(assessment["risk"])),
+                )
+
     def test_migration_path_requires_red_review(self) -> None:
         paths = (
             "client/src/db/migrate.ts",
