@@ -520,6 +520,27 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_ignores_protocol_header_values_but_checks_reader_text(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "headers.ts"
+            path.write_text(
+                'res.setHeader("Content-Security-Policy", '
+                '"default-src self; img-src data:");\n'
+                'response.appendHeader("Link", "</style.css>; rel=preload");\n'
+                'response.headers.set("Content-Type", '
+                '"text/html; charset=utf-8");\n'
+                'reply.header("Link", `</app.css>; rel=preload`);\n'
+                'const message = "Do not deploy; wait.";\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(5, "semicolon")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_checks_html_text_and_reader_facing_attributes(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "index.html"
@@ -606,6 +627,31 @@ class ProseCheckerTests(unittest.TestCase):
                 (5, "semicolon"),
             },
             {(finding.line, finding.rule) for finding in findings},
+        )
+
+    def test_checks_aria_role_descriptions_in_html_and_jsx(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            html_path = Path(directory) / "index.html"
+            html_path.write_text(
+                '<div aria-roledescription="Unlock the potential."></div>\n',
+                encoding="utf-8",
+            )
+            jsx_path = Path(directory) / "example.tsx"
+            jsx_path.write_text(
+                'export const item = <div aria-roledescription="Unlock the potential." />;\n',
+                encoding="utf-8",
+            )
+
+            html_findings = editorial_findings(html_path)
+            jsx_findings = editorial_findings(jsx_path)
+
+        self.assertEqual(
+            [(1, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in html_findings],
+        )
+        self.assertEqual(
+            [(1, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in jsx_findings],
         )
 
     def test_checks_labels_only_for_html_elements_that_render_them(self) -> None:

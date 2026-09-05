@@ -406,11 +406,6 @@ class LocalReviewRunnerTests(unittest.TestCase):
                 cwd=repository,
                 check=True,
             )
-            subprocess.run(
-                ["git", "branch", "trusted-base", base_commit],
-                cwd=repository,
-                check=True,
-            )
             changed = repository / "client/src/lookup.ts"
             changed.parent.mkdir(parents=True)
             changed.write_text("export const lookup = true\n", encoding="utf-8")
@@ -423,7 +418,11 @@ class LocalReviewRunnerTests(unittest.TestCase):
 
             original_resolve = run_local_review.resolve_commit
 
+            resolution_count = 0
+
             def resolve_and_move(repo: Path, reference: str) -> str:
+                nonlocal resolution_count
+                resolution_count += 1
                 resolved = original_resolve(repo, reference)
                 if reference == "review-base":
                     subprocess.run(
@@ -449,7 +448,7 @@ class LocalReviewRunnerTests(unittest.TestCase):
                         "--base",
                         "review-base",
                         "--trusted-ref",
-                        "trusted-base",
+                        "review-base",
                         "--risk",
                         "yellow",
                         "--dry-run",
@@ -459,9 +458,11 @@ class LocalReviewRunnerTests(unittest.TestCase):
 
         self.assertEqual(0, result_code)
         self.assertEqual(base_commit, result["base"])
+        self.assertEqual(base_commit, result["trusted_commit"])
         self.assertEqual("review-base", result["requested_base"])
         self.assertEqual(["client/src/lookup.ts"], result["files"])
         self.assertEqual(result["command"][-2:], ["--base", base_commit])
+        self.assertEqual(1, resolution_count)
 
     def test_integration_review_uses_sol(self) -> None:
         result = self.dry_run("--risk", "yellow", "--task-type", "integration")

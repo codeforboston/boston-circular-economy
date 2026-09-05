@@ -287,7 +287,11 @@ def main(argv: list[str] | None = None) -> int:
     review_base = arguments.base
     if arguments.scope == "branch":
         review_base = resolve_commit(repository, arguments.base)
-    trusted_commit = resolve_commit(repository, arguments.trusted_ref)
+    trusted_commit = (
+        review_base
+        if arguments.scope == "branch" and arguments.trusted_ref == arguments.base
+        else resolve_commit(repository, arguments.trusted_ref)
+    )
     risk_policy = load_json_from_commit(
         repository,
         trusted_commit,

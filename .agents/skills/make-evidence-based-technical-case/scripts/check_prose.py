@@ -85,6 +85,7 @@ HTML_READER_ATTRIBUTES = {
     "alt",
     "aria-description",
     "aria-label",
+    "aria-roledescription",
     "aria-valuetext",
     "placeholder",
     "title",
@@ -1564,6 +1565,9 @@ JAVASCRIPT_DATABASE_RECEIVERS = {
 }
 JAVASCRIPT_CSS_CALL_METHODS = {"insertrule", "replace", "replacesync"}
 JAVASCRIPT_CSS_STYLESHEET_RECEIVERS = {"sheet", "stylesheet"}
+JAVASCRIPT_HEADER_METHODS = {"appendheader", "header", "setheader"}
+JAVASCRIPT_HEADER_COLLECTION_METHODS = {"append", "set"}
+JAVASCRIPT_RESPONSE_RECEIVERS = {"reply", "res", "response"}
 
 
 def javascript_route_argument(tokens: list[str]) -> bool:
@@ -1618,6 +1622,28 @@ def javascript_css_payload(tokens: list[str]) -> bool:
         len(normalized) >= 4
         and normalized[-4] == "setproperty"
         and normalized[-3:] == ["(", "<string>", ","]
+    )
+
+
+def javascript_protocol_header_argument(tokens: list[str]) -> bool:
+    """Return whether the next literal is a static protocol-header argument."""
+
+    normalized = [token.casefold() for token in tokens]
+    if normalized[-2:] == ["<header-argument>", ","]:
+        return True
+    if len(normalized) < 4 or normalized[-1] != "(":
+        return False
+    receiver, separator, method = normalized[-4:-1]
+    if separator != ".":
+        return False
+    if method in JAVASCRIPT_HEADER_METHODS:
+        return True
+    return bool(
+        method in JAVASCRIPT_HEADER_COLLECTION_METHODS
+        and (
+            receiver == "headers"
+            or receiver in JAVASCRIPT_RESPONSE_RECEIVERS
+        )
     )
 
 
@@ -2348,19 +2374,25 @@ def mask_javascript_code(
         character = text[index]
         if character in "'\"":
             end = javascript_string_end(text, index, character)
+            protocol_header = javascript_protocol_header_argument(tokens)
             if not (
                 javascript_module_specifier(tokens)
                 or javascript_route_argument(tokens)
                 or javascript_database_argument(tokens)
                 or javascript_css_payload(tokens)
+                or protocol_header
                 or javascript_identifier_literal(text, index, end)
                 or javascript_property_key(text, index, end, tokens)
             ):
                 copy_javascript_string(text, output, index, end)
             index = end
-            remember_javascript_token(tokens, "<string>")
+            remember_javascript_token(
+                tokens,
+                "<header-argument>" if protocol_header else "<string>",
+            )
             continue
         if character == "`":
+            protocol_header = javascript_protocol_header_argument(tokens)
             index = mask_js_template(
                 text,
                 output,
@@ -2370,11 +2402,15 @@ def mask_javascript_code(
                     or javascript_route_argument(tokens)
                     or javascript_database_argument(tokens)
                     or javascript_css_payload(tokens)
+                    or protocol_header
                     or javascript_template_identifier(text, index)
                 ),
                 parse_jsx=parse_jsx,
             )
-            remember_javascript_token(tokens, "<template>")
+            remember_javascript_token(
+                tokens,
+                "<header-argument>" if protocol_header else "<template>",
+            )
             continue
         if parse_jsx and character == "<" and javascript_expression_start(text, index):
             end = jsx_tag_end(text, index)
