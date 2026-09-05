@@ -394,6 +394,9 @@ class LocalReviewRunnerTests(unittest.TestCase):
         work_unit_validator = (
             ROOT / ".agents/skills/route-agent-work/scripts/validate_work_units.py"
         ).read_text(encoding="utf-8")
+        server_smoke = (ROOT / "server/scripts/smoke-test.mjs").read_text(
+            encoding="utf-8"
+        )
 
         self.assertNotIn("github.event.action != 'edited'", ci_workflow)
         self.assertIn(
@@ -409,6 +412,10 @@ class LocalReviewRunnerTests(unittest.TestCase):
         self.assertIn("invalid-missing-fields.json", ci_workflow)
         self.assertIn("validate_work_units.py", ci_workflow)
         self.assertIn("npm run test:smoke -w server", ci_workflow)
+        self.assertIn("database.close()", server_smoke)
+        self.assertLess(
+            server_smoke.index("database.close()"), server_smoke.index("await rm(")
+        )
         self.assertIn(
             "types: [opened, reopened, synchronize, edited]",
             submission_workflow,

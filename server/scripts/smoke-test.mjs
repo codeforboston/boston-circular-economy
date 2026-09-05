@@ -8,7 +8,10 @@ process.env.DATABASE_URL = join(temporaryDirectory, 'smoke.db')
 process.env.PORT = '0'
 
 let server
+let database
 try {
+  const databaseModule = await import('../dist/db/index.js')
+  database = databaseModule.default
   const serverModule = await import('../dist/index.js')
   server = serverModule.default
   if (!server.listening) {
@@ -32,6 +35,9 @@ try {
     await new Promise((resolve, reject) => {
       server.close((error) => (error ? reject(error) : resolve()))
     })
+  }
+  if (database?.open) {
+    database.close()
   }
   await rm(temporaryDirectory, { recursive: true, force: true })
 }

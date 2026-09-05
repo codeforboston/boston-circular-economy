@@ -9,6 +9,7 @@ from check_prose import (
     editorial_findings,
     load_profile,
     markdown_findings,
+    prose_files,
 )
 
 
@@ -337,6 +338,26 @@ class ProseCheckerTests(unittest.TestCase):
             rules = {finding.rule for finding in editorial_findings(path)}
 
         self.assertIn("formulaic AI opening", rules)
+
+    def test_checks_html_text_and_reader_facing_attributes(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "index.html"
+            path.write_text(
+                "<script>Unlock the potential.</script>\n"
+                "<p>Unlock the potential.</p>\n"
+                '<img src="/unlock-the-potential.png" '
+                'alt="Unlock the potential.">\n',
+                encoding="utf-8",
+            )
+
+            files = prose_files([Path(directory)])
+            findings = editorial_findings(path)
+
+        self.assertIn(path, files)
+        self.assertEqual(
+            [(2, "promotional cliche"), (3, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
 
     def test_ignores_javascript_identifiers_but_checks_reader_text(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

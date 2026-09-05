@@ -9,6 +9,7 @@ import re
 import sys
 import tokenize
 from dataclasses import dataclass
+from html.parser import HTMLParser
 from pathlib import Path
 
 from check_submission import mask_inline_code_spans, mask_markdown_code_blocks
@@ -22,6 +23,7 @@ SCANNED_SUFFIXES = {
     ".js",
     ".jsx",
     ".json",
+    ".html",
     ".md",
     ".mjs",
     ".py",
@@ -65,6 +67,19 @@ URL = re.compile(r"https?://\S+")
 MARKDOWN_ATX_HEADING = re.compile(r"^[ ]{0,3}#{1,6}(?:[ \t]+|$)")
 MARKDOWN_LINK_DEFINITION = re.compile(
     r"(?m)^[ ]{0,3}\[[^]\r\n]+]:[ \t]*(?P<destination><[^>\r\n]*>|\S+)"
+)
+HTML_READER_ATTRIBUTES = {
+    "alt",
+    "aria-description",
+    "aria-label",
+    "placeholder",
+    "title",
+}
+HTML_SUPPRESSED_ELEMENTS = {"code", "pre", "script", "style", "template"}
+HTML_ATTRIBUTE = re.compile(
+    r"""(?P<name>[A-Za-z_:][-A-Za-z0-9_:.]*)[ \t\r\n]*=[ \t\r\n]*"""
+    r"""(?:"(?P<double>[^"]*)"|'(?P<single>[^']*)'|"""
+    r"""(?P<bare>[^\s"'=<>`]+))"""
 )
 CONTRACTION = re.compile(
     r"\b(?:can't|cannot've|couldn't|didn't|doesn't|don't|hadn't|hasn't|haven't|"
@@ -508,6 +523,93 @@ def copy_span(output: list[str], source: str, start: int, end: int) -> None:
 
 def mask_span(output: list[str], source: str, start: int, end: int) -> None:
     output[start:end] = blank_like(source[start:end])
+
+
+class ReaderFacingHtmlParser(HTMLParser):
+    """Copy visible HTML text and reader-facing attributes into a text mask."""
+
+    def __init__(self, source: str, output: list[str]) -> None:
+        super().__init__(convert_charrefs=False)
+        self.source = source
+        self.output = output
+        self.offsets = line_offsets(source)
+        self.suppressed_elements: list[str] = []
+
+    def current_offset(self) -> int:
+        line, column = self.getpos()
+        return self.offsets[line - 1] + column
+
+    def expose_current(self, value: str) -> None:
+        start = self.current_offset()
+        copy_span(self.output, self.source, start, start + len(value))
+
+    def expose_attributes(self) -> None:
+        raw_tag = self.get_starttag_text()
+        tag_start = self.current_offset()
+        for match in HTML_ATTRIBUTE.finditer(raw_tag):
+            if match.group("name").casefold() not in HTML_READER_ATTRIBUTES:
+                continue
+            value_group = next(
+                group
+                for group in ("double", "single", "bare")
+                if match.group(group) is not None
+            )
+            value_start, value_end = match.span(value_group)
+            copy_span(
+                self.output,
+                self.source,
+                tag_start + value_start,
+                tag_start + value_end,
+            )
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        del attrs
+        normalized_tag = tag.casefold()
+        if normalized_tag in HTML_SUPPRESSED_ELEMENTS:
+            self.suppressed_elements.append(normalized_tag)
+            return
+        if not self.suppressed_elements:
+            self.expose_attributes()
+
+    def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        del attrs
+        if (
+            not self.suppressed_elements
+            and tag.casefold() not in HTML_SUPPRESSED_ELEMENTS
+        ):
+            self.expose_attributes()
+
+    def handle_endtag(self, tag: str) -> None:
+        normalized_tag = tag.casefold()
+        if normalized_tag in self.suppressed_elements:
+            matching_index = (
+                len(self.suppressed_elements)
+                - 1
+                - self.suppressed_elements[::-1].index(normalized_tag)
+            )
+            del self.suppressed_elements[matching_index:]
+
+    def handle_data(self, data: str) -> None:
+        if not self.suppressed_elements:
+            self.expose_current(data)
+
+    def handle_entityref(self, name: str) -> None:
+        if not self.suppressed_elements:
+            self.expose_current(f"&{name};")
+
+    def handle_charref(self, name: str) -> None:
+        if not self.suppressed_elements:
+            self.expose_current(f"&#{name};")
+
+
+def mask_html_code(text: str) -> str:
+    """Return visible HTML prose with source line positions preserved."""
+
+    output = list(blank_like(text))
+    parser = ReaderFacingHtmlParser(text, output)
+    parser.feed(text)
+    parser.close()
+    return decode_markdown_entities("".join(output))
 
 
 def copy_decoded_text(
@@ -1797,6 +1899,8 @@ def mask_source_code(path: Path, text: str) -> str:
         output = list(blank_like(text))
         mask_javascript_code(text, output)
         return "".join(output)
+    if suffix == ".html":
+        return mask_html_code(text)
     if suffix in {".yaml", ".yml"}:
         return mask_yaml_code(text, mask_actions_commands=github_actions_yaml(path))
     if suffix == ".toml":
