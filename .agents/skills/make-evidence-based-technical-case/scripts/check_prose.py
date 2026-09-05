@@ -85,6 +85,7 @@ HTML_READER_ATTRIBUTES = {
     "alt",
     "aria-description",
     "aria-label",
+    "aria-placeholder",
     "aria-roledescription",
     "aria-valuetext",
     "placeholder",

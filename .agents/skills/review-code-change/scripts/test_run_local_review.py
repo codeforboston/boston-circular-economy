@@ -167,6 +167,9 @@ class LocalReviewRunnerTests(unittest.TestCase):
 
     def test_migration_path_requires_red_review(self) -> None:
         paths = (
+            "client/src/db/migrate.ts",
+            "client/src/db/migration.ts",
+            "client/src/db/migrations/add-index.ts",
             "etl/migrate.py",
             "etl/migration.py",
             "etl/migrations/0001_initial.py",

@@ -629,16 +629,18 @@ class ProseCheckerTests(unittest.TestCase):
             {(finding.line, finding.rule) for finding in findings},
         )
 
-    def test_checks_aria_role_descriptions_in_html_and_jsx(self) -> None:
+    def test_checks_accessible_aria_descriptions_in_html_and_jsx(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             html_path = Path(directory) / "index.html"
             html_path.write_text(
-                '<div aria-roledescription="Unlock the potential."></div>\n',
+                '<div aria-roledescription="Unlock the potential."></div>\n'
+                '<div role="textbox" aria-placeholder="Unlock the potential."></div>\n',
                 encoding="utf-8",
             )
             jsx_path = Path(directory) / "example.tsx"
             jsx_path.write_text(
-                'export const item = <div aria-roledescription="Unlock the potential." />;\n',
+                'const item = <div aria-roledescription="Unlock the potential." />;\n'
+                'const field = <div role="textbox" aria-placeholder="Unlock the potential." />;\n',
                 encoding="utf-8",
             )
 
@@ -646,11 +648,11 @@ class ProseCheckerTests(unittest.TestCase):
             jsx_findings = editorial_findings(jsx_path)
 
         self.assertEqual(
-            [(1, "promotional cliche")],
+            [(1, "promotional cliche"), (2, "promotional cliche")],
             [(finding.line, finding.rule) for finding in html_findings],
         )
         self.assertEqual(
-            [(1, "promotional cliche")],
+            [(1, "promotional cliche"), (2, "promotional cliche")],
             [(finding.line, finding.rule) for finding in jsx_findings],
         )
 

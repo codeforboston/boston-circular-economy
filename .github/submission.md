@@ -143,6 +143,8 @@ issue existed.
 - Keep static protocol-header arguments outside reader-prose checks.
 - Scan `aria-roledescription` values in HTML and JSX.
 - Enforce accepted prerequisites before a dependent work unit can start.
+- Route client persistence migrations to Red review.
+- Scan `aria-placeholder` values in HTML and JSX.
 
 ## Challenge cases
 
@@ -256,6 +258,8 @@ issue existed.
 - Author-defined ARIA role descriptions remain visible to wording checks.
 - A dependent unit cannot enter a started, review, revision, or accepted state while a
   prerequisite remains unaccepted. The waiting state remains valid.
+- Client, server, and ETL migration paths all require Red review.
+- Custom textbox placeholders exposed through ARIA remain visible to wording checks.
 - Red review stops for specialist and human escalation, including ETL credential and secret paths.
 
 ## Evidence
@@ -305,6 +309,7 @@ password and authentication-token risk floor.
 Examine resolved-base reuse and programmatic CSS payload classification.
 Examine shared-ref resolution, protocol-header classification, and ARIA role descriptions.
 Examine prerequisite-state enforcement for dependent work units.
+Examine client migration routing and ARIA placeholder coverage.
 Examine Python resource identifiers, heading termination, hook suffix coverage, and the
 Red workflow risk floor. Confirm the deployment reconcile step verifies the selected
 run has an unexpired client artifact before it marks the deployment ready. Confirm
