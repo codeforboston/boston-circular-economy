@@ -102,6 +102,43 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_ignores_markdown_destinations_but_checks_visible_labels(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.md"
+            path.write_text(
+                "[API reference](https://example.com/unlock)\n"
+                "![Map](https://example.com/robust(icon))\n"
+                "[Unlock the potential.](https://example.com/reference)\n"
+                '[Guide](https://example.com/reference "Unlock the potential.")\n'
+                "https://example.com/powerful\n"
+                '[api]: /unlock "Reference"\n'
+                '[guide]: /reference "Unlock the potential."\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [
+                (3, "promotional cliche"),
+                (4, "promotional cliche"),
+                (7, "promotional cliche"),
+            ],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
+    def test_rejects_contractions_in_markdown_headings(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.md"
+            path.write_text("# Don't deploy\n", encoding="utf-8")
+
+            findings = markdown_findings(path, load_profile(DEFAULT_PROFILE))
+
+        self.assertEqual(
+            [(1, "contraction")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_shorter_inner_fence_does_not_close_a_longer_outer_fence(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.md"
@@ -422,6 +459,24 @@ class ProseCheckerTests(unittest.TestCase):
                 (5, "promotional cliche"),
                 (6, "promotional cliche"),
             ],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
+    def test_decodes_python_reader_text_escapes(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.py"
+            path.write_text(
+                'message = "Don\\x27t proceed."\n'
+                'unicode_message = "Don\\u0027t proceed."\n'
+                'formatted = f"Don\\x27t proceed, {name}."\n'
+                'raw_message = r"Don\\x27t proceed."\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(1, "contraction"), (2, "contraction"), (3, "contraction")],
             [(finding.line, finding.rule) for finding in findings],
         )
 

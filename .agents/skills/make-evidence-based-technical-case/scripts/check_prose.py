@@ -61,6 +61,10 @@ SENTENCE_END = re.compile(r"(?<=[.!?])(?:\s+|$)")
 IMAGE = re.compile(r"!\[[^]]*]\([^)]+\)")
 LINK = re.compile(r"\[([^]]+)]\([^)]+\)")
 URL = re.compile(r"https?://\S+")
+MARKDOWN_ATX_HEADING = re.compile(r"^[ ]{0,3}#{1,6}(?:[ \t]+|$)")
+MARKDOWN_LINK_DEFINITION = re.compile(
+    r"(?m)^[ ]{0,3}\[[^]\r\n]+]:[ \t]*(?P<destination><[^>\r\n]*>|\S+)"
+)
 CONTRACTION = re.compile(
     r"\b(?:can't|cannot've|couldn't|didn't|doesn't|don't|hadn't|hasn't|haven't|"
     r"isn't|mustn't|shan't|shouldn't|wasn't|weren't|won't|wouldn't|"
@@ -220,6 +224,86 @@ def plain_markdown(line: str) -> str:
     return " ".join(text.split())
 
 
+def markdown_character_is_escaped(text: str, index: int) -> bool:
+    """Return whether an odd backslash run escapes one Markdown character."""
+
+    backslashes = 0
+    index -= 1
+    while index >= 0 and text[index] == "\\":
+        backslashes += 1
+        index -= 1
+    return backslashes % 2 == 1
+
+
+def markdown_link_destination_end(text: str, start: int) -> int | None:
+    """Return the end of one inline destination without consuming its title."""
+
+    if start < len(text) and text[start] == "<":
+        index = start + 1
+        while index < len(text) and text[index] not in "\r\n":
+            if text[index] == ">" and not markdown_character_is_escaped(text, index):
+                return index + 1
+            index += 1
+        return None
+
+    nested_parentheses = 0
+    index = start
+    while index < len(text):
+        character = text[index]
+        if character == "\\":
+            index += 2
+            continue
+        if character in "\r\n":
+            return None
+        if character.isspace() and nested_parentheses == 0:
+            return index
+        if character == "(":
+            nested_parentheses += 1
+        elif character == ")":
+            if nested_parentheses == 0:
+                return index
+            nested_parentheses -= 1
+        index += 1
+    return None
+
+
+def mask_markdown_link_destinations(text: str) -> str:
+    """Hide inline-link destinations and bare URLs while retaining visible labels."""
+
+    output = list(text)
+    cursor = 0
+    while cursor < len(text):
+        marker = text.find("](", cursor)
+        if marker < 0:
+            break
+        line_start = text.rfind("\n", 0, marker) + 1
+        label_start = text.rfind("[", line_start, marker)
+        if (
+            label_start < 0
+            or markdown_character_is_escaped(text, label_start)
+            or markdown_character_is_escaped(text, marker)
+            or markdown_character_is_escaped(text, marker + 1)
+        ):
+            cursor = marker + 2
+            continue
+
+        destination_start = marker + 2
+        destination_end = markdown_link_destination_end(text, destination_start)
+        if destination_end is None:
+            cursor = marker + 2
+            continue
+        mask_span(output, text, destination_start, destination_end)
+        cursor = destination_end
+
+    masked = "".join(output)
+    for match in MARKDOWN_LINK_DEFINITION.finditer(masked):
+        mask_span(output, text, match.start("destination"), match.end("destination"))
+    masked = "".join(output)
+    for match in URL.finditer(masked):
+        mask_span(output, text, match.start(), match.end())
+    return "".join(output)
+
+
 def eligible_markdown_line(line: str) -> bool:
     stripped = line.strip()
     if not stripped:
@@ -293,6 +377,16 @@ def markdown_findings(path: Path, profile: dict[str, object]) -> list[Finding]:
         if in_frontmatter:
             in_frontmatter = stripped != "---"
             continue
+        if MARKDOWN_ATX_HEADING.match(checked_line):
+            flush()
+            heading_text = plain_markdown(checked_line)
+            if not bool(profile["permit_contractions_in_prose"]) and CONTRACTION.search(
+                heading_text
+            ):
+                findings.append(
+                    Finding(path, number, "contraction", "contraction in prose")
+                )
+            continue
         if not eligible_markdown_line(checked_line):
             flush()
             continue
@@ -345,7 +439,7 @@ def editorial_findings(path: Path) -> list[Finding]:
     source_text = path.read_text(encoding="utf-8")
     suffix = path.suffix.casefold()
     if suffix == ".md":
-        text = mask_markdown_code(source_text)
+        text = mask_markdown_link_destinations(mask_markdown_code(source_text))
     else:
         text = mask_source_code(path, source_text)
     for name, pattern in EDITORIAL_PATTERNS.items():
@@ -383,12 +477,58 @@ def mask_span(output: list[str], source: str, start: int, end: int) -> None:
     output[start:end] = blank_like(source[start:end])
 
 
+def copy_decoded_text(
+    output: list[str], source: str, start: int, end: int, decoded: str
+) -> None:
+    """Copy decoded text into its source span without moving source line boundaries."""
+
+    cursor = start
+    for character in decoded:
+        if character in "\r\n":
+            newline = source.find("\n", cursor, end)
+            if newline >= 0:
+                cursor = newline + 1
+                continue
+            character = " "
+        while cursor < end and source[cursor] in "\r\n":
+            cursor += 1
+        if cursor >= end:
+            return
+        output[cursor] = " " if character.isspace() else character
+        cursor += 1
+
+
 def position_offset(offsets: list[int], position: tuple[int, int]) -> int:
     line, column = position
     return offsets[line - 1] + column
 
 
 PYTHON_STRING_START = re.compile(r"(?i:([rubf]*))(\"\"\"|'''|\"|')")
+
+
+def decoded_python_segment(segment: str, prefix: str, delimiter: str) -> str:
+    """Decode one Python string segment without evaluating an f-string expression."""
+
+    literal_prefix = "".join(
+        character for character in prefix if character.casefold() != "f"
+    )
+    try:
+        value = ast.literal_eval(f"{literal_prefix}{delimiter}{segment}{delimiter}")
+    except (SyntaxError, ValueError):
+        return segment
+    return value if isinstance(value, str) else segment
+
+
+def copy_decoded_python_segment(
+    text: str,
+    output: list[str],
+    start: int,
+    end: int,
+    prefix: str,
+    delimiter: str,
+) -> None:
+    decoded = decoded_python_segment(text[start:end], prefix, delimiter)
+    copy_decoded_text(output, text, start, end, decoded)
 
 
 def python_fstring_expression_end(text: str, start: int, end: int) -> int | None:
@@ -433,17 +573,24 @@ def python_fstring_expression_end(text: str, start: int, end: int) -> int | None
 
 
 def copy_python_string(text: str, output: list[str], start: int, end: int) -> None:
-    """Copy string text while hiding replacement fields in legacy f-string tokens."""
+    """Decode string text while hiding replacement fields in legacy f-string tokens."""
 
     value = text[start:end]
     match = PYTHON_STRING_START.match(value)
-    if match is None or "f" not in match.group(1).casefold():
+    if match is None:
         copy_span(output, text, start, end)
         return
 
+    prefix = match.group(1)
     delimiter = match.group(2)
     content_start = start + match.end()
     content_end = end - len(delimiter) if value.endswith(delimiter) else end
+    if "f" not in prefix.casefold():
+        copy_decoded_python_segment(
+            text, output, content_start, content_end, prefix, delimiter
+        )
+        return
+
     copy_span(output, text, start, content_start)
     index = content_start
     literal_start = content_start
@@ -457,7 +604,10 @@ def copy_python_string(text: str, output: list[str], start: int, end: int) -> No
         if text[index] != "{":
             index += 1
             continue
-        copy_span(output, text, literal_start, index + 1)
+        copy_decoded_python_segment(
+            text, output, literal_start, index, prefix, delimiter
+        )
+        copy_span(output, text, index, index + 1)
         expression_end = python_fstring_expression_end(text, index + 1, content_end)
         if expression_end is None:
             copy_span(output, text, index + 1, content_end)
@@ -466,7 +616,9 @@ def copy_python_string(text: str, output: list[str], start: int, end: int) -> No
         copy_span(output, text, expression_end, expression_end + 1)
         index = expression_end + 1
         literal_start = index
-    copy_span(output, text, literal_start, content_end)
+    copy_decoded_python_segment(
+        text, output, literal_start, content_end, prefix, delimiter
+    )
     copy_span(output, text, content_end, end)
 
 
@@ -662,6 +814,7 @@ def mask_python_code(text: str) -> str:
     fstring_middle = getattr(tokenize, "FSTRING_MIDDLE", None)
     fstring_end = getattr(tokenize, "FSTRING_END", None)
     fstring_depth = 0
+    fstring_contexts: list[tuple[str, str]] = []
     for token in tokens:
         start = position_offset(offsets, token.start)
         end = position_offset(offsets, token.end)
@@ -679,15 +832,22 @@ def mask_python_code(text: str) -> str:
             continue
         if fstring_start is not None and token.type == fstring_start:
             fstring_depth += 1
+            match = PYTHON_STRING_START.match(token.string)
+            if match is None:
+                fstring_contexts.append(("", '"'))
+            else:
+                fstring_contexts.append((match.group(1), match.group(2)))
             if fstring_depth == 1:
                 copy_span(output, text, start, end)
         elif fstring_middle is not None and token.type == fstring_middle:
             if fstring_depth == 1:
-                copy_span(output, text, start, end)
+                prefix, delimiter = fstring_contexts[-1]
+                copy_decoded_python_segment(text, output, start, end, prefix, delimiter)
         elif fstring_end is not None and token.type == fstring_end:
             if fstring_depth == 1:
                 copy_span(output, text, start, end)
             fstring_depth -= 1
+            fstring_contexts.pop()
         elif token.type == tokenize.STRING and fstring_depth == 0:
             copy_python_string(text, output, start, end)
         elif token.type == tokenize.COMMENT and fstring_depth == 0:

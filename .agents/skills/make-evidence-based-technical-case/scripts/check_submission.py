@@ -80,7 +80,7 @@ REQUIRED_EVIDENCE_CHECKS = (
 )
 EVIDENCE_HEADER = ("Check", "Result", "Evidence or reason not run")
 ALLOWED_EVIDENCE_RESULTS = {"pass", "fail", "not run", "not affected"}
-SECTION_HEADING = re.compile(r"(?m)^##\s+(.+?)\s*$")
+SECTION_HEADING = re.compile(r"(?m)^##[ \t]+(.+?)[ \t]*$")
 TRAILING_HEADING_MARKS = re.compile(r"[ \t]+#+[ \t]*$")
 FENCE_START = re.compile(r"(`{3,}|~{3,})[^\r\n]*$")
 LIST_ITEM_START = re.compile(
@@ -365,19 +365,44 @@ def mask_markdown_code_blocks(body: str) -> str:
     return "".join(output)
 
 
-def section_map(body: str) -> dict[str, str]:
+def section_map(body: str, value_source: str | None = None) -> dict[str, str]:
+    """Map headings found in one view to content from an offset-aligned source."""
+
+    source = body if value_source is None else value_source
+    if len(source) != len(body):
+        raise ValueError("section source must preserve structural offsets")
     headings = list(SECTION_HEADING.finditer(body))
     sections: dict[str, str] = {}
     for index, heading in enumerate(headings):
         start = heading.end()
         end = headings[index + 1].start() if index + 1 < len(headings) else len(body)
-        sections[normalize_section_name(heading.group(1))] = body[start:end].strip()
+        sections[normalize_section_name(heading.group(1))] = source[start:end]
     return sections
 
 
-def labeled_values(content: str, label: str) -> list[str]:
+def labeled_values(
+    content: str, label: str, value_source: str | None = None
+) -> list[str]:
+    """Read labels from one view and values from an offset-aligned source."""
+
+    source = content if value_source is None else value_source
+    if len(source) != len(content):
+        raise ValueError("label source must preserve structural offsets")
     pattern = re.compile(rf"(?im)^[ \t]*-[ \t]*{re.escape(label)}[ \t]*([^\r\n]*)$")
-    return [match.group(1) for match in pattern.finditer(content)]
+    return [
+        source[match.start(1) : match.end(1)] for match in pattern.finditer(content)
+    ]
+
+
+def selected_checkbox_values(structure: str, value_source: str) -> list[str]:
+    """Read selected checkbox text without letting inline code define the control."""
+
+    if len(structure) != len(value_source):
+        raise ValueError("checkbox source must preserve structural offsets")
+    return [
+        value_source[match.start(1) : match.end(1)]
+        for match in SELECTED_AI_BOX.finditer(structure)
+    ]
 
 
 def unescaped_pipe_positions(value: str) -> list[int]:
@@ -412,13 +437,20 @@ def evidence_row_cells(line: str) -> list[str] | None:
     return cells
 
 
-def evidence_findings(content: str) -> list[SubmissionFinding]:
+def evidence_findings(
+    content: str, structural_content: str | None = None
+) -> list[SubmissionFinding]:
     findings: list[SubmissionFinding] = []
     lines = content.splitlines()
+    structural_lines = (
+        lines if structural_content is None else structural_content.splitlines()
+    )
+    if len(lines) != len(structural_lines):
+        raise ValueError("evidence structure must preserve source lines")
     normalized_header = tuple(cell.casefold() for cell in EVIDENCE_HEADER)
     header_indexes = [
         index
-        for index, line in enumerate(lines)
+        for index, line in enumerate(structural_lines)
         if (cells := evidence_row_cells(line)) is not None
         and tuple(" ".join(cell.split()).casefold() for cell in cells)
         == normalized_header
@@ -433,8 +465,8 @@ def evidence_findings(content: str) -> list[SubmissionFinding]:
     header_index = header_indexes[0]
     delimiter_index = header_index + 1
     delimiter = (
-        evidence_row_cells(lines[delimiter_index])
-        if delimiter_index < len(lines)
+        evidence_row_cells(structural_lines[delimiter_index])
+        if delimiter_index < len(structural_lines)
         else None
     )
     if (
@@ -449,11 +481,17 @@ def evidence_findings(content: str) -> list[SubmissionFinding]:
         ]
 
     rows: list[list[str]] = []
-    for line in lines[delimiter_index + 1 :]:
-        cells = evidence_row_cells(line)
-        if cells is None:
+    for index in range(delimiter_index + 1, len(structural_lines)):
+        structural_cells = evidence_row_cells(structural_lines[index])
+        if structural_cells is None:
             break
-        rows.append(cells)
+        visible_cells = evidence_row_cells(lines[index])
+        if visible_cells is None:
+            findings.append(
+                SubmissionFinding("evidence-table", "use visible pipe-delimited rows")
+            )
+            continue
+        rows.append(visible_cells)
     if not rows:
         return [SubmissionFinding("evidence-table", "add at least one check row")]
 
@@ -501,10 +539,12 @@ def evidence_findings(content: str) -> list[SubmissionFinding]:
 def check_submission(body: str) -> list[SubmissionFinding]:
     findings: list[SubmissionFinding] = []
     record = mask_markdown_code_blocks(body)
-    sections = section_map(record)
+    structural_record = mask_inline_code_spans(record)
+    sections = section_map(structural_record, record)
+    structural_sections = section_map(structural_record)
     section_names = [
         normalize_section_name(match.group(1))
-        for match in SECTION_HEADING.finditer(record)
+        for match in SECTION_HEADING.finditer(structural_record)
     ]
 
     for name in REQUIRED_SECTIONS:
@@ -518,9 +558,11 @@ def check_submission(body: str) -> list[SubmissionFinding]:
             findings.append(SubmissionFinding("empty-section", name))
 
     for section_name, labels in REQUIRED_SECTION_LABELS.items():
-        content = sections.get(normalize_section_name(section_name), "")
+        section_key = normalize_section_name(section_name)
+        content = sections.get(section_key, "")
+        structural_content = structural_sections.get(section_key, "")
         for label in labels:
-            values = labeled_values(content, label)
+            values = labeled_values(structural_content, label, content)
             if not values:
                 findings.append(
                     SubmissionFinding("missing-label", f"{section_name}: {label}")
@@ -534,46 +576,51 @@ def check_submission(body: str) -> list[SubmissionFinding]:
                     SubmissionFinding("empty-label", f"{section_name}: {label}")
                 )
 
-    record_without_inline_code = mask_inline_code_spans(record)
-    if has_unclosed_html_comment(record_without_inline_code):
+    if has_unclosed_html_comment(structural_record):
         findings.append(
             SubmissionFinding(
                 "unclosed-html-comment", "close or remove every HTML comment"
             )
         )
-    if PLACEHOLDER.search(record_without_inline_code):
+    if PLACEHOLDER.search(structural_record):
         findings.append(
             SubmissionFinding("template-placeholder", "remove all HTML placeholders")
         )
-    if RAW_HTML_TAG.search(record_without_inline_code):
+    if RAW_HTML_TAG.search(structural_record):
         findings.append(
             SubmissionFinding("raw-html", "use visible Markdown instead of HTML tags")
         )
-    if HTML_ENTITY.search(record_without_inline_code):
+    if HTML_ENTITY.search(structural_record):
         findings.append(
             SubmissionFinding(
                 "html-entity", "use visible characters instead of HTML entities"
             )
         )
-    if not ISSUE_REFERENCE.search(record) and not ISSUE_EXCEPTION.search(record):
+    if not ISSUE_REFERENCE.search(structural_record) and not ISSUE_EXCEPTION.search(
+        structural_record
+    ):
         findings.append(
             SubmissionFinding(
                 "issue-reference",
                 "add Closes #<number> or a specific Issue exception",
             )
         )
-    risk_section = sections.get(normalize_section_name("Risk and scope"), "")
-    risk_values = labeled_values(risk_section, "Risk lane:")
+    risk_key = normalize_section_name("Risk and scope")
+    risk_section = sections.get(risk_key, "")
+    structural_risk_section = structural_sections.get(risk_key, "")
+    risk_values = labeled_values(structural_risk_section, "Risk lane:", risk_section)
     if len(risk_values) != 1 or risk_values[0].strip().casefold() not in {
         "green",
         "yellow",
         "red",
     }:
         findings.append(SubmissionFinding("risk-lane", "select Green, Yellow, or Red"))
-    ai_section = sections.get(normalize_section_name("AI assistance"), "")
+    ai_key = normalize_section_name("AI assistance")
+    ai_section = sections.get(ai_key, "")
+    structural_ai_section = structural_sections.get(ai_key, "")
     selected_ai_options = [
-        " ".join(match.group(1).split()).casefold()
-        for match in SELECTED_AI_BOX.finditer(ai_section)
+        " ".join(value.split()).casefold()
+        for value in selected_checkbox_values(structural_ai_section, ai_section)
     ]
     supported_ai_options = {option.casefold() for option in AI_DISCLOSURE_OPTIONS}
     selected_supported_options = {
@@ -601,12 +648,14 @@ def check_submission(body: str) -> list[SubmissionFinding]:
                 "do not combine no substantial assistance with an AI-assisted choice",
             )
         )
-    documentation_section = sections.get(
-        normalize_section_name("Documentation and learning"), ""
-    )
+    documentation_key = normalize_section_name("Documentation and learning")
+    documentation_section = sections.get(documentation_key, "")
+    structural_documentation_section = structural_sections.get(documentation_key, "")
     selected_documentation_options = [
-        " ".join(match.group(1).split()).casefold()
-        for match in SELECTED_AI_BOX.finditer(documentation_section)
+        " ".join(value.split()).casefold()
+        for value in selected_checkbox_values(
+            structural_documentation_section, documentation_section
+        )
     ]
     supported_documentation_options = {
         option.casefold() for option in DOCUMENTATION_OPTIONS
@@ -646,8 +695,10 @@ def check_submission(body: str) -> list[SubmissionFinding]:
         )
     evidence_key = normalize_section_name("Evidence")
     if evidence_key in sections:
-        findings.extend(evidence_findings(sections[evidence_key]))
-    if ACCOUNTABILITY_PARAGRAPH.search(record) is None:
+        findings.extend(
+            evidence_findings(sections[evidence_key], structural_sections[evidence_key])
+        )
+    if ACCOUNTABILITY_PARAGRAPH.search(structural_record) is None:
         findings.append(
             SubmissionFinding("accountability", "include the submitter attestation")
         )

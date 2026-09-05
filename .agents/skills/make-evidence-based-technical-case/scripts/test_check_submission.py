@@ -131,6 +131,20 @@ class CheckSubmissionTests(unittest.TestCase):
         rules = [finding.rule for finding in check_submission.check_submission(body)]
         self.assertIn("missing-section", rules)
 
+    def test_heading_inside_inline_code_does_not_define_a_section(self) -> None:
+        body = VALID_BODY.replace("## Claim", "`## Claim`")
+
+        findings = check_submission.check_submission(body)
+
+        self.assertIn(
+            "Claim",
+            [
+                finding.detail
+                for finding in findings
+                if finding.rule == "missing-section"
+            ],
+        )
+
     def test_template_bullet_does_not_fill_a_required_section(self) -> None:
         body = VALID_BODY.replace(
             "- Route lookup through the service.",
@@ -212,6 +226,63 @@ class CheckSubmissionTests(unittest.TestCase):
             finding.detail for finding in check_submission.check_submission(body)
         ]
         self.assertIn("Decision explanation: Revisit when:", details)
+
+    def test_label_inside_multiline_inline_code_does_not_count(self) -> None:
+        body = VALID_BODY.replace(
+            "- Rebuttal: Provider data can become stale.",
+            "`- Rebuttal:\nProvider data can become stale.`",
+        )
+
+        details = [
+            finding.detail for finding in check_submission.check_submission(body)
+        ]
+
+        self.assertIn("Technical case: Rebuttal:", details)
+
+    def test_inline_code_does_not_define_submission_controls(self) -> None:
+        cases = (
+            (
+                VALID_BODY.replace("Closes #123", "`Closes #123`"),
+                "issue-reference",
+            ),
+            (
+                VALID_BODY.replace("- Risk lane: Yellow", "`- Risk lane: Yellow`"),
+                "risk-lane",
+            ),
+            (
+                VALID_BODY.replace(
+                    "- [x] No substantial AI assistance",
+                    "`- [x] No substantial AI assistance`",
+                ),
+                "ai-disclosure",
+            ),
+            (
+                VALID_BODY.replace(
+                    "- [x] No documentation change is needed",
+                    "`- [x] No documentation change is needed`",
+                ),
+                "documentation-disclosure",
+            ),
+            (
+                VALID_BODY.replace(
+                    "| Check | Result | Evidence or reason not run |",
+                    "`| Check | Result | Evidence or reason not run |`",
+                ),
+                "evidence-table",
+            ),
+            (
+                VALID_BODY.replace(ACCOUNTABILITY, f"`{ACCOUNTABILITY}`"),
+                "accountability",
+            ),
+        )
+
+        for body, expected_rule in cases:
+            with self.subTest(expected_rule=expected_rule):
+                rules = {
+                    finding.rule for finding in check_submission.check_submission(body)
+                }
+
+                self.assertIn(expected_rule, rules)
 
     def test_empty_why_label_fails(self) -> None:
         body = VALID_BODY.replace(

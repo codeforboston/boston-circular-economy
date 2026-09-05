@@ -67,6 +67,10 @@ issue existed.
 - Use one Markdown inline-code parser that keeps escaped backticks visible to both prose and submission checks.
 - Reject an unclosed visible HTML comment in a submission record while allowing comment syntax in code examples.
 - Publish one terminal submission status after the final live-head check instead of publishing an intermediate pending status.
+- Mask inline code before parsing submission headings, labels, checkboxes, issue references, evidence tables, and attestation text.
+- Check contractions in visible Markdown headings without applying paragraph limits to those headings.
+- Keep Markdown link labels and titles in prose checks while excluding destinations and bare URLs.
+- Decode non-raw Python reader strings before editorial matching, including f-string literal segments.
 
 ## Challenge cases
 
@@ -98,6 +102,10 @@ issue existed.
 - Escaped Markdown backticks remain visible punctuation and cannot hide prose or raw HTML.
 - A visible unclosed HTML comment fails submission validation, while the same syntax in a code span or fenced example remains inert.
 - A stale run for one of two pull requests at the same head cannot leave the shared commit status pending.
+- A required heading, label, checkbox, issue reference, or attestation inside inline code cannot satisfy the submission contract.
+- A contraction in a visible Markdown heading fails even though the heading is outside paragraph-length checks.
+- A prohibited term in an external Markdown destination or bare URL remains inert, while the same term in a visible label or title fails.
+- Hexadecimal and Unicode escapes in non-raw Python reader strings are checked as rendered text, while raw strings retain literal backslashes.
 - An unclosed list fence stops masking when visible prose leaves the list container.
 - An unclosed quote fence stops masking when the quote depth decreases.
 - A clean server install initializes temporary SQLite and returns `pong` from `/ping`.
@@ -111,7 +119,7 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass; startup creates temporary SQLite and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 106 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 112 communication and submission tests |
 | Routing policy | Pass | 34 routing and hook-context tests, policy validation, and model-route samples |
 | Review policy and model routing | Pass | 25 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation plus commit-stage and push-stage runs |
@@ -133,7 +141,8 @@ I read and understand the submitted diff. I verified the evidence above and rema
 ## Review focus and uncertainty
 
 Review the versioned first-parent record boundary, terminal-only status publication,
-native SQLite lockfile changes, path mapping, evidence threshold, model defaults, and
+Markdown structure and prose boundaries, and Python escape decoding. Examine native
+SQLite lockfile changes, path mapping, evidence threshold, model defaults, and
 protected-branch activation steps.
 
 The repository has not observed the submission workflow from `main`. A repository
