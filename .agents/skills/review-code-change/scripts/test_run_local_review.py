@@ -123,8 +123,14 @@ class LocalReviewRunnerTests(unittest.TestCase):
 
     def test_access_control_path_requires_red_review(self) -> None:
         paths = (
+            "client/src/security/acl.ts",
+            "client/src/security/rbac.ts",
             "client/src/security/access-control.ts",
+            "etl/src/etl/security/acl.py",
+            "etl/src/etl/security/rbac.py",
             "etl/src/etl/security/access_control.py",
+            "server/src/acl.ts",
+            "server/src/rbac.ts",
             "server/src/access-control.ts",
         )
         policy = load_risk_policy()

@@ -1851,14 +1851,67 @@ def javascript_machine_template(tokens: list[str]) -> bool:
     normalized = [token.casefold() for token in tokens]
     if normalized and normalized[-1] in JAVASCRIPT_MACHINE_TEMPLATE_TAGS:
         return True
-    if len(normalized) >= 3 and normalized[-3] == "styled":
-        return normalized[-2] == "."
-    return bool(
-        len(normalized) >= 4
-        and normalized[-4] == "styled"
-        and normalized[-3] == "("
-        and normalized[-1] == ")"
+    return any(
+        javascript_styled_tag(normalized, start)
+        for start, token in enumerate(normalized)
+        if token == "styled"
     )
+
+
+def javascript_styled_tag(tokens: list[str], start: int) -> bool:
+    """Return whether tokens from ``start`` form a styled-components tag."""
+
+    index = start + 1
+    if index >= len(tokens):
+        return False
+    if tokens[index] == ".":
+        index = javascript_member_end(tokens, index)
+    elif tokens[index] == "(":
+        index = javascript_balanced_group_end(tokens, index)
+    else:
+        return False
+    if index is None:
+        return False
+    while index < len(tokens):
+        if tokens[index] != ".":
+            return False
+        index = javascript_member_end(tokens, index)
+        if index is None:
+            return False
+        if index < len(tokens) and tokens[index] == "(":
+            index = javascript_balanced_group_end(tokens, index)
+            if index is None:
+                return False
+    return True
+
+
+def javascript_member_end(tokens: list[str], dot: int) -> int | None:
+    """Return the offset after a dotted JavaScript member."""
+
+    member = dot + 1
+    if member >= len(tokens) or not re.fullmatch(r"[a-z_$][a-z0-9_$]*", tokens[member]):
+        return None
+    return member + 1
+
+
+def javascript_balanced_group_end(tokens: list[str], start: int) -> int | None:
+    """Return the offset after one balanced JavaScript delimiter group."""
+
+    closing_for = {"(": ")", "[": "]", "{": "}"}
+    opening = tokens[start]
+    if opening not in closing_for:
+        return None
+    expected_closers = [closing_for[opening]]
+    for index in range(start + 1, len(tokens)):
+        token = tokens[index]
+        if token in closing_for:
+            expected_closers.append(closing_for[token])
+        elif token in closing_for.values():
+            if token != expected_closers.pop():
+                return None
+            if not expected_closers:
+                return index + 1
+    return None
 
 
 def javascript_css_payload(tokens: list[str]) -> bool:
@@ -1971,7 +2024,7 @@ def remember_javascript_token(tokens: list[str], token: str) -> None:
     """Keep the small token window needed to classify the next string."""
 
     tokens.append(token)
-    del tokens[:-4]
+    del tokens[:-64]
 
 
 def static_javascript_string_expression(

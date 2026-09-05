@@ -597,6 +597,8 @@ class ProseCheckerTests(unittest.TestCase):
                 "const query = sql`SELECT 1; SELECT 2;`;\n"
                 'const dynamic = css`color: ${"red; blue"};`;\n'
                 "const button = styled.button`color: red; display: block;`;\n"
+                'const accessibleButton = styled.div.attrs({ role: "button" })'
+                '`color: red; display: block;`;\n'
                 "const reader = readerText`Unlock the potential.`;\n"
                 'const message = `Do not deploy; wait.`;\n',
                 encoding="utf-8",
@@ -605,7 +607,7 @@ class ProseCheckerTests(unittest.TestCase):
             findings = editorial_findings(path)
 
         self.assertEqual(
-            [(5, "promotional cliche"), (6, "semicolon")],
+            [(6, "promotional cliche"), (7, "semicolon")],
             [(finding.line, finding.rule) for finding in findings],
         )
 

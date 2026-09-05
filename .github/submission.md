@@ -57,6 +57,7 @@ issue existed.
 - Treat the proposed review tree as data before the read-only Codex sandbox starts.
 - Keep review command-construction tests independent of the caller's working-tree risk.
 - Align the managed-review decision record with the review severities observed during this validation.
+- Route ACL and RBAC modules in every application subsystem to Red review.
 - Route destructive utilities throughout each subsystem to Red review while excluding fixture data.
 - Route `wipe` and `truncate` utility paths to Red review across all three application subsystems.
 - Declare the server's existing SQLite runtime and types, and use its emitted JavaScript import path.
@@ -77,6 +78,7 @@ issue existed.
 - Check contractions in visible Markdown headings without applying paragraph limits to those headings.
 - Keep Markdown link labels and titles in prose checks while excluding destinations and bare URLs.
 - Decode non-raw Python reader strings before editorial matching, including f-string literal segments.
+- Recognize chained styled-components tags as machine-language templates.
 - Decode Markdown entities before language checks so entity terminators do not look like prose semicolons.
 - Validate every work-unit manifest against its schema in commit hooks, push hooks, and CI.
 - Discover numbered work-unit manifests in one tested script so future units cannot bypass validation.
@@ -268,7 +270,9 @@ issue existed.
 - Child-process shell commands remain machine syntax while adjacent user messages remain visible.
 - Python process commands follow standard import aliases and remain machine syntax.
 - Destructive `drop` utilities in each application subsystem require Red review.
+- ACL and RBAC modules in each application subsystem require Red review.
 - Known CSS, SQL, and GraphQL template tags remain machine syntax while reader templates remain visible.
+- Chained styled-components tags remain machine syntax while unrelated tagged templates remain visible.
 - Red review stops for specialist and human escalation, including ETL credential and secret paths.
 
 ## Evidence
@@ -324,7 +328,8 @@ Examine access-control routing and generic header-call text visibility.
 Examine protocol-header recognition on aliased response objects.
 Examine literal-only Python f-string output and child-process command classification.
 Examine Python process-command aliases and destructive `drop` routing.
-Examine tagged machine templates and reader-template boundaries.
+Examine tagged and chained styled machine templates, reader-template boundaries, and
+ACL and RBAC risk routing.
 Examine Python resource identifiers, heading termination, hook suffix coverage, and the
 Red workflow risk floor. Confirm the deployment reconcile step verifies the selected
 run has an unexpired client artifact before it marks the deployment ready. Confirm
