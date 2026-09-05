@@ -409,10 +409,9 @@ class LocalReviewRunnerTests(unittest.TestCase):
         )
         self.assertIn("github.event.pull_request.number || github.sha }}", ci_workflow)
         self.assertIn("cancel-in-progress: true", ci_workflow)
-        self.assertIn('CHECK_JSONSCHEMA_VERSION = "0.35.0"', work_unit_validator)
-        self.assertIn(
-            'f"check-jsonschema=={CHECK_JSONSCHEMA_VERSION}"', work_unit_validator
-        )
+        self.assertIn("SCHEMA_TOOL_PROJECT", work_unit_validator)
+        self.assertIn('"--locked"', work_unit_validator)
+        self.assertNotIn("uvx", work_unit_validator)
         self.assertIn("invalid-*.json", ci_workflow)
         self.assertIn("validate_work_units.py", ci_workflow)
         self.assertIn("npm run test:smoke -w server", ci_workflow)

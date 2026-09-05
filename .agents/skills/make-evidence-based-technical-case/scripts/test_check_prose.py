@@ -739,6 +739,27 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_checks_static_jsx_html_injection_but_not_dynamic_html(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.tsx"
+            path.write_text(
+                'const prose = <div dangerouslySetInnerHTML={{__html: "<p>Don\\x27t deploy.</p>"}} />;\n'
+                'const script = <div dangerouslySetInnerHTML={{__html: "<script>Unlock the potential.</script><p>Safe.</p>"}} />;\n'
+                "const dynamic = <div dangerouslySetInnerHTML={{__html: content}} />;\n"
+                'const image = <div dangerouslySetInnerHTML={{__html: "<img alt=\\"Unlock the potential.\\">"}} />;\n'
+                "const template = <div dangerouslySetInnerHTML={{__html: `<p>Don\\x27t deploy.</p>`}} />;\n"
+                "const templateScript = <div dangerouslySetInnerHTML={{__html: `<script>Unlock the potential.</script><p>Safe.</p>`}} />;\n"
+                "const dynamicTemplate = <div dangerouslySetInnerHTML={{__html: `<p>Unlock the potential. ${content}</p>`}} />;\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(1, "contraction"), (5, "contraction"), (4, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_ignores_python_identifiers_and_checks_reader_text(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.py"
@@ -1042,6 +1063,25 @@ class ProseCheckerTests(unittest.TestCase):
 
         self.assertEqual([], yaml_findings)
         self.assertEqual([], toml_findings)
+
+    def test_checks_css_generated_content_but_not_machine_values(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.css"
+            path.write_text(
+                '.warning::before { content: "Unlock the potential."; }\n'
+                '.safe { --content: "Unlock the potential."; }\n'
+                '.icon { background-image: url("/unlock.svg"); }\n'
+                '.quote::after { content: "Don\\27 t deploy."; }\n'
+                '.joined::after { content: "Don" "\'t deploy."; }\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(4, "contraction"), (5, "contraction"), (1, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
 
     def test_ignores_github_command_code_but_checks_names_and_comments(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

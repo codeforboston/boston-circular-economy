@@ -7,7 +7,7 @@ repos:
           python -B
           .agents/skills/make-evidence-based-technical-case/scripts/check_prose.py
         language: python
-        files: '\.(cjs|html|js|jsx|json|md|mjs|py|toml|ts|tsx|yaml|yml)$'
+        files: '\.(cjs|css|html|js|jsx|json|md|mjs|py|toml|ts|tsx|yaml|yml)$'
       - id: submission-record
         name: Check committed submission record
         entry: >-

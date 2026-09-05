@@ -1,0 +1,11 @@
+[project]
+name = "work-unit-schema-tools"
+version = "0.1.0"
+description = "Locked tools for assignment manifest validation"
+requires-python = ">=3.11"
+dependencies = [
+  "check-jsonschema==0.35.0",
+]
+
+[tool.uv]
+package = false

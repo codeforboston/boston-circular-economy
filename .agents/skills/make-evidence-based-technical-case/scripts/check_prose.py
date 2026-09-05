@@ -26,6 +26,7 @@ DEFAULT_PROFILE = (
 
 SCANNED_SUFFIXES = {
     ".cjs",
+    ".css",
     ".js",
     ".jsx",
     ".json",
@@ -546,7 +547,8 @@ def collapse_logical_joins(text: str, source: str) -> tuple[str, list[int]]:
         escaped_line_end = source[index] == "\\" and (
             index + 1 < len(source) and source[index + 1] in "\r\n"
         )
-        if character == LOGICAL_JOIN and (source[index] in "\r\n" or escaped_line_end):
+        removable_separator = source[index].isspace() or source[index] in "'\""
+        if character == LOGICAL_JOIN and (removable_separator or escaped_line_end):
             continue
         logical_text.append(character)
         source_offsets.append(index)
@@ -709,6 +711,15 @@ def copy_decoded_jsx_text(
     )
     mask_span(output, source, start, end)
     copy_decoded_text(output, source, start, end, decoded)
+
+
+def copy_decoded_jsx_html(output: list[str], source: str, start: int, end: int) -> None:
+    """Copy visible text from a static JSX HTML injection value."""
+
+    decoded_html = decode_javascript_text(source[start:end])
+    visible_html = mask_html_code(decoded_html)
+    mask_span(output, source, start, end)
+    copy_decoded_text(output, source, start, end, visible_html)
 
 
 def position_offset(offsets: list[int], position: tuple[int, int]) -> int:
@@ -1592,6 +1603,8 @@ def copy_jsx_spread_object_literals(
     start: int,
     end: int,
     reader_attributes: set[str],
+    *,
+    html_properties: set[str] | None = None,
 ) -> None:
     """Copy reader-facing static values from one JSX object-literal spread."""
 
@@ -1628,10 +1641,8 @@ def copy_jsx_spread_object_literals(
             continue
         colon = colons[0]
         property_name = javascript_static_property_name(text, entry_start, colon)
-        if (
-            property_name is None
-            or property_name.casefold() not in spread_reader_attributes
-        ):
+        normalized_property = property_name.casefold() if property_name else None
+        if normalized_property not in spread_reader_attributes:
             continue
         value_start, value_end = trimmed_span(text, colon + 1, entry_end)
         if value_start >= value_end:
@@ -1646,23 +1657,44 @@ def copy_jsx_spread_object_literals(
                 if literal_end > value_start + 1 and text[literal_end - 1] == delimiter
                 else literal_end
             )
-            copy_decoded_jsx_text(
-                output,
-                text,
-                value_start + 1,
-                content_end,
-                decode_javascript=True,
-            )
+            if html_properties and normalized_property in html_properties:
+                copy_decoded_jsx_html(
+                    output,
+                    text,
+                    value_start + 1,
+                    content_end,
+                )
+            else:
+                copy_decoded_jsx_text(
+                    output,
+                    text,
+                    value_start + 1,
+                    content_end,
+                    decode_javascript=True,
+                )
         elif delimiter == "`":
+            html_property = bool(
+                html_properties and normalized_property in html_properties
+            )
+            target = list(blank_like(text)) if html_property else output
             literal_end = mask_js_template(
                 text,
-                output,
+                target,
                 value_start,
-                copy_literal=True,
+                copy_literal=not html_property,
                 parse_jsx=False,
             )
             if literal_end > value_end or text[literal_end:value_end].strip():
                 mask_span(output, text, value_start, min(literal_end, value_end))
+                continue
+            content_end = literal_end - 1
+            if html_property and "${" not in text[value_start + 1 : content_end]:
+                copy_decoded_jsx_html(
+                    output,
+                    text,
+                    value_start + 1,
+                    content_end,
+                )
 
 
 def copy_jsx_spread_literals(
@@ -1743,6 +1775,37 @@ def copy_jsx_spread_literals(
         index = object_end + 1 if object_end < end else end
 
 
+def copy_jsx_inner_html_expression(
+    text: str, output: list[str], start: int, end: int
+) -> None:
+    """Copy a static __html string from a JSX injection expression."""
+
+    expression_start, expression_end = trimmed_span(text, start + 1, end - 1)
+    if expression_start >= expression_end or text[expression_start] != "{":
+        return
+    scratch = list(blank_like(text))
+    object_end = mask_javascript_code(
+        text,
+        scratch,
+        expression_start + 1,
+        stop_at_brace=True,
+        parse_jsx=False,
+    )
+    if object_end >= expression_end or text[object_end] != "}":
+        return
+    remainder_start, remainder_end = trimmed_span(text, object_end + 1, expression_end)
+    if remainder_start != remainder_end:
+        return
+    copy_jsx_spread_object_literals(
+        text,
+        output,
+        expression_start + 1,
+        object_end,
+        {"__html"},
+        html_properties={"__html"},
+    )
+
+
 def copy_jsx_tag_literals(text: str, output: list[str], start: int, end: int) -> None:
     """Keep reader-facing JSX attributes while hiding implementation metadata."""
 
@@ -1790,6 +1853,13 @@ def copy_jsx_tag_literals(text: str, output: list[str], start: int, end: int) ->
             cursor = closing + 1 if closing < len(text) else closing
             if not reader_facing:
                 mask_span(output, text, value_start, cursor)
+            if attribute_name == "dangerouslysetinnerhtml":
+                copy_jsx_inner_html_expression(
+                    text,
+                    output,
+                    value_start,
+                    cursor,
+                )
         else:
             cursor = value_start + 1
 
@@ -2517,6 +2587,205 @@ def decode_copied_toml_basic_strings(output: list[str], text: str) -> None:
         copy_decoded_text(output, text, start, end, decoded)
 
 
+def css_string_end(text: str, start: int, end: int) -> int:
+    """Return the first offset after one quoted CSS string."""
+
+    quote = text[start]
+    index = start + 1
+    while index < end:
+        if text[index] == "\\":
+            if index + 1 < end and text[index + 1] == "\r":
+                index += 3 if index + 2 < end and text[index + 2] == "\n" else 2
+            else:
+                index += 2
+            continue
+        if text[index] == quote:
+            return index + 1
+        if text[index] in "\r\n":
+            return index
+        index += 1
+    return end
+
+
+def decode_css_string(value: str) -> str:
+    """Decode CSS escapes from generated reader text."""
+
+    output: list[str] = []
+    index = 0
+    while index < len(value):
+        if value[index] != "\\" or index + 1 >= len(value):
+            output.append(value[index])
+            index += 1
+            continue
+        escaped = value[index + 1]
+        if escaped == "\r":
+            index += 3 if index + 2 < len(value) and value[index + 2] == "\n" else 2
+            continue
+        if escaped == "\n":
+            index += 2
+            continue
+        hex_match = re.match(r"[0-9A-Fa-f]{1,6}", value[index + 1 :])
+        if hex_match is not None:
+            code_point = int(hex_match.group(0), 16)
+            invalid = (
+                code_point == 0
+                or code_point > 0x10FFFF
+                or 0xD800 <= code_point <= 0xDFFF
+            )
+            output.append("\ufffd" if invalid else chr(code_point))
+            index += 1 + len(hex_match.group(0))
+            if index < len(value) and value[index].isspace():
+                if (
+                    value[index] == "\r"
+                    and index + 1 < len(value)
+                    and value[index + 1] == "\n"
+                ):
+                    index += 2
+                else:
+                    index += 1
+            continue
+        output.append(escaped)
+        index += 2
+    return "".join(output)
+
+
+def copy_css_string(output: list[str], text: str, start: int, end: int) -> None:
+    """Copy one decoded CSS string into an offset-stable prose mask."""
+
+    content_end = end - 1 if end > start + 1 and text[end - 1] == text[start] else end
+    mask_span(output, text, start, end)
+    copy_decoded_text(
+        output,
+        text,
+        start + 1,
+        content_end,
+        decode_css_string(text[start + 1 : content_end]),
+    )
+
+
+def css_value_end(text: str, start: int) -> int:
+    """Find the end of a CSS declaration value."""
+
+    pairs = {"(": ")", "[": "]"}
+    containers: list[str] = []
+    index = start
+    while index < len(text):
+        if text.startswith("/*", index):
+            closing = text.find("*/", index + 2)
+            index = len(text) if closing == -1 else closing + 2
+            continue
+        if text[index] in "'\"":
+            index = css_string_end(text, index, len(text))
+            continue
+        if text[index] in pairs:
+            containers.append(pairs[text[index]])
+        elif containers and text[index] == containers[-1]:
+            containers.pop()
+        elif not containers and text[index] in ";}":
+            return index
+        index += 1
+    return len(text)
+
+
+def previous_css_delimiter(text: str, start: int) -> str | None:
+    """Return the previous declaration delimiter, ignoring space and comments."""
+
+    index = start
+    while index > 0:
+        while index > 0 and text[index - 1].isspace():
+            index -= 1
+        if index >= 2 and text[index - 2 : index] == "*/":
+            opening = text.rfind("/*", 0, index - 2)
+            if opening == -1:
+                return None
+            index = opening
+            continue
+        return text[index - 1]
+    return None
+
+
+def copy_css_content_value(output: list[str], text: str, start: int, end: int) -> None:
+    """Copy strings and comments from one CSS generated-content value."""
+
+    index = start
+    previous_string_end: int | None = None
+    while index < end:
+        if text.startswith("/*", index):
+            closing = text.find("*/", index + 2, end)
+            comment_end = end if closing == -1 else closing + 2
+            copy_span(output, text, index, comment_end)
+            index = comment_end
+            previous_string_end = None
+            continue
+        if text[index] in "'\"":
+            string_end = css_string_end(text, index, end)
+            copy_css_string(output, text, index, string_end)
+            if (
+                previous_string_end is not None
+                and not text[previous_string_end:index].strip()
+            ):
+                for position in range(previous_string_end - 1, index + 1):
+                    output[position] = LOGICAL_JOIN
+            previous_string_end = string_end
+            index = string_end
+            continue
+        if not text[index].isspace():
+            previous_string_end = None
+        index += 1
+
+
+def mask_css_code(text: str) -> str:
+    """Keep CSS comments and strings rendered by the content property."""
+
+    output = list(blank_like(text))
+    index = 0
+    block_depth = 0
+    while index < len(text):
+        if text.startswith("/*", index):
+            closing = text.find("*/", index + 2)
+            comment_end = len(text) if closing == -1 else closing + 2
+            copy_span(output, text, index, comment_end)
+            index = comment_end
+            continue
+        if text[index] in "'\"":
+            index = css_string_end(text, index, len(text))
+            continue
+        if text[index] == "{":
+            block_depth += 1
+            index += 1
+            continue
+        if text[index] == "}":
+            block_depth = max(0, block_depth - 1)
+            index += 1
+            continue
+        if not (text[index].isalpha() or text[index] in "_-"):
+            index += 1
+            continue
+        name_end = index + 1
+        while name_end < len(text) and (
+            text[name_end].isalnum() or text[name_end] in "_-"
+        ):
+            name_end += 1
+        property_name = text[index:name_end].casefold()
+        colon = name_end
+        while colon < len(text) and text[colon].isspace():
+            colon += 1
+        declaration_start = previous_css_delimiter(text, index) in {"{", ";"}
+        if (
+            block_depth > 0
+            and declaration_start
+            and property_name == "content"
+            and colon < len(text)
+            and text[colon] == ":"
+        ):
+            value_end = css_value_end(text, colon + 1)
+            copy_css_content_value(output, text, colon + 1, value_end)
+            index = value_end
+            continue
+        index = name_end
+    return "".join(output)
+
+
 JSON_TOKEN = re.compile(r'"(?:\\.|[^"\\])*"|[{}\[\]:,]')
 JSON_PROSE_FIELDS = {
     "acceptance",
@@ -2654,6 +2923,8 @@ def mask_source_code(path: Path, text: str) -> str:
         return "".join(output)
     if suffix == ".html":
         return mask_html_code(text)
+    if suffix == ".css":
+        return mask_css_code(text)
     if suffix in {".yaml", ".yml"}:
         return mask_yaml_code(text, mask_actions_commands=github_actions_yaml(path))
     if suffix == ".toml":

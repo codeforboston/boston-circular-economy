@@ -45,8 +45,9 @@ contract: components, visible states, actions, data needs, and acceptance cases.
 It is a draft template. Empty fields require decisions before implementation.
 
 Keep product research and design originals in the project Drive or approved Figma
-file. Keep assignment manifests and engineering decisions in GitHub. Record artifact
-links and accepted revisions in the issue and completion record.
+file. Keep assignment manifests and engineering decisions in GitHub. For an accepted
+unit, record at least one artifact link, the reviewer, the review date, and the accepted
+revision in the issue and completion record.
 
 ## Contributor instructions
 

@@ -80,6 +80,9 @@ issue existed.
 - Discover numbered work-unit manifests in one tested script so future units cannot bypass validation.
 - Add an invalid manifest fixture that proves CI rejects missing required fields.
 - Require accepted work units to name a reviewed revision and test the invalid terminal state in CI.
+- Require accepted work units to name artifacts, a reviewer, and a review date.
+- Bind each numbered manifest ID to its filename and reject duplicate IDs.
+- Run the schema validator from a repository lock that fixes its full dependency graph.
 - Start the built server with temporary SQLite and verify `/ping` in local push checks and CI.
 - Route every GitHub Actions workflow change to Red review because any workflow can change permissions or authorization.
 - Add authorization to the Red risk option in the work-unit issue form.
@@ -110,6 +113,8 @@ issue existed.
 - Scan literal React `children` props while retaining machine-only JSX prop exclusions.
 - Join escaped physical lines before editorial matching while retaining source line reports.
 - Scan reader-facing static values in JSX object-literal spreads while excluding dynamic spreads and machine-only properties.
+- Scan decoded CSS `content` strings while excluding selectors, URLs, custom properties, and other machine values.
+- Parse static `dangerouslySetInnerHTML` values as HTML prose while leaving dynamic expressions inert.
 
 ## Challenge cases
 
@@ -153,6 +158,8 @@ issue existed.
 - A Markdown entity does not create a false semicolon finding, and an encoded prohibited term remains visible to editorial checks.
 - Five valid work-unit manifests pass schema validation, while the incomplete fixture fails on its missing fields.
 - An otherwise valid accepted work unit fails when its completion record omits the reviewed revision.
+- An accepted work unit fails when its artifact list, reviewer, or review date is empty.
+- A numbered manifest fails when its ID differs from its filename or duplicates another manifest ID.
 - Server smoke testing imports the native SQLite binding, uses a temporary database, binds an available port, and requires a successful `pong` response.
 - An unclosed list fence stops masking when visible prose leaves the list container.
 - An unclosed quote fence stops masking when the quote depth decreases.
@@ -186,6 +193,8 @@ issue existed.
 - Static and expression `children` text remains visible, while `data-children` remains machine metadata.
 - JavaScript, Python, and TOML reader strings preserve word adjacency across escaped physical line endings.
 - Literal JSX spreads expose reader-facing `children` and accessibility labels without exposing dynamic spreads or machine-only keys.
+- CSS generated text decodes string escapes, while custom properties and resource URLs remain inert.
+- Static JSX HTML injection exposes visible text and attributes but excludes scripts and dynamic HTML.
 - Red review stops for specialist and human escalation, including ETL credential and secret paths.
 
 ## Evidence
@@ -195,8 +204,8 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass. Startup creates and closes a temporary SQLite database, and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 139 communication and submission tests |
-| Routing policy | Pass | 37 routing, hook-context, and manifest-discovery tests plus model-route samples |
+| Technical prose and editorial style | Pass | Full repository scan and 141 communication and submission tests |
+| Routing policy | Pass | 39 routing, hook-context, manifest-identity, and model-route tests |
 | Review policy and model routing | Pass | 25 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation, schema validation, and commit-stage and push-stage runs |
 | Workflow syntax | Pass | Actionlint 1.7.11 and YAML parsing |
@@ -221,13 +230,14 @@ Examine Markdown fence, paragraph, table, image-alt, and code-span boundaries. E
 link-label, reference-link, and heading boundaries. Examine YAML escape handling,
 TOML basic-string escape handling, assignment step labels, TypeScript generic
 classification, escaped-line source mapping, JSX character references, and static
-object-literal spreads. Examine
+object-literal spreads. Examine CSS generated content and static HTML injection. Examine
 element-specific HTML and JSX attributes, React children, and JavaScript property keys.
 Examine Python resource identifiers, heading termination, hook suffix coverage, and the
 Red workflow risk floor. Confirm the deployment reconcile step verifies the selected
 run has an unexpired client artifact before it marks the deployment ready. Confirm
 accepted work units identify a reviewed revision and destructive utility synonyms
-retain the Red checkpoint.
+retain the Red checkpoint. Confirm accepted records contain complete review metadata,
+manifest IDs match unique filenames, and schema validation uses the committed lock.
 Check SQLite shutdown order, native lockfile changes, path mapping, evidence threshold,
 model defaults, and protected-branch activation steps.
 
