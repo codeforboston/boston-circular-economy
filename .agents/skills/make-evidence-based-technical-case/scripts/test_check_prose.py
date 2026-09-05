@@ -715,6 +715,30 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_checks_reader_text_in_jsx_literal_spreads_only(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.tsx"
+            path.write_text(
+                'const children = <div {...{children: "Don\'t deploy."}} />;\n'
+                'const label = <div {...{"aria-label": "Unlock the potential."}} />;\n'
+                'const metadata = <div {...{"data-children": "Unlock the potential."}} />;\n'
+                "const dynamic = <div {...properties} />;\n"
+                'const hidden = <input {...{type: "hidden", value: "Unlock the potential."}} />;\n'
+                'const submit = <input {...{type: "submit", value: "Unlock the potential."}} />;\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [
+                (1, "contraction"),
+                (2, "promotional cliche"),
+                (6, "promotional cliche"),
+            ],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_ignores_python_identifiers_and_checks_reader_text(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.py"
@@ -756,6 +780,37 @@ class ProseCheckerTests(unittest.TestCase):
             [(1, "contraction"), (2, "contraction"), (3, "contraction")],
             [(finding.line, finding.rule) for finding in findings],
         )
+
+    def test_preserves_words_across_reader_string_line_continuations(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            javascript_path = root / "example.js"
+            javascript_path.write_text(
+                'const message = "Don\\\n\'t deploy.";\n',
+                encoding="utf-8",
+            )
+            python_path = root / "example.py"
+            python_path.write_text(
+                'message = "Don\\\n\'t deploy."\n',
+                encoding="utf-8",
+            )
+            toml_path = root / "example.toml"
+            toml_path.write_text(
+                'message = """Don\\\n\'t deploy."""\n',
+                encoding="utf-8",
+            )
+
+            findings_by_suffix = {
+                path.suffix: editorial_findings(path)
+                for path in (javascript_path, python_path, toml_path)
+            }
+
+        for suffix, findings in findings_by_suffix.items():
+            with self.subTest(suffix=suffix):
+                self.assertEqual(
+                    [(1, "contraction")],
+                    [(finding.line, finding.rule) for finding in findings],
+                )
 
     def test_ignores_python_mapping_keys_but_checks_string_values(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

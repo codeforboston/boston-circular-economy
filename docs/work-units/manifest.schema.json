@@ -240,5 +240,34 @@
       }
     }
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "accepted"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "completion_record": {
+            "properties": {
+              "accepted_revision": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "accepted_revision"
+            ]
+          }
+        }
+      }
+    }
+  ],
   "additionalProperties": false
 }

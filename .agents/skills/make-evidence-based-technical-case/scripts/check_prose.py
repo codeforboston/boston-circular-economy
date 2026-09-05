@@ -519,6 +519,7 @@ def editorial_findings(path: Path) -> list[Finding]:
         )
     else:
         text = mask_source_code(path, source_text)
+    text, source_offsets = collapse_logical_joins(text, source_text)
     for name, pattern in EDITORIAL_PATTERNS.items():
         if suffix == ".md" and name == "contraction":
             continue
@@ -527,9 +528,29 @@ def editorial_findings(path: Path) -> list[Finding]:
         if path.name == "CHANGELOG.md" and name in CHANGELOG_PATTERN_EXEMPTIONS:
             continue
         for match in pattern.finditer(text):
-            line = text.count("\n", 0, match.start()) + 1
+            source_offset = source_offsets[match.start()]
+            line = source_text.count("\n", 0, source_offset) + 1
             findings.append(Finding(path, line, name, match.group(0)))
     return findings
+
+
+LOGICAL_JOIN = "\0"
+
+
+def collapse_logical_joins(text: str, source: str) -> tuple[str, list[int]]:
+    """Remove escaped physical line endings and retain their source offsets."""
+
+    logical_text: list[str] = []
+    source_offsets: list[int] = []
+    for index, character in enumerate(text):
+        escaped_line_end = source[index] == "\\" and (
+            index + 1 < len(source) and source[index + 1] in "\r\n"
+        )
+        if character == LOGICAL_JOIN and (source[index] in "\r\n" or escaped_line_end):
+            continue
+        logical_text.append(character)
+        source_offsets.append(index)
+    return "".join(logical_text), source_offsets
 
 
 def blank_like(text: str) -> str:
@@ -662,6 +683,7 @@ def copy_decoded_text(
                 continue
             character = " "
         while cursor < end and source[cursor] in "\r\n":
+            output[cursor] = LOGICAL_JOIN
             cursor += 1
         if cursor >= end:
             return
@@ -1228,10 +1250,17 @@ def copy_decoded_javascript_text(
 
     cursor = start
     for source_line in text[start:end].splitlines(keepends=True):
-        line_text = source_line.rstrip("\r\n")
-        trailing_backslashes = len(line_text) - len(line_text.rstrip("\\"))
-        if len(line_text) < len(source_line) and trailing_backslashes % 2 == 1:
-            line_text = line_text[:-1]
+        source_body = source_line.rstrip("\r\n")
+        line_text = source_body
+        trailing_backslashes = len(source_body) - len(source_body.rstrip("\\"))
+        continuation = (
+            len(source_body) < len(source_line) and trailing_backslashes % 2 == 1
+        )
+        if continuation:
+            line_text = source_body[:-1]
+            output[cursor + len(line_text)] = LOGICAL_JOIN
+            for position in range(cursor + len(source_body), cursor + len(source_line)):
+                output[position] = LOGICAL_JOIN
         decoded = decode_javascript_text(line_text)
         visible = "".join(
             " " if character.isspace() else character for character in decoded
@@ -1477,10 +1506,248 @@ def jsx_reader_attributes(text: str, start: int, end: int) -> set[str]:
     return attributes
 
 
+def javascript_top_level_delimiters(
+    text: str, start: int, end: int, delimiter: str
+) -> list[int]:
+    """Locate delimiters outside nested JavaScript containers and literals."""
+
+    positions: list[int] = []
+    containers: list[str] = []
+    pairs = {"(": ")", "[": "]", "{": "}"}
+    scratch = list(blank_like(text))
+    index = start
+    while index < end:
+        if text.startswith("//", index):
+            newline = text.find("\n", index + 2, end)
+            index = end if newline == -1 else newline + 1
+            continue
+        if text.startswith("/*", index):
+            closing = text.find("*/", index + 2, end)
+            index = end if closing == -1 else closing + 2
+            continue
+        character = text[index]
+        if character in "'\"":
+            index = javascript_string_end(text, index, character)
+            continue
+        if character == "`":
+            index = mask_js_template(
+                text,
+                scratch,
+                index,
+                copy_literal=False,
+                parse_jsx=False,
+            )
+            continue
+        if character in pairs:
+            containers.append(pairs[character])
+        elif containers and character == containers[-1]:
+            containers.pop()
+        elif character == delimiter and not containers:
+            positions.append(index)
+        index += 1
+    return positions
+
+
+def javascript_object_entries(text: str, start: int, end: int) -> list[tuple[int, int]]:
+    """Split a JavaScript object body at top-level commas."""
+
+    entries: list[tuple[int, int]] = []
+    entry_start = start
+    for comma in javascript_top_level_delimiters(text, start, end, ","):
+        entries.append((entry_start, comma))
+        entry_start = comma + 1
+    entries.append((entry_start, end))
+    return entries
+
+
+def trimmed_span(text: str, start: int, end: int) -> tuple[int, int]:
+    """Trim surrounding whitespace without losing source offsets."""
+
+    while start < end and text[start].isspace():
+        start += 1
+    while end > start and text[end - 1].isspace():
+        end -= 1
+    return start, end
+
+
+def javascript_static_property_name(text: str, start: int, end: int) -> str | None:
+    """Return one identifier or quoted static JavaScript property name."""
+
+    start, end = trimmed_span(text, start, end)
+    if start >= end:
+        return None
+    if text[start] not in "'\"":
+        value = text[start:end]
+        return value if re.fullmatch(r"[A-Za-z_$][A-Za-z0-9_$]*", value) else None
+    property_end = javascript_string_end(text, start, text[start])
+    if property_end > end or text[property_end:end].strip():
+        return None
+    content_end = property_end - 1 if text[property_end - 1] == text[start] else end
+    return decode_javascript_text(text[start + 1 : content_end])
+
+
+def copy_jsx_spread_object_literals(
+    text: str,
+    output: list[str],
+    start: int,
+    end: int,
+    reader_attributes: set[str],
+) -> None:
+    """Copy reader-facing static values from one JSX object-literal spread."""
+
+    entries = javascript_object_entries(text, start, end)
+    spread_reader_attributes = set(reader_attributes)
+    if "value" in spread_reader_attributes:
+        value_is_reader_facing = True
+        for entry_start, entry_end in entries:
+            colons = javascript_top_level_delimiters(text, entry_start, entry_end, ":")
+            if not colons:
+                continue
+            colon = colons[0]
+            property_name = javascript_static_property_name(text, entry_start, colon)
+            if property_name is None or property_name.casefold() != "type":
+                continue
+            value_start, value_end = trimmed_span(text, colon + 1, entry_end)
+            if value_start >= value_end or text[value_start] not in "'\"":
+                value_is_reader_facing = False
+                continue
+            literal_end = javascript_string_end(text, value_start, text[value_start])
+            if literal_end > value_end or text[literal_end:value_end].strip():
+                value_is_reader_facing = False
+                continue
+            input_type = decode_javascript_text(text[value_start + 1 : literal_end - 1])
+            value_is_reader_facing = (
+                input_type.casefold() in HTML_READER_VALUE_INPUT_TYPES
+            )
+        if not value_is_reader_facing:
+            spread_reader_attributes.discard("value")
+
+    for entry_start, entry_end in entries:
+        colons = javascript_top_level_delimiters(text, entry_start, entry_end, ":")
+        if not colons:
+            continue
+        colon = colons[0]
+        property_name = javascript_static_property_name(text, entry_start, colon)
+        if (
+            property_name is None
+            or property_name.casefold() not in spread_reader_attributes
+        ):
+            continue
+        value_start, value_end = trimmed_span(text, colon + 1, entry_end)
+        if value_start >= value_end:
+            continue
+        delimiter = text[value_start]
+        if delimiter in "'\"":
+            literal_end = javascript_string_end(text, value_start, delimiter)
+            if literal_end > value_end or text[literal_end:value_end].strip():
+                continue
+            content_end = (
+                literal_end - 1
+                if literal_end > value_start + 1 and text[literal_end - 1] == delimiter
+                else literal_end
+            )
+            copy_decoded_jsx_text(
+                output,
+                text,
+                value_start + 1,
+                content_end,
+                decode_javascript=True,
+            )
+        elif delimiter == "`":
+            literal_end = mask_js_template(
+                text,
+                output,
+                value_start,
+                copy_literal=True,
+                parse_jsx=False,
+            )
+            if literal_end > value_end or text[literal_end:value_end].strip():
+                mask_span(output, text, value_start, min(literal_end, value_end))
+
+
+def copy_jsx_spread_literals(
+    text: str,
+    output: list[str],
+    start: int,
+    end: int,
+    reader_attributes: set[str],
+) -> None:
+    """Copy supported literal values from direct JSX spread expressions."""
+
+    scratch = list(blank_like(text))
+    index = start
+    while index < end:
+        character = text[index]
+        if character in "'\"":
+            index = javascript_string_end(text, index, character)
+            continue
+        if character == "`":
+            index = mask_js_template(
+                text,
+                scratch,
+                index,
+                copy_literal=False,
+                parse_jsx=False,
+            )
+            continue
+        if character != "{":
+            index += 1
+            continue
+
+        expression_start = index + 1
+        while expression_start < end and text[expression_start].isspace():
+            expression_start += 1
+        if not text.startswith("...", expression_start):
+            closing = mask_javascript_code(
+                text,
+                scratch,
+                index + 1,
+                stop_at_brace=True,
+                parse_jsx=False,
+            )
+            index = closing + 1 if closing < end else end
+            continue
+        object_start = expression_start + 3
+        while object_start < end and text[object_start].isspace():
+            object_start += 1
+        if object_start >= end or text[object_start] != "{":
+            closing = mask_javascript_code(
+                text,
+                scratch,
+                index + 1,
+                stop_at_brace=True,
+                parse_jsx=False,
+            )
+            index = closing + 1 if closing < end else end
+            continue
+        object_end = mask_javascript_code(
+            text,
+            scratch,
+            object_start + 1,
+            stop_at_brace=True,
+            parse_jsx=False,
+        )
+        outer_end = object_end + 1
+        while outer_end < end and text[outer_end].isspace():
+            outer_end += 1
+        if object_end < end and outer_end < end and text[outer_end] == "}":
+            copy_jsx_spread_object_literals(
+                text,
+                output,
+                object_start + 1,
+                object_end,
+                reader_attributes,
+            )
+            index = outer_end + 1
+            continue
+        index = object_end + 1 if object_end < end else end
+
+
 def copy_jsx_tag_literals(text: str, output: list[str], start: int, end: int) -> None:
     """Keep reader-facing JSX attributes while hiding implementation metadata."""
 
     reader_attributes = jsx_reader_attributes(text, start, end)
+    copy_jsx_spread_literals(text, output, start, end, reader_attributes)
     cursor = start
     while match := JSX_ATTRIBUTE_ASSIGNMENT.search(text, cursor, end):
         attribute_name = match.group("name").casefold()

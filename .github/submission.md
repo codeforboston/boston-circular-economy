@@ -56,6 +56,7 @@ issue existed.
 - Keep review command-construction tests independent of the caller's working-tree risk.
 - Align the managed-review decision record with the review severities observed during this validation.
 - Route destructive utilities throughout each subsystem to Red review while excluding fixture data.
+- Route `wipe` and `truncate` utility paths to Red review across all three application subsystems.
 - Declare the server's existing SQLite runtime and types, and use its emitted JavaScript import path.
 - Refresh the locked Node dependency graph to include the native SQLite package.
 - Add the pinned ETL lint toolchain and format existing ETL code without changing its data contracts.
@@ -78,6 +79,7 @@ issue existed.
 - Validate every work-unit manifest against its schema in commit hooks, push hooks, and CI.
 - Discover numbered work-unit manifests in one tested script so future units cannot bypass validation.
 - Add an invalid manifest fixture that proves CI rejects missing required fields.
+- Require accepted work units to name a reviewed revision and test the invalid terminal state in CI.
 - Start the built server with temporary SQLite and verify `/ping` in local push checks and CI.
 - Route every GitHub Actions workflow change to Red review because any workflow can change permissions or authorization.
 - Add authorization to the Red risk option in the work-unit issue form.
@@ -106,6 +108,8 @@ issue existed.
 - End required submission sections at the next level-one or level-two heading.
 - Keep the pre-commit prose filter synchronized with every scanned suffix, including HTML.
 - Scan literal React `children` props while retaining machine-only JSX prop exclusions.
+- Join escaped physical lines before editorial matching while retaining source line reports.
+- Scan reader-facing static values in JSX object-literal spreads while excluding dynamic spreads and machine-only properties.
 
 ## Challenge cases
 
@@ -132,6 +136,7 @@ issue existed.
 - The work-unit issue form identifies authorization changes as Red.
 - Documentation manifests retain the Green review route.
 - Destructive utilities outside source directories require Red review, while fixture data remains Yellow.
+- Destructive utilities named with `wipe` or `truncate` require Red review.
 - Uncommitted review routing unions staged, unstaged, and untracked paths before applying the risk floor.
 - Command construction retains uncommitted scope even while workflow edits raise the live tree to Red.
 - Unrelated CI completions cannot cancel an active qualifying Pages deployment.
@@ -147,6 +152,7 @@ issue existed.
 - Hexadecimal and Unicode escapes in non-raw Python reader strings are checked as rendered text, while raw strings retain literal backslashes.
 - A Markdown entity does not create a false semicolon finding, and an encoded prohibited term remains visible to editorial checks.
 - Five valid work-unit manifests pass schema validation, while the incomplete fixture fails on its missing fields.
+- An otherwise valid accepted work unit fails when its completion record omits the reviewed revision.
 - Server smoke testing imports the native SQLite binding, uses a temporary database, binds an available port, and requires a successful `pong` response.
 - An unclosed list fence stops masking when visible prose leaves the list container.
 - An unclosed quote fence stops masking when the quote depth decreases.
@@ -178,6 +184,8 @@ issue existed.
 - A level-one heading ends the preceding required section, so later labels cannot fill it.
 - An HTML-only change selects the commit-stage prose hook.
 - Static and expression `children` text remains visible, while `data-children` remains machine metadata.
+- JavaScript, Python, and TOML reader strings preserve word adjacency across escaped physical line endings.
+- Literal JSX spreads expose reader-facing `children` and accessibility labels without exposing dynamic spreads or machine-only keys.
 - Red review stops for specialist and human escalation, including ETL credential and secret paths.
 
 ## Evidence
@@ -187,7 +195,7 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass. Startup creates and closes a temporary SQLite database, and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 137 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 139 communication and submission tests |
 | Routing policy | Pass | 37 routing, hook-context, and manifest-discovery tests plus model-route samples |
 | Review policy and model routing | Pass | 25 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation, schema validation, and commit-stage and push-stage runs |
@@ -212,11 +220,14 @@ Review the versioned first-parent record boundary and terminal-only status publi
 Examine Markdown fence, paragraph, table, image-alt, and code-span boundaries. Examine
 link-label, reference-link, and heading boundaries. Examine YAML escape handling,
 TOML basic-string escape handling, assignment step labels, TypeScript generic
-classification, and JSX character references. Examine
+classification, escaped-line source mapping, JSX character references, and static
+object-literal spreads. Examine
 element-specific HTML and JSX attributes, React children, and JavaScript property keys.
 Examine Python resource identifiers, heading termination, hook suffix coverage, and the
 Red workflow risk floor. Confirm the deployment reconcile step verifies the selected
-run has an unexpired client artifact before it marks the deployment ready.
+run has an unexpired client artifact before it marks the deployment ready. Confirm
+accepted work units identify a reviewed revision and destructive utility synonyms
+retain the Red checkpoint.
 Check SQLite shutdown order, native lockfile changes, path mapping, evidence threshold,
 model defaults, and protected-branch activation steps.
 

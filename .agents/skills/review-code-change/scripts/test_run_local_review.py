@@ -219,6 +219,8 @@ class LocalReviewRunnerTests(unittest.TestCase):
             "server/src/users/delete-user.ts",
             "server/src/admin/purge-expired-records.ts",
             "server/src/maintenance/resetDatabase.ts",
+            "server/scripts/truncate-tables.ts",
+            "server/scripts/wipe_database.ts",
             "server/scripts/reset-database.ts",
             "etl/src/jobs/delete-records.py",
             "etl/src/etl/jobs/reset-data.py",
@@ -411,7 +413,7 @@ class LocalReviewRunnerTests(unittest.TestCase):
         self.assertIn(
             'f"check-jsonschema=={CHECK_JSONSCHEMA_VERSION}"', work_unit_validator
         )
-        self.assertIn("invalid-missing-fields.json", ci_workflow)
+        self.assertIn("invalid-*.json", ci_workflow)
         self.assertIn("validate_work_units.py", ci_workflow)
         self.assertIn("npm run test:smoke -w server", ci_workflow)
         self.assertIn("database.close()", server_smoke)

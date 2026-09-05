@@ -84,12 +84,16 @@ jobs:
           .agents/skills/route-agent-work/scripts/validate_work_units.py
       - name: Test work-unit schema rejection
         run: |
-          if python -B \
-            .agents/skills/route-agent-work/scripts/validate_work_units.py \
-            docs/work-units/fixtures/invalid-missing-fields.json; then
-            echo "The invalid work-unit fixture passed schema validation."
-            exit 1
-          fi
+          result=0
+          for fixture in docs/work-units/fixtures/invalid-*.json; do
+            if python -B \
+              .agents/skills/route-agent-work/scripts/validate_work_units.py \
+              "$fixture"; then
+              echo "The invalid work-unit fixture passed: $fixture"
+              result=1
+            fi
+          done
+          exit "$result"
       - name: Check committed submission record
         run: >-
           python -B
