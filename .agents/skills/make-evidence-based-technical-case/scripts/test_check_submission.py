@@ -517,17 +517,24 @@ class CheckSubmissionTests(unittest.TestCase):
 
         self.assertIn("empty-label", rules)
 
-        unresolved_reference = VALID_BODY.replace(
-            "- Grounds: The tests pass.",
+        for visible_reference in (
             "- Grounds: [][proof]",
-        )
-        self.assertNotIn(
-            "empty-label",
-            [
-                finding.rule
-                for finding in check_submission.check_submission(unresolved_reference)
-            ],
-        )
+            "- Grounds: [][proof]\n\n[proof]:",
+        ):
+            with self.subTest(visible_reference=visible_reference):
+                unresolved_reference = VALID_BODY.replace(
+                    "- Grounds: The tests pass.",
+                    visible_reference,
+                )
+                self.assertNotIn(
+                    "empty-label",
+                    [
+                        finding.rule
+                        for finding in check_submission.check_submission(
+                            unresolved_reference
+                        )
+                    ],
+                )
 
     def test_allows_up_to_three_spaces_before_submission_headings(self) -> None:
         indented = re.sub(r"(?m)^## ", "   ## ", VALID_BODY)

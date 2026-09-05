@@ -475,6 +475,21 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_does_not_treat_typescript_generic_arrows_as_jsx(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.ts"
+            path.write_text(
+                "const identity = <T>(value: T) => value;\n"
+                "const robust = true;\n"
+                "const wrapped = `${(<T>(value: T) => value)(robust)}`;\n"
+                "const scalable = true;\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual([], findings)
+
     def test_decodes_javascript_reader_text_escapes(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.ts"
@@ -638,6 +653,23 @@ class ProseCheckerTests(unittest.TestCase):
                 (4, "promotional cliche"),
                 (5, "promotional cliche"),
             ],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
+    def test_decodes_entities_in_direct_jsx_text_and_attributes(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.tsx"
+            path.write_text(
+                "export default <p>Don&apos;t deploy.</p>;\n"
+                'const field = <input aria-label="Don&#x27;t deploy." />;\n'
+                'const expression = <p>{"Don&apos;t deploy."}</p>;\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(1, "contraction"), (2, "contraction")],
             [(finding.line, finding.rule) for finding in findings],
         )
 
@@ -853,6 +885,23 @@ class ProseCheckerTests(unittest.TestCase):
                 (6, "promotional cliche"),
             ],
             [(finding.line, finding.rule) for finding in toml_findings],
+        )
+
+    def test_decodes_yaml_quoted_scalar_escapes(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.yaml"
+            path.write_text(
+                'unicode: "Don\\u0027t deploy."\n'
+                "single: 'Don''t deploy.'\n"
+                "plain: Don\\u0027t deploy.\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(1, "contraction"), (2, "contraction")],
+            [(finding.line, finding.rule) for finding in findings],
         )
 
     def test_ignores_yaml_and_toml_inline_mapping_keys(self) -> None:

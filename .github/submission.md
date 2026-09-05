@@ -94,6 +94,10 @@ issue existed.
 - Classify raw HTML inside Markdown so visible text and alt text remain subject to prose checks.
 - Keep Markdown reference labels and titles visible while masking resolved identifiers and definition labels.
 - Scan `label` attributes only on HTML and JSX elements that render them.
+- Require a reference destination before treating its identifier as hidden Markdown control text.
+- Keep TypeScript generic arrows as code while retaining JSX parsing for JSX-capable source files.
+- Decode YAML quoted-scalar escapes before checking reader-facing values.
+- Decode character references in direct JSX text and static reader-facing attributes.
 
 ## Challenge cases
 
@@ -154,6 +158,10 @@ issue existed.
 - An empty reference link cannot satisfy a rationale field, even when its definition supplies an identifier and destination.
 - Resolved Markdown reference identifiers remain inert. Unresolved syntax, visible link labels, and optional titles remain subject to prose checks.
 - Labels on `optgroup`, `option`, and `track` remain visible, while unrelated element labels remain machine data.
+- A blank reference definition leaves its unresolved identifier visible to submission checks.
+- TypeScript generic arrows remain inert at top level and inside template expressions.
+- YAML double-quoted Unicode escapes and doubled single quotes are checked as rendered text.
+- JSX character references decode in direct text and static attributes, but not inside JavaScript expression strings.
 - Red review stops for specialist and human escalation, including ETL credential and secret paths.
 
 ## Evidence
@@ -163,7 +171,7 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass. Startup creates and closes a temporary SQLite database, and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 130 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 133 communication and submission tests |
 | Routing policy | Pass | 37 routing, hook-context, and manifest-discovery tests plus model-route samples |
 | Review policy and model routing | Pass | 25 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation, schema validation, and commit-stage and push-stage runs |
@@ -186,9 +194,10 @@ I read and understand the submitted diff. I verified the evidence above and rema
 
 Review the versioned first-parent record boundary and terminal-only status publication.
 Examine Markdown fence, paragraph, table, image-alt, and code-span boundaries. Examine
-link-label, reference-link, and heading boundaries. Examine element-specific HTML and
-JSX attribute classification and JavaScript property keys. Examine Python resource
-identifiers and the Red workflow risk floor.
+link-label, reference-link, and heading boundaries. Examine YAML escape handling,
+TypeScript generic classification, and JSX character references. Examine
+element-specific HTML and JSX attributes, JavaScript property keys, Python resource
+identifiers, and the Red workflow risk floor.
 Check SQLite shutdown order, native lockfile changes, path mapping, evidence threshold,
 model defaults, and protected-branch activation steps.
 

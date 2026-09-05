@@ -13,6 +13,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 from check_submission import (
+    markdown_reference_identifiers,
     mask_inline_code_spans,
     mask_markdown_code_blocks,
     mask_markdown_reference_controls,
@@ -71,6 +72,9 @@ URL = re.compile(r"https?://\S+")
 MARKDOWN_ATX_HEADING = re.compile(r"^[ ]{0,3}#{1,6}(?:[ \t]+|$)")
 MARKDOWN_LINK_DEFINITION = re.compile(
     r"(?m)^[ ]{0,3}\[[^]\r\n]+]:[ \t]*(?P<destination><[^>\r\n]*>|\S+)"
+)
+HTML_CHARACTER_REFERENCE = re.compile(
+    r"&(?:#[0-9]+|#x[0-9A-Fa-f]+|[A-Za-z][A-Za-z0-9]+);"
 )
 HTML_READER_ATTRIBUTES = {
     "alt",
@@ -504,9 +508,11 @@ def editorial_findings(path: Path) -> list[Finding]:
     source_text = path.read_text(encoding="utf-8")
     suffix = path.suffix.casefold()
     if suffix == ".md":
+        markdown_text = mask_markdown_code(source_text)
         text = mask_html_code(
             mask_markdown_reference_controls(
-                mask_markdown_link_destinations(mask_markdown_code(source_text))
+                mask_markdown_link_destinations(markdown_text),
+                markdown_reference_identifiers(markdown_text),
             )
         )
     else:
@@ -659,6 +665,26 @@ def copy_decoded_text(
             return
         output[cursor] = " " if character.isspace() else character
         cursor += 1
+
+
+def copy_decoded_jsx_text(
+    output: list[str],
+    source: str,
+    start: int,
+    end: int,
+    *,
+    decode_javascript: bool = False,
+) -> None:
+    """Copy direct JSX text after decoding its character references."""
+
+    raw_text = source[start:end]
+    decoded_source = decode_javascript_text(raw_text) if decode_javascript else raw_text
+    decoded = HTML_CHARACTER_REFERENCE.sub(
+        lambda match: html.unescape(match.group(0)),
+        decoded_source,
+    )
+    mask_span(output, source, start, end)
+    copy_decoded_text(output, source, start, end, decoded)
 
 
 def position_offset(offsets: list[int], position: tuple[int, int]) -> int:
@@ -1330,7 +1356,12 @@ def remember_javascript_token(tokens: list[str], token: str) -> None:
 
 
 def mask_js_template(
-    text: str, output: list[str], start: int, *, copy_literal: bool = True
+    text: str,
+    output: list[str],
+    start: int,
+    *,
+    copy_literal: bool = True,
+    parse_jsx: bool = True,
 ) -> int:
     """Walk a template and optionally copy its literal text segments."""
 
@@ -1343,7 +1374,13 @@ def mask_js_template(
         if text.startswith("${", index):
             if copy_literal:
                 copy_decoded_javascript_text(text, output, literal_start, index)
-            index = mask_javascript_code(text, output, index + 2, stop_at_brace=True)
+            index = mask_javascript_code(
+                text,
+                output,
+                index + 2,
+                stop_at_brace=True,
+                parse_jsx=parse_jsx,
+            )
             if index < len(text) and text[index] == "}":
                 index += 1
             literal_start = index
@@ -1453,7 +1490,18 @@ def copy_jsx_tag_literals(text: str, output: list[str], start: int, end: int) ->
         if delimiter in "'\"":
             cursor = javascript_string_end(text, value_start, delimiter)
             if reader_facing:
-                copy_javascript_string(text, output, value_start, cursor)
+                content_end = (
+                    cursor - 1
+                    if cursor > value_start + 1 and text[cursor - 1] == delimiter
+                    else cursor
+                )
+                copy_decoded_jsx_text(
+                    output,
+                    text,
+                    value_start + 1,
+                    content_end,
+                    decode_javascript=True,
+                )
         elif delimiter == "`":
             cursor = mask_js_template(
                 text,
@@ -1506,13 +1554,21 @@ def mask_jsx_children(text: str, output: list[str], start: int) -> int:
                 depth += 1
             index = end + 1
             continue
-        copy_span(output, text, index, index + 1)
-        index += 1
+        text_end = index + 1
+        while text_end < len(text) and text[text_end] not in "{<":
+            text_end += 1
+        copy_decoded_jsx_text(output, text, index, text_end)
+        index = text_end
     return index
 
 
 def mask_javascript_code(
-    text: str, output: list[str], start: int = 0, *, stop_at_brace: bool = False
+    text: str,
+    output: list[str],
+    start: int = 0,
+    *,
+    stop_at_brace: bool = False,
+    parse_jsx: bool = True,
 ) -> int:
     """Mask JavaScript code while keeping comments, strings, templates, and JSX text."""
 
@@ -1555,10 +1611,11 @@ def mask_javascript_code(
                     or javascript_route_argument(tokens)
                     or javascript_template_identifier(text, index)
                 ),
+                parse_jsx=parse_jsx,
             )
             remember_javascript_token(tokens, "<template>")
             continue
-        if character == "<" and javascript_expression_start(text, index):
+        if parse_jsx and character == "<" and javascript_expression_start(text, index):
             end = jsx_tag_end(text, index)
             if end is not None:
                 copy_jsx_tag_literals(text, output, index, end + 1)
@@ -1701,6 +1758,98 @@ def skip_yaml_quoted_scalar(text: str, start: int, end: int) -> int:
             return index + 1
         index += 1
     return end
+
+
+YAML_DOUBLE_QUOTED_ESCAPES = {
+    "0": "\0",
+    "a": "\a",
+    "b": "\b",
+    "t": "\t",
+    "n": "\n",
+    "v": "\v",
+    "f": "\f",
+    "r": "\r",
+    "e": "\x1b",
+    " ": " ",
+    '"': '"',
+    "/": "/",
+    "\\": "\\",
+    "N": "\u0085",
+    "_": "\u00a0",
+    "L": "\u2028",
+    "P": "\u2029",
+}
+YAML_HEXADECIMAL_ESCAPE_LENGTHS = {"x": 2, "u": 4, "U": 8}
+
+
+def decode_yaml_double_quoted_scalar(value: str) -> str:
+    """Decode escapes that YAML permits in a double-quoted scalar."""
+
+    output: list[str] = []
+    index = 0
+    while index < len(value):
+        if value[index] != "\\" or index + 1 >= len(value):
+            output.append(value[index])
+            index += 1
+            continue
+
+        escaped = value[index + 1]
+        if escaped in YAML_DOUBLE_QUOTED_ESCAPES:
+            output.append(YAML_DOUBLE_QUOTED_ESCAPES[escaped])
+            index += 2
+            continue
+        digit_count = YAML_HEXADECIMAL_ESCAPE_LENGTHS.get(escaped)
+        digits = value[index + 2 : index + 2 + (digit_count or 0)]
+        if digit_count and re.fullmatch(rf"[0-9A-Fa-f]{{{digit_count}}}", digits):
+            code_point = int(digits, 16)
+            if code_point <= 0x10FFFF and not 0xD800 <= code_point <= 0xDFFF:
+                output.append(chr(code_point))
+                index += digit_count + 2
+                continue
+        if escaped in "\r\n":
+            index += 2
+            if escaped == "\r" and index < len(value) and value[index] == "\n":
+                index += 1
+            while index < len(value) and value[index] in " \t":
+                index += 1
+            continue
+        output.extend(("\\", escaped))
+        index += 2
+    return "".join(output)
+
+
+def yaml_quote_starts_node(text: str, start: int, index: int) -> bool:
+    """Return whether a quote starts a scalar instead of plain-scalar text."""
+
+    prefix = text[start:index].rstrip()
+    return not prefix or prefix[-1] in "[{,:-?"
+
+
+def copy_yaml_reader_value(output: list[str], text: str, start: int, end: int) -> None:
+    """Copy one YAML value and decode its quoted reader-facing scalars."""
+
+    copy_span(output, text, start, end)
+    index = start
+    while index < end:
+        quote = text[index]
+        if quote not in "'\"" or not yaml_quote_starts_node(text, start, index):
+            index += 1
+            continue
+        scalar_end = skip_yaml_quoted_scalar(text, index, end)
+        content_end = (
+            scalar_end - 1
+            if scalar_end > index + 1 and text[scalar_end - 1] == quote
+            else scalar_end
+        )
+        raw_value = text[index + 1 : content_end]
+        decoded = (
+            decode_yaml_double_quoted_scalar(raw_value)
+            if quote == '"'
+            else raw_value.replace("''", "'")
+        )
+        mask_span(output, text, index, scalar_end)
+        copy_decoded_text(output, text, index + 1, content_end, decoded)
+        index = scalar_end
 
 
 def skip_yaml_space_and_comments(text: str, start: int, end: int) -> int:
@@ -1901,7 +2050,12 @@ def mask_yaml_code(text: str, *, mask_actions_commands: bool = False) -> str:
                     mask_actions_commands and direct_step_key and key in {"run", "uses"}
                 )
                 if copy_value:
-                    copy_span(output, text, offset + value_start, offset + len(code))
+                    copy_yaml_reader_value(
+                        output,
+                        text,
+                        offset + value_start,
+                        offset + len(code),
+                    )
                     mask_inline_mapping_keys(
                         text,
                         output,
@@ -1932,7 +2086,12 @@ def mask_yaml_code(text: str, *, mask_actions_commands: bool = False) -> str:
                     step_mapping_indent = None
             elif code.lstrip().startswith("- "):
                 value_start = code.index("-") + 2
-                copy_span(output, text, offset + value_start, offset + len(code))
+                copy_yaml_reader_value(
+                    output,
+                    text,
+                    offset + value_start,
+                    offset + len(code),
+                )
                 mask_inline_mapping_keys(
                     text,
                     output,
@@ -2114,7 +2273,11 @@ def mask_source_code(path: Path, text: str) -> str:
         return mask_python_code(text)
     if suffix in {".cjs", ".js", ".jsx", ".mjs", ".ts", ".tsx"}:
         output = list(blank_like(text))
-        mask_javascript_code(text, output)
+        mask_javascript_code(
+            text,
+            output,
+            parse_jsx=suffix != ".ts",
+        )
         return "".join(output)
     if suffix == ".html":
         return mask_html_code(text)

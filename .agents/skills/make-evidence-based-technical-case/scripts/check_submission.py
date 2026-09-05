@@ -90,8 +90,9 @@ THEMATIC_OR_SETEXT_LINE = re.compile(
 REFERENCE_DEFINITION = re.compile(r"\[[^]\r\n]+]:[ \t]*\S")
 REFERENCE_LINK = re.compile(r"\[(?P<label>[^]\r\n]*)]\[(?P<reference>[^]\r\n]*)]")
 REFERENCE_DEFINITION_LINE = re.compile(
-    r"(?m)^[ ]{0,3}\[(?P<label>[^]\r\n]+)]:[^\r\n]*(?:\r?\n|$)"
+    r"(?m)^[ ]{0,3}\[(?P<label>[^]\r\n]+)]:[ \t]*\S[^\r\n]*(?:\r?\n|$)"
 )
+REFERENCE_DEFINITION_LABEL = re.compile(r"(?m)^[ ]{0,3}\[(?P<label>[^]\r\n]+)](?=:)")
 LIST_ITEM_START = re.compile(
     r"^(?P<indent>[ \t]*)(?:[-+*]|\d{1,9}[.)])(?P<spacing>[ \t]+)"
 )
@@ -304,9 +305,10 @@ def mask_markdown_reference_controls(
         output[match.start() : match.end()] = " " * (match.end() - match.start())
         label_start = match.start() + 1
         output[label_start : label_start + len(label)] = label
-    for match in REFERENCE_DEFINITION_LINE.finditer(content):
-        label_end = content.find("]", match.start(), match.end()) + 1
-        output[match.start() : label_end] = " " * (label_end - match.start())
+    for match in REFERENCE_DEFINITION_LABEL.finditer(content):
+        label = normalize_markdown_reference_identifier(match.group("label"))
+        if label in identifiers:
+            output[match.start() : match.end()] = " " * (match.end() - match.start())
     return "".join(output)
 
 
