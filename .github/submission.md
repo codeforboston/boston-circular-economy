@@ -60,6 +60,7 @@ issue existed.
 - Route ACL and RBAC modules in every application subsystem to Red review.
 - Route destructive utilities throughout each subsystem to Red review while excluding fixture data.
 - Route `destroy` utility paths to Red review across all three application subsystems.
+- Route `remove` utility paths to Red review across all three application subsystems.
 - Route `wipe` and `truncate` utility paths to Red review across all three application subsystems.
 - Declare the server's existing SQLite runtime and types, and use its emitted JavaScript import path.
 - Refresh the locked Node dependency graph to include the native SQLite package.
@@ -184,6 +185,7 @@ issue existed.
 - Documentation manifests retain the Green review route.
 - Destructive utilities outside source directories require Red review, while fixture data remains Yellow.
 - Destructive utilities named with `wipe` or `truncate` require Red review.
+- Destructive utilities named with `remove` require Red review.
 - Uncommitted review routing unions staged, unstaged, and untracked paths before applying the risk floor.
 - Command construction retains uncommitted scope even while workflow edits raise the live tree to Red.
 - A modified target routing script remains inert while trusted-base policy selects the review route.
@@ -278,6 +280,7 @@ issue existed.
 - Components appended to a uniquely assigned Python path variable remain machine syntax.
 - Destructive `drop` utilities in each application subsystem require Red review.
 - Destructive `destroy` utilities in each application subsystem require Red review.
+- Destructive `remove` utilities in each application subsystem require Red review.
 - ACL and RBAC modules in each application subsystem require Red review.
 - Known CSS, SQL, and GraphQL template tags remain machine syntax while reader templates remain visible.
 - Chained styled-components tags remain machine syntax while unrelated tagged templates remain visible.
@@ -338,7 +341,7 @@ Examine literal-only Python f-string output and child-process command classifica
 Examine Python process-command aliases and destructive `drop` routing.
 Examine tagged and chained styled machine templates, reader-template boundaries, and
 ACL and RBAC risk routing.
-Examine Python path-variable propagation and destructive `destroy` routing.
+Examine Python path-variable propagation and destructive `destroy` and `remove` routing.
 Examine Python resource identifiers, heading termination, hook suffix coverage, and the
 Red workflow risk floor. Confirm the deployment reconcile step verifies the selected
 run has an unexpired client artifact before it marks the deployment ready. Confirm
