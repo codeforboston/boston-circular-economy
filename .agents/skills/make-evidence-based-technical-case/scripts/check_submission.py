@@ -92,9 +92,6 @@ EMPTY_MARKDOWN_LINE = re.compile(
 MARKDOWN_CHECKBOX = re.compile(r"\[[ xX]\]")
 RAW_HTML_TAG = re.compile(r"</?[A-Za-z][A-Za-z0-9-]*(?:[ \t\r\n][^>]*|/?)>")
 HTML_ENTITY = re.compile(r"&(?:#[0-9]+|#x[0-9A-Fa-f]+|[A-Za-z][A-Za-z0-9]+);")
-INLINE_CODE_SPAN = re.compile(
-    r"(?<!`)(?P<ticks>`+)(?!`)(?P<code>[\s\S]*?)(?<!`)(?P=ticks)(?!`)"
-)
 BLOCKQUOTE_MARKER = re.compile(r"[ ]{0,3}>[ \t]?")
 TEMPLATE_GUIDANCE = (
     "Describe how you tried to prove the change wrong. Include normal, boundary, "
@@ -127,24 +124,85 @@ def normalize_section_name(name: str) -> str:
     return " ".join(without_marks.split()).casefold()
 
 
+def escaped_backtick(content: str, index: int) -> bool:
+    """Return whether an odd backslash run escapes one backtick."""
+
+    backslashes = 0
+    index -= 1
+    while index >= 0 and content[index] == "\\":
+        backslashes += 1
+        index -= 1
+    return backslashes % 2 == 1
+
+
+def inline_code_spans(content: str) -> list[tuple[int, int, int, int]]:
+    """Return matched Markdown code delimiters and content boundaries."""
+
+    spans: list[tuple[int, int, int, int]] = []
+    cursor = 0
+    while cursor < len(content):
+        opening_start = content.find("`", cursor)
+        if opening_start < 0:
+            break
+        if escaped_backtick(content, opening_start):
+            cursor = opening_start + 1
+            continue
+        opening_end = opening_start
+        while opening_end < len(content) and content[opening_end] == "`":
+            opening_end += 1
+        delimiter_length = opening_end - opening_start
+
+        search = opening_end
+        closing_start: int | None = None
+        closing_end: int | None = None
+        while search < len(content):
+            candidate = content.find("`", search)
+            if candidate < 0:
+                break
+            if escaped_backtick(content, candidate):
+                search = candidate + 1
+                continue
+            run_end = candidate
+            while run_end < len(content) and content[run_end] == "`":
+                run_end += 1
+            if run_end - candidate == delimiter_length:
+                closing_start = candidate
+                closing_end = run_end
+                break
+            search = run_end
+
+        if closing_start is None or closing_end is None:
+            cursor = opening_end
+            continue
+        spans.append((opening_start, opening_end, closing_start, closing_end))
+        cursor = closing_end
+    return spans
+
+
 def mask_inline_code_spans(content: str) -> str:
     """Hide visible code spans before checking for raw HTML controls."""
 
-    return INLINE_CODE_SPAN.sub(
-        lambda match: "".join(
-            character if character in "\r\n" else " " for character in match.group(0)
-        ),
-        content,
-    )
+    output = list(content)
+    for opening_start, _, _, closing_end in inline_code_spans(content):
+        for index in range(opening_start, closing_end):
+            if output[index] not in "\r\n":
+                output[index] = " "
+    return "".join(output)
 
 
 def expose_inline_code_text(content: str) -> str:
     """Keep code-span text meaningful without parsing its symbols as HTML."""
 
-    return INLINE_CODE_SPAN.sub(
-        lambda match: re.sub(r"[<>&]", " ", match.group("code")),
-        content,
-    )
+    output: list[str] = []
+    cursor = 0
+    for opening_start, opening_end, closing_start, closing_end in inline_code_spans(
+        content
+    ):
+        output.append(content[cursor:opening_start])
+        output.append(re.sub(r"[<>&]", " ", content[opening_end:closing_start]))
+        cursor = closing_end
+    output.append(content[cursor:])
+    return "".join(output)
 
 
 def has_meaningful_section_content(content: str) -> bool:

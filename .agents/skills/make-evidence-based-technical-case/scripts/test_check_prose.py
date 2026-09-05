@@ -87,6 +87,21 @@ class ProseCheckerTests(unittest.TestCase):
         self.assertEqual([], editorial)
         self.assertEqual([], sentence)
 
+    def test_escaped_backticks_leave_markdown_prose_visible(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.md"
+            path.write_text(
+                "Use \\`Unlock the potential.\\` in reader-facing text.\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(1, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_shorter_inner_fence_does_not_close_a_longer_outer_fence(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.md"
@@ -261,6 +276,27 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_decodes_javascript_reader_text_escapes(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.ts"
+            path.write_text(
+                "const message = 'Don\\'t proceed.';\n"
+                'const title = "\\u0055nlock the potential.";\n'
+                "const template = `Don\\'t proceed.`;\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [
+                (1, "contraction"),
+                (2, "promotional cliche"),
+                (3, "contraction"),
+            ],
+            sorted((finding.line, finding.rule) for finding in findings),
+        )
+
     def test_ignores_javascript_module_specifiers(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.ts"
@@ -400,6 +436,26 @@ class ProseCheckerTests(unittest.TestCase):
                 '    b"scalable": value,\n'
                 '    "label": "Unlock the potential.",\n'
                 "}\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(6, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
+    def test_ignores_python_environment_keys(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.py"
+            path.write_text(
+                "import os\n"
+                'direct = os.environ["UNLOCK"]\n'
+                'lookup = os.environ.get("ROBUST")\n'
+                'fallback = os.getenv("SCALABLE")\n'
+                'alias = environ.get("POWERFUL")\n'
+                'message = "Unlock the potential."\n',
                 encoding="utf-8",
             )
 

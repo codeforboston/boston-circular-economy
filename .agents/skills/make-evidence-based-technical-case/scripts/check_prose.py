@@ -10,7 +10,7 @@ import tokenize
 from dataclasses import dataclass
 from pathlib import Path
 
-from check_submission import mask_markdown_code_blocks
+from check_submission import mask_inline_code_spans, mask_markdown_code_blocks
 
 DEFAULT_PROFILE = (
     Path(__file__).resolve().parents[1] / "references" / "asd-ste100-software.yaml"
@@ -69,6 +69,7 @@ CONTRACTION = re.compile(
 )
 
 EDITORIAL_PATTERNS = {
+    "contraction": CONTRACTION,
     "requester narration": re.compile(
         r"\b(?:as requested|the (?:user|prompt) (?:asked|requested|said|wanted))\b",
         re.IGNORECASE,
@@ -348,6 +349,8 @@ def editorial_findings(path: Path) -> list[Finding]:
     else:
         text = mask_source_code(path, source_text)
     for name, pattern in EDITORIAL_PATTERNS.items():
+        if suffix == ".md" and name == "contraction":
+            continue
         if name in TEMPORAL_PATTERN_NAMES and path.name in TEMPORAL_EXEMPT_NAMES:
             continue
         if path.name == "CHANGELOG.md" and name in CHANGELOG_PATTERN_EXEMPTIONS:
@@ -504,6 +507,78 @@ def python_mapping_key_spans(text: str, offsets: list[int]) -> list[tuple[int, i
     return sorted(spans)
 
 
+def python_environment_key_spans(
+    text: str, offsets: list[int]
+) -> list[tuple[int, int]]:
+    """Locate environment keys, which are executable configuration metadata."""
+
+    try:
+        syntax_tree = ast.parse(text)
+    except SyntaxError:
+        return []
+
+    lines = text.splitlines(keepends=True)
+
+    def source_offset(line: int, byte_column: int) -> int:
+        line_prefix = lines[line - 1].encode("utf-8")[:byte_column]
+        character_column = len(line_prefix.decode("utf-8"))
+        return offsets[line - 1] + character_column
+
+    def qualified_name(node: ast.AST) -> str | None:
+        if isinstance(node, ast.Name):
+            return node.id
+        if isinstance(node, ast.Attribute):
+            owner = qualified_name(node.value)
+            if owner is not None:
+                return f"{owner}.{node.attr}"
+        return None
+
+    def string_span(node: ast.AST) -> tuple[int, int] | None:
+        if not isinstance(node, (ast.Constant, ast.JoinedStr)):
+            return None
+        if isinstance(node, ast.Constant) and not isinstance(node.value, (str, bytes)):
+            return None
+        if node.end_lineno is None or node.end_col_offset is None:
+            return None
+        return (
+            source_offset(node.lineno, node.col_offset),
+            source_offset(node.end_lineno, node.end_col_offset),
+        )
+
+    environment_calls = {
+        "environ.get",
+        "environ.pop",
+        "environ.setdefault",
+        "getenv",
+        "os.environ.get",
+        "os.environ.pop",
+        "os.environ.setdefault",
+        "os.getenv",
+        "os.putenv",
+        "os.unsetenv",
+        "putenv",
+        "unsetenv",
+    }
+    environment_mappings = {"environ", "os.environ"}
+    spans: list[tuple[int, int]] = []
+    for node in ast.walk(syntax_tree):
+        candidate: ast.AST | None = None
+        if (
+            isinstance(node, ast.Call)
+            and qualified_name(node.func) in environment_calls
+            and node.args
+        ):
+            candidate = node.args[0]
+        elif (
+            isinstance(node, ast.Subscript)
+            and qualified_name(node.value) in environment_mappings
+        ):
+            candidate = node.slice
+        if candidate is not None and (span := string_span(candidate)) is not None:
+            spans.append(span)
+    return sorted(spans)
+
+
 def token_mapping_key_spans(
     tokens: list[tokenize.TokenInfo], offsets: list[int]
 ) -> list[tuple[int, int]]:
@@ -575,13 +650,14 @@ def mask_python_code(text: str) -> str:
     except (IndentationError, tokenize.TokenError):
         # Keep the tokens produced before an incomplete construct stopped parsing.
         pass
-    mapping_key_spans = sorted(
+    hidden_string_spans = sorted(
         set(
             python_mapping_key_spans(text, offsets)
+            + python_environment_key_spans(text, offsets)
             + token_mapping_key_spans(tokens, offsets)
         )
     )
-    mapping_key_index = 0
+    hidden_string_index = 0
     fstring_start = getattr(tokenize, "FSTRING_START", None)
     fstring_middle = getattr(tokenize, "FSTRING_MIDDLE", None)
     fstring_end = getattr(tokenize, "FSTRING_END", None)
@@ -590,16 +666,16 @@ def mask_python_code(text: str) -> str:
         start = position_offset(offsets, token.start)
         end = position_offset(offsets, token.end)
         while (
-            mapping_key_index < len(mapping_key_spans)
-            and mapping_key_spans[mapping_key_index][1] <= start
+            hidden_string_index < len(hidden_string_spans)
+            and hidden_string_spans[hidden_string_index][1] <= start
         ):
-            mapping_key_index += 1
-        inside_mapping_key = (
-            mapping_key_index < len(mapping_key_spans)
-            and mapping_key_spans[mapping_key_index][0] <= start
-            and end <= mapping_key_spans[mapping_key_index][1]
+            hidden_string_index += 1
+        inside_hidden_string = (
+            hidden_string_index < len(hidden_string_spans)
+            and hidden_string_spans[hidden_string_index][0] <= start
+            and end <= hidden_string_spans[hidden_string_index][1]
         )
-        if inside_mapping_key:
+        if inside_hidden_string:
             continue
         if fstring_start is not None and token.type == fstring_start:
             fstring_depth += 1
@@ -634,6 +710,89 @@ def javascript_string_end(text: str, start: int, quote: str) -> int:
             break
         index += 1
     return min(index, len(text))
+
+
+JAVASCRIPT_SIMPLE_ESCAPES = {
+    "0": "\0",
+    "b": "\b",
+    "f": "\f",
+    "n": "\n",
+    "r": "\r",
+    "t": "\t",
+    "v": "\v",
+}
+
+
+def decode_javascript_text(value: str) -> str:
+    """Decode JavaScript literal escapes needed for reader-facing prose."""
+
+    output: list[str] = []
+    index = 0
+    while index < len(value):
+        if value[index] != "\\" or index + 1 >= len(value):
+            output.append(value[index])
+            index += 1
+            continue
+
+        escaped = value[index + 1]
+        if escaped == "\r":
+            index += 3 if index + 2 < len(value) and value[index + 2] == "\n" else 2
+            continue
+        if escaped == "\n":
+            index += 2
+            continue
+        if escaped == "x" and re.fullmatch(
+            r"[0-9A-Fa-f]{2}", value[index + 2 : index + 4]
+        ):
+            output.append(chr(int(value[index + 2 : index + 4], 16)))
+            index += 4
+            continue
+        if escaped == "u":
+            if index + 2 < len(value) and value[index + 2] == "{":
+                closing = value.find("}", index + 3)
+                digits = value[index + 3 : closing] if closing != -1 else ""
+                if re.fullmatch(r"[0-9A-Fa-f]{1,6}", digits):
+                    code_point = int(digits, 16)
+                    if code_point <= 0x10FFFF:
+                        output.append(chr(code_point))
+                        index = closing + 1
+                        continue
+            digits = value[index + 2 : index + 6]
+            if re.fullmatch(r"[0-9A-Fa-f]{4}", digits):
+                output.append(chr(int(digits, 16)))
+                index += 6
+                continue
+        output.append(JAVASCRIPT_SIMPLE_ESCAPES.get(escaped, escaped))
+        index += 2
+    return "".join(output)
+
+
+def copy_decoded_javascript_text(
+    text: str, output: list[str], start: int, end: int
+) -> None:
+    """Copy decoded literal text without changing source line positions."""
+
+    cursor = start
+    for source_line in text[start:end].splitlines(keepends=True):
+        line_text = source_line.rstrip("\r\n")
+        trailing_backslashes = len(line_text) - len(line_text.rstrip("\\"))
+        if len(line_text) < len(source_line) and trailing_backslashes % 2 == 1:
+            line_text = line_text[:-1]
+        decoded = decode_javascript_text(line_text)
+        visible = "".join(
+            " " if character.isspace() else character for character in decoded
+        )
+        destination_end = min(cursor + len(visible), cursor + len(line_text))
+        output[cursor:destination_end] = visible[: destination_end - cursor]
+        cursor += len(source_line)
+
+
+def copy_javascript_string(text: str, output: list[str], start: int, end: int) -> None:
+    """Copy the decoded content of one quoted JavaScript string."""
+
+    quote = text[start]
+    content_end = end - 1 if end > start + 1 and text[end - 1] == quote else end
+    copy_decoded_javascript_text(text, output, start + 1, content_end)
 
 
 def javascript_module_specifier(tokens: list[str]) -> bool:
@@ -728,29 +887,26 @@ def mask_js_template(
     """Walk a template and optionally copy its literal text segments."""
 
     index = start + 1
-    literal_start = start
+    literal_start = start + 1
     while index < len(text):
         if text[index] == "\\":
             index += 2
             continue
         if text.startswith("${", index):
             if copy_literal:
-                copy_span(output, text, literal_start, index + 2)
+                copy_decoded_javascript_text(text, output, literal_start, index)
             index = mask_javascript_code(text, output, index + 2, stop_at_brace=True)
             if index < len(text) and text[index] == "}":
-                if copy_literal:
-                    copy_span(output, text, index, index + 1)
                 index += 1
             literal_start = index
             continue
         if text[index] == "`":
-            index += 1
             if copy_literal:
-                copy_span(output, text, literal_start, index)
-            return index
+                copy_decoded_javascript_text(text, output, literal_start, index)
+            return index + 1
         index += 1
     if copy_literal:
-        copy_span(output, text, literal_start, len(text))
+        copy_decoded_javascript_text(text, output, literal_start, len(text))
     return len(text)
 
 
@@ -804,7 +960,7 @@ def copy_jsx_tag_literals(text: str, output: list[str], start: int, end: int) ->
         if text[index] in "'\"":
             next_index = javascript_string_end(text, index, text[index])
             if not javascript_identifier_literal(text, index, next_index):
-                copy_span(output, text, index, next_index)
+                copy_javascript_string(text, output, index, next_index)
             index = min(next_index, end)
         elif text[index] == "`":
             next_index = mask_js_template(text, output, index)
@@ -876,7 +1032,7 @@ def mask_javascript_code(
                 or javascript_route_argument(tokens)
                 or javascript_identifier_literal(text, index, end)
             ):
-                copy_span(output, text, index, end)
+                copy_javascript_string(text, output, index, end)
             index = end
             remember_javascript_token(tokens, "<string>")
             continue
@@ -1459,49 +1615,11 @@ def mask_source_code(path: Path, text: str) -> str:
     return text
 
 
-def mask_inline_code(text: str) -> str:
-    """Hide code spans whose closing backtick run matches the opener."""
-
-    output = list(text)
-    cursor = 0
-    while cursor < len(text):
-        opening_start = text.find("`", cursor)
-        if opening_start < 0:
-            break
-        opening_end = opening_start
-        while opening_end < len(text) and text[opening_end] == "`":
-            opening_end += 1
-        delimiter_length = opening_end - opening_start
-
-        search = opening_end
-        closing_end: int | None = None
-        while search < len(text):
-            closing_start = text.find("`", search)
-            if closing_start < 0:
-                break
-            run_end = closing_start
-            while run_end < len(text) and text[run_end] == "`":
-                run_end += 1
-            if run_end - closing_start == delimiter_length:
-                closing_end = run_end
-                break
-            search = run_end
-
-        if closing_end is None:
-            cursor = opening_end
-            continue
-        for index in range(opening_start, closing_end):
-            if output[index] not in "\r\n":
-                output[index] = " "
-        cursor = closing_end
-    return "".join(output)
-
-
 def mask_markdown_code(text: str) -> str:
     """Hide Markdown code while preserving offsets and line numbers."""
 
     block_masked = mask_markdown_code_blocks(text)
-    return mask_inline_code(block_masked)
+    return mask_inline_code_spans(block_masked)
 
 
 def main(argv: list[str] | None = None) -> int:

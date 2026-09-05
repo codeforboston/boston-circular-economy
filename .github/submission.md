@@ -63,6 +63,8 @@ issue existed.
 - Scan reader-facing assignment-manifest values while excluding machine-only JSON metadata.
 - Mask valid Markdown inline-code spans that cross a line break.
 - Apply the same multiline inline-code boundary to committed submission validation.
+- Keep Python environment keys outside prose checks and decode JavaScript reader strings before checking them.
+- Use one Markdown inline-code parser that keeps escaped backticks visible to both prose and submission checks.
 
 ## Challenge cases
 
@@ -78,7 +80,9 @@ issue existed.
 - Module paths and workflow commands remain outside prose checks while reader-facing strings and comments remain inside.
 - Action references remain outside prose checks while action names, nested values, and comments remain inside.
 - JavaScript route paths remain outside prose checks while reader-facing strings remain inside.
+- JavaScript reader strings decode apostrophe and Unicode escapes before editorial checks.
 - Python mapping keys remain outside prose checks while string values remain inside.
+- Python environment-variable names remain outside prose checks while reader-facing values remain inside.
 - Incomplete Python keeps plain, formatted, byte, and nested mapping keys outside prose checks.
 - Assignment JSON decodes and checks reader-facing values while paths, identifiers, and status values remain outside the scan.
 - Authentication, credential, and security workflow or utility paths require Red review across subsystem directories.
@@ -89,6 +93,7 @@ issue existed.
 - Hosted frontend CI rejects generated client files that differ after the build.
 - List-marker fences stay masked, including tilde fences and nested quotes.
 - Inline-code spans stay masked when matching backticks occur after a line break.
+- Escaped Markdown backticks remain visible punctuation and cannot hide prose or raw HTML.
 - An unclosed list fence stops masking when visible prose leaves the list container.
 - An unclosed quote fence stops masking when the quote depth decreases.
 - A clean server install initializes temporary SQLite and returns `pong` from `/ping`.
@@ -102,7 +107,7 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass; startup creates temporary SQLite and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 100 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 104 communication and submission tests |
 | Routing policy | Pass | 34 routing and hook-context tests, policy validation, and model-route samples |
 | Review policy and model routing | Pass | 25 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation plus commit-stage and push-stage runs |

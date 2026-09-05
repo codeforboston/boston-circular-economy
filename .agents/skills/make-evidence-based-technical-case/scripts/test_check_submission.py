@@ -116,6 +116,16 @@ class CheckSubmissionTests(unittest.TestCase):
 
         self.assertEqual(check_submission.check_submission(body), [])
 
+    def test_escaped_backticks_do_not_hide_raw_html(self) -> None:
+        body = VALID_BODY.replace(
+            "Review the stale-data boundary.",
+            "Review \\`<div>\\` as visible text.",
+        )
+
+        rules = [finding.rule for finding in check_submission.check_submission(body)]
+
+        self.assertIn("raw-html", rules)
+
     def test_missing_section_fails(self) -> None:
         body = VALID_BODY.replace("## Code quality", "## Quality")
         rules = [finding.rule for finding in check_submission.check_submission(body)]
