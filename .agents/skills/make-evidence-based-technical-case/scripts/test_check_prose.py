@@ -58,6 +58,52 @@ class ProseCheckerTests(unittest.TestCase):
 
         self.assertEqual([], findings)
 
+    def test_shorter_inner_fence_does_not_close_a_longer_outer_fence(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.md"
+            path.write_text(
+                "````markdown\n"
+                "```text\n"
+                "unlock the potential\n"
+                "```\n"
+                "````\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual([], findings)
+
+    def test_four_space_marker_does_not_close_a_top_level_fence(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.md"
+            path.write_text(
+                "```text\n"
+                "    ```\n"
+                "Unlock the potential.\n"
+                "```\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual([], findings)
+
+    def test_fenced_code_inside_a_list_uses_the_list_indent(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.md"
+            path.write_text(
+                "- Example:\n\n"
+                "  ```text\n"
+                "  Unlock the potential.\n"
+                "  ```\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual([], findings)
+
     def test_ignores_cliche_examples_inside_indented_markdown_code(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.md"

@@ -107,6 +107,42 @@ class CheckSubmissionTests(unittest.TestCase):
         rules = [finding.rule for finding in check_submission.check_submission(body)]
         self.assertIn("missing-section", rules)
 
+    def test_template_bullet_does_not_fill_a_required_section(self) -> None:
+        body = VALID_BODY.replace(
+            "- Route lookup through the service.",
+            "- <!-- Describe the change. -->",
+        )
+
+        findings = check_submission.check_submission(body)
+
+        self.assertIn(
+            "What changed",
+            [
+                finding.detail
+                for finding in findings
+                if finding.rule == "empty-section"
+            ],
+        )
+
+    def test_markdown_without_explanatory_text_does_not_fill_a_section(self) -> None:
+        for non_content in ("---", "- [ ]", "- [x]", ">", "###"):
+            with self.subTest(non_content=non_content):
+                body = VALID_BODY.replace(
+                    "- Route lookup through the service.",
+                    non_content,
+                )
+
+                findings = check_submission.check_submission(body)
+
+                self.assertIn(
+                    "What changed",
+                    [
+                        finding.detail
+                        for finding in findings
+                        if finding.rule == "empty-section"
+                    ],
+                )
+
     def test_label_in_wrong_section_fails(self) -> None:
         body = VALID_BODY.replace(
             "- Revisit when: A second provider needs another contract.\n",
@@ -267,6 +303,38 @@ class CheckSubmissionTests(unittest.TestCase):
         body = VALID_BODY.replace("[x] No substantial", "[ ] No substantial")
         rules = [finding.rule for finding in check_submission.check_submission(body)]
         self.assertIn("ai-disclosure", rules)
+
+    def test_unrelated_selected_box_does_not_disclose_ai_assistance(self) -> None:
+        body = VALID_BODY.replace(
+            "- [x] No substantial AI assistance",
+            "- [ ] No substantial AI assistance\n- [x] Reviewed the screenshots",
+        )
+
+        details = [
+            finding.detail for finding in check_submission.check_submission(body)
+        ]
+
+        self.assertIn("select at least one assistance option", details)
+        self.assertIn(
+            "remove selected options outside the four supported choices",
+            details,
+        )
+
+    def test_no_assistance_conflicts_with_ai_assisted_choice(self) -> None:
+        body = VALID_BODY.replace(
+            "- [x] No substantial AI assistance",
+            "- [x] No substantial AI assistance\n"
+            "- [x] AI assisted with implementation or tests",
+        )
+
+        details = [
+            finding.detail for finding in check_submission.check_submission(body)
+        ]
+
+        self.assertIn(
+            "do not combine no substantial assistance with an AI-assisted choice",
+            details,
+        )
 
     def test_empty_evidence_cell_fails(self) -> None:
         body = VALID_BODY.replace(

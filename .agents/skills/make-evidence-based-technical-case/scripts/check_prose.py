@@ -858,20 +858,27 @@ def mask_markdown_code(text: str) -> str:
     """Hide Markdown code while preserving offsets and line numbers."""
 
     output: list[str] = []
-    in_fence = False
+    fence_character: str | None = None
+    fence_length = 0
+    fence_container_indent = 0
     list_indents: list[tuple[int, int]] = []
     for line in text.splitlines(keepends=True):
-        stripped = line.lstrip()
-        if stripped.startswith(("```", "~~~")):
-            in_fence = not in_fence
-            output.append("".join("\n" if char == "\n" else " " for char in line))
-            continue
-        if in_fence:
-            output.append("".join("\n" if char == "\n" else " " for char in line))
-            continue
         content = line.rstrip("\r\n")
+        stripped = content.lstrip()
         indentation_text = content[: len(content) - len(content.lstrip(" \t"))]
         indentation = len(indentation_text.expandtabs(4))
+        if fence_character is not None:
+            relative_indent = indentation - fence_container_indent
+            if 0 <= relative_indent <= 3 and re.fullmatch(
+                rf"{re.escape(fence_character)}{{{fence_length},}}[ \t]*",
+                stripped,
+            ):
+                fence_character = None
+                fence_length = 0
+                fence_container_indent = 0
+            output.append("".join("\n" if char == "\n" else " " for char in line))
+            continue
+
         list_item = LIST_ITEM_START.match(content)
         if list_item is not None:
             marker_indent = len(list_item.group("indent").expandtabs(4))
@@ -882,6 +889,17 @@ def mask_markdown_code(text: str) -> str:
         elif content.strip():
             while list_indents and indentation < list_indents[-1][1]:
                 list_indents.pop()
+
+        container_indent = list_indents[-1][1] if list_indents else 0
+        relative_indent = indentation - container_indent
+        opening_fence = re.match(r"(`{3,}|~{3,})", stripped)
+        if 0 <= relative_indent <= 3 and opening_fence is not None:
+            marker = opening_fence.group(1)
+            fence_character = marker[0]
+            fence_length = len(marker)
+            fence_container_indent = container_indent
+            output.append("".join("\n" if char == "\n" else " " for char in line))
+            continue
 
         code_indent = (list_indents[-1][1] + 4) if list_indents else 4
         if list_item is None and indentation >= code_indent:

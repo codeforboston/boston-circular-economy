@@ -53,7 +53,13 @@ ACCOUNTABILITY = (
 )
 ISSUE_REFERENCE = re.compile(r"(?im)^\s*(?:closes|fixes|resolves)\s+#\d+\s*$")
 ISSUE_EXCEPTION = re.compile(r"(?im)^\s*issue exception:\s*\S.+$")
-SELECTED_AI_BOX = re.compile(r"(?im)^\s*-\s*\[[xX]]\s+.+$")
+SELECTED_AI_BOX = re.compile(r"(?im)^\s*-\s*\[[xX]]\s+(.+?)\s*$")
+AI_DISCLOSURE_OPTIONS = (
+    "No substantial AI assistance",
+    "AI assisted with exploration or planning",
+    "AI assisted with implementation or tests",
+    "AI assisted with review or challenge",
+)
 PLACEHOLDER = re.compile(r"<!--.*?-->", re.DOTALL)
 REQUIRED_EVIDENCE_CHECKS = (
     "Client lint and build",
@@ -69,6 +75,10 @@ SECTION_HEADING = re.compile(r"(?m)^##\s+(.+?)\s*$")
 TRAILING_HEADING_MARKS = re.compile(r"[ \t]+#+[ \t]*$")
 FENCE_START = re.compile(r"^[ ]{0,3}(`{3,}|~{3,})[^\r\n]*$")
 INDENTED_CODE = re.compile(r"^(?: {4}|\t)")
+EMPTY_MARKDOWN_LINE = re.compile(
+    r"(?m)^[ \t]*(?:(?:[-+*]|\d{1,9}[.)])(?:[ \t]+\[[ xX]\])?|"
+    r"(?:[*_-][ \t]*){3,}|>+|#{1,6})[ \t]*$"
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -84,6 +94,13 @@ def normalize_section_name(name: str) -> str:
     without_comments = PLACEHOLDER.sub("", name)
     without_marks = TRAILING_HEADING_MARKS.sub("", without_comments)
     return " ".join(without_marks.split()).casefold()
+
+
+def has_meaningful_section_content(content: str) -> bool:
+    """Reject empty template bullets as section content."""
+
+    without_placeholders = PLACEHOLDER.sub("", content)
+    return bool(EMPTY_MARKDOWN_LINE.sub("", without_placeholders).strip())
 
 
 def mask_markdown_code_blocks(body: str) -> str:
@@ -235,7 +252,7 @@ def check_submission(body: str) -> list[SubmissionFinding]:
             findings.append(SubmissionFinding("duplicate-section", name))
         if count == 0:
             findings.append(SubmissionFinding("missing-section", name))
-        elif not PLACEHOLDER.sub("", sections[section_key]).strip():
+        elif not has_meaningful_section_content(sections[section_key]):
             findings.append(SubmissionFinding("empty-section", name))
 
     for section_name, labels in REQUIRED_SECTION_LABELS.items():
@@ -271,9 +288,32 @@ def check_submission(body: str) -> list[SubmissionFinding]:
     }:
         findings.append(SubmissionFinding("risk-lane", "select Green, Yellow, or Red"))
     ai_section = sections.get(normalize_section_name("AI assistance"), "")
-    if ai_section and not SELECTED_AI_BOX.search(ai_section):
+    selected_ai_options = [
+        " ".join(match.group(1).split()).casefold()
+        for match in SELECTED_AI_BOX.finditer(ai_section)
+    ]
+    supported_ai_options = {option.casefold() for option in AI_DISCLOSURE_OPTIONS}
+    selected_supported_options = {
+        option for option in selected_ai_options if option in supported_ai_options
+    }
+    if ai_section and not selected_supported_options:
         findings.append(
             SubmissionFinding("ai-disclosure", "select at least one assistance option")
+        )
+    if any(option not in supported_ai_options for option in selected_ai_options):
+        findings.append(
+            SubmissionFinding(
+                "ai-disclosure",
+                "remove selected options outside the four supported choices",
+            )
+        )
+    no_assistance = AI_DISCLOSURE_OPTIONS[0].casefold()
+    if no_assistance in selected_supported_options and len(selected_supported_options) > 1:
+        findings.append(
+            SubmissionFinding(
+                "ai-disclosure",
+                "do not combine no substantial assistance with an AI-assisted choice",
+            )
         )
     evidence_key = normalize_section_name("Evidence")
     if evidence_key in sections:
