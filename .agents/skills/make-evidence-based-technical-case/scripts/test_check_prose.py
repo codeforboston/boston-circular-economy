@@ -500,6 +500,26 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_ignores_programmatic_css_payloads_but_checks_reader_text(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "styles.ts"
+            path.write_text(
+                'element.style.cssText = "color: red; display: block";\n'
+                'element.style.cssText += "padding: 0; margin: 0";\n'
+                'sheet.insertRule("body { color: red; }");\n'
+                'stylesheet.replaceSync(`body { color: red; }`);\n'
+                'element.style.setProperty("--theme", "color: red; display: block");\n'
+                'const message = "Do not deploy; wait.";\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(6, "semicolon")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_checks_html_text_and_reader_facing_attributes(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "index.html"

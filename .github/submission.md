@@ -137,6 +137,8 @@ issue existed.
 - Preserve reader prose in multiline quoted YAML scalars.
 - Join output from string-only JavaScript template interpolations.
 - Route password and authentication-token handlers to Red review.
+- Bind changed-file discovery and the review command to one resolved base commit.
+- Keep programmatic CSS payload strings outside reader-prose checks.
 
 ## Challenge cases
 
@@ -239,6 +241,10 @@ issue existed.
 - A static template interpolation cannot split a prohibited contraction.
 - Password and authentication-token handlers require Red review, while design-token
   files retain the normal application route.
+- A mutable base ref can move after resolution without changing the classified diff or
+  the base passed to the review command.
+- CSSOM payload assignments and calls remain machine syntax, while adjacent reader text
+  remains subject to wording checks.
 - Red review stops for specialist and human escalation, including ETL credential and secret paths.
 
 ## Evidence
@@ -248,9 +254,9 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass. Startup creates and closes a temporary SQLite database, and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 155 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 156 communication and submission tests |
 | Routing policy | Pass | 42 routing, hook-context, manifest-integrity, and model-route tests |
-| Review policy and model routing | Pass | 29 local-runner tests and independent delivery challenges |
+| Review policy and model routing | Pass | 30 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation, schema validation, and commit-stage and push-stage runs |
 | Workflow syntax | Pass | Actionlint 1.7.11 and YAML parsing |
 | Hosted pull-request CI | Not run | Hosted CI starts after this record enters the commit |
@@ -285,6 +291,7 @@ Examine database-operation string classification and front-matter closure detect
 Examine deliverable-name classification and adjacent rendered-text source mapping.
 Examine multiline YAML quoted scalars, static template interpolation, and the
 password and authentication-token risk floor.
+Examine resolved-base reuse and programmatic CSS payload classification.
 Examine Python resource identifiers, heading termination, hook suffix coverage, and the
 Red workflow risk floor. Confirm the deployment reconcile step verifies the selected
 run has an unexpired client artifact before it marks the deployment ready. Confirm

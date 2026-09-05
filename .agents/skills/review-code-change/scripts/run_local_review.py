@@ -284,8 +284,9 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     arguments = build_parser().parse_args(argv)
     repository = arguments.repository.resolve()
+    review_base = arguments.base
     if arguments.scope == "branch":
-        resolve_commit(repository, arguments.base)
+        review_base = resolve_commit(repository, arguments.base)
     trusted_commit = resolve_commit(repository, arguments.trusted_ref)
     risk_policy = load_json_from_commit(
         repository,
@@ -299,13 +300,13 @@ def main(argv: list[str] | None = None) -> int:
     )
     load_risk_policy_from_data(risk_policy)
     load_routing_policy_from_data(routing_policy)
-    files = changed_files(arguments.base, arguments.scope, repository=repository)
+    files = changed_files(review_base, arguments.scope, repository=repository)
     inferred = infer_minimum_risk(files, risk_policy)
     minimum_risk = str(inferred["risk"])
     selected_risk = effective_risk(arguments.risk, minimum_risk)
     route = select_route(routing_policy, arguments.task_type, selected_risk)
     try:
-        command = build_codex_command(route, arguments.base, arguments.scope)
+        command = build_codex_command(route, review_base, arguments.scope)
     except ReviewNeedsEscalationError as error:
         print(str(error), file=sys.stderr)
         return 2
@@ -314,7 +315,7 @@ def main(argv: list[str] | None = None) -> int:
         print(
             json.dumps(
                 {
-                    "base": arguments.base,
+                    "base": review_base,
                     "command": command,
                     "files": files,
                     "trusted_commit": trusted_commit,
@@ -330,6 +331,7 @@ def main(argv: list[str] | None = None) -> int:
                         "reasons": inferred["reasons"],
                     },
                     "route": route,
+                    "requested_base": arguments.base,
                     "scope": arguments.scope,
                 },
                 indent=2,

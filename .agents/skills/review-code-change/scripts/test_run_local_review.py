@@ -1,11 +1,16 @@
 from __future__ import annotations
 
+import io
 import json
 import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
+from unittest import mock
+
+import run_local_review
 
 from run_local_review import (
     build_codex_command,
@@ -50,7 +55,10 @@ class LocalReviewRunnerTests(unittest.TestCase):
         self.assertIsInstance(route, dict)
         self.assertEqual(route["model"], "gpt-5.6-luna")
         self.assertEqual(route["reasoning_effort"], "low")
-        self.assertEqual(result["command"][-2:], ["--base", "HEAD"])
+        self.assertEqual(
+            result["command"][-2:], ["--base", resolve_commit(ROOT, "HEAD")]
+        )
+        self.assertEqual(result["requested_base"], "HEAD")
         self.assertNotIn("-", result["command"])
         self.assertIn('sandbox_mode="read-only"', result["command"])
 
@@ -361,6 +369,99 @@ class LocalReviewRunnerTests(unittest.TestCase):
             files = changed_files(base, "branch", repository=repository)
 
         self.assertEqual(files, ["client/src/lookup.ts", "docs/lookup.ts"])
+
+    def test_review_reuses_base_commit_after_mutable_ref_moves(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            repository = Path(directory)
+            subprocess.run(["git", "init", "-q"], cwd=repository, check=True)
+            subprocess.run(
+                ["git", "config", "user.email", "review@example.invalid"],
+                cwd=repository,
+                check=True,
+            )
+            subprocess.run(
+                ["git", "config", "user.name", "Review test"],
+                cwd=repository,
+                check=True,
+            )
+            for source in (
+                run_local_review.RISK_POLICY_REPOSITORY_PATH,
+                run_local_review.ROUTING_POLICY_REPOSITORY_PATH,
+            ):
+                destination = repository / source
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                destination.write_text(
+                    (ROOT / source).read_text(encoding="utf-8"),
+                    encoding="utf-8",
+                )
+            subprocess.run(["git", "add", "."], cwd=repository, check=True)
+            subprocess.run(
+                ["git", "commit", "-qm", "Add trusted policies"],
+                cwd=repository,
+                check=True,
+            )
+            base_commit = resolve_commit(repository, "HEAD")
+            subprocess.run(
+                ["git", "branch", "review-base", base_commit],
+                cwd=repository,
+                check=True,
+            )
+            subprocess.run(
+                ["git", "branch", "trusted-base", base_commit],
+                cwd=repository,
+                check=True,
+            )
+            changed = repository / "client/src/lookup.ts"
+            changed.parent.mkdir(parents=True)
+            changed.write_text("export const lookup = true\n", encoding="utf-8")
+            subprocess.run(["git", "add", "."], cwd=repository, check=True)
+            subprocess.run(
+                ["git", "commit", "-qm", "Add client change"],
+                cwd=repository,
+                check=True,
+            )
+
+            original_resolve = run_local_review.resolve_commit
+
+            def resolve_and_move(repo: Path, reference: str) -> str:
+                resolved = original_resolve(repo, reference)
+                if reference == "review-base":
+                    subprocess.run(
+                        ["git", "branch", "-f", "review-base", "HEAD"],
+                        cwd=repo,
+                        check=True,
+                    )
+                return resolved
+
+            stdout = io.StringIO()
+            with (
+                mock.patch.object(
+                    run_local_review,
+                    "resolve_commit",
+                    side_effect=resolve_and_move,
+                ),
+                redirect_stdout(stdout),
+            ):
+                result_code = run_local_review.main(
+                    [
+                        "--repository",
+                        str(repository),
+                        "--base",
+                        "review-base",
+                        "--trusted-ref",
+                        "trusted-base",
+                        "--risk",
+                        "yellow",
+                        "--dry-run",
+                    ]
+                )
+            result = json.loads(stdout.getvalue())
+
+        self.assertEqual(0, result_code)
+        self.assertEqual(base_commit, result["base"])
+        self.assertEqual("review-base", result["requested_base"])
+        self.assertEqual(["client/src/lookup.ts"], result["files"])
+        self.assertEqual(result["command"][-2:], ["--base", base_commit])
 
     def test_integration_review_uses_sol(self) -> None:
         result = self.dry_run("--risk", "yellow", "--task-type", "integration")

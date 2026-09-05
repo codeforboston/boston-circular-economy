@@ -1562,6 +1562,8 @@ JAVASCRIPT_DATABASE_RECEIVERS = {
     "sql",
     "statement",
 }
+JAVASCRIPT_CSS_CALL_METHODS = {"insertrule", "replace", "replacesync"}
+JAVASCRIPT_CSS_STYLESHEET_RECEIVERS = {"sheet", "stylesheet"}
 
 
 def javascript_route_argument(tokens: list[str]) -> bool:
@@ -1588,6 +1590,34 @@ def javascript_database_argument(tokens: list[str]) -> bool:
         and tokens[-2] in JAVASCRIPT_DATABASE_METHODS
         and tokens[-3] == "."
         and tokens[-4] in JAVASCRIPT_DATABASE_RECEIVERS
+    )
+
+
+def javascript_css_payload(tokens: list[str]) -> bool:
+    """Return whether the next literal supplies programmatic CSS syntax."""
+
+    normalized = [token.casefold() for token in tokens]
+    if len(normalized) >= 2 and normalized[-2:] == ["csstext", "="]:
+        return True
+    if len(normalized) >= 3 and (
+        normalized[-3] == "csstext" and normalized[-1] == "="
+    ):
+        return True
+    if len(normalized) >= 4 and normalized[-1] == "(":
+        receiver, separator, method = normalized[-4:-1]
+        if separator != ".":
+            return False
+        if method == "setproperty" and receiver == "style":
+            return True
+        if (
+            method in JAVASCRIPT_CSS_CALL_METHODS
+            and receiver in JAVASCRIPT_CSS_STYLESHEET_RECEIVERS
+        ):
+            return True
+    return bool(
+        len(normalized) >= 4
+        and normalized[-4] == "setproperty"
+        and normalized[-3:] == ["(", "<string>", ","]
     )
 
 
@@ -2322,6 +2352,7 @@ def mask_javascript_code(
                 javascript_module_specifier(tokens)
                 or javascript_route_argument(tokens)
                 or javascript_database_argument(tokens)
+                or javascript_css_payload(tokens)
                 or javascript_identifier_literal(text, index, end)
                 or javascript_property_key(text, index, end, tokens)
             ):
@@ -2338,6 +2369,7 @@ def mask_javascript_code(
                     javascript_module_specifier(tokens)
                     or javascript_route_argument(tokens)
                     or javascript_database_argument(tokens)
+                    or javascript_css_payload(tokens)
                     or javascript_template_identifier(text, index)
                 ),
                 parse_jsx=parse_jsx,
