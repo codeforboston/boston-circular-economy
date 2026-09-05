@@ -1789,6 +1789,7 @@ JAVASCRIPT_DATABASE_RECEIVERS = {
 }
 JAVASCRIPT_SHELL_COMMAND_FUNCTIONS = {"exec", "execsync"}
 JAVASCRIPT_SHELL_COMMAND_RECEIVERS = {"child_process", "childprocess", "cp"}
+JAVASCRIPT_MACHINE_TEMPLATE_TAGS = {"css", "gql", "graphql", "keyframes", "sql"}
 JAVASCRIPT_CSS_CALL_METHODS = {"insertrule", "replace", "replacesync"}
 JAVASCRIPT_CSS_STYLESHEET_RECEIVERS = {"sheet", "stylesheet"}
 JAVASCRIPT_PROTOCOL_HEADER_METHODS = {"appendheader", "setheader"}
@@ -1841,6 +1842,22 @@ def javascript_shell_command_argument(tokens: list[str]) -> bool:
         and normalized[-2] in JAVASCRIPT_SHELL_COMMAND_FUNCTIONS
         and normalized[-3] == "."
         and normalized[-4] in JAVASCRIPT_SHELL_COMMAND_RECEIVERS
+    )
+
+
+def javascript_machine_template(tokens: list[str]) -> bool:
+    """Return whether a tag identifies a known machine-language template."""
+
+    normalized = [token.casefold() for token in tokens]
+    if normalized and normalized[-1] in JAVASCRIPT_MACHINE_TEMPLATE_TAGS:
+        return True
+    if len(normalized) >= 3 and normalized[-3] == "styled":
+        return normalized[-2] == "."
+    return bool(
+        len(normalized) >= 4
+        and normalized[-4] == "styled"
+        and normalized[-3] == "("
+        and normalized[-1] == ")"
     )
 
 
@@ -2645,21 +2662,27 @@ def mask_javascript_code(
             continue
         if character == "`":
             protocol_header = javascript_protocol_header_argument(tokens)
+            machine_template = javascript_machine_template(tokens)
+            template_start = index
+            copy_literal = not (
+                javascript_module_specifier(tokens)
+                or javascript_route_argument(tokens)
+                or javascript_database_argument(tokens)
+                or javascript_shell_command_argument(tokens)
+                or machine_template
+                or javascript_css_payload(tokens)
+                or protocol_header
+                or javascript_template_identifier(text, index)
+            )
             index = mask_js_template(
                 text,
                 output,
                 index,
-                copy_literal=not (
-                    javascript_module_specifier(tokens)
-                    or javascript_route_argument(tokens)
-                    or javascript_database_argument(tokens)
-                    or javascript_shell_command_argument(tokens)
-                    or javascript_css_payload(tokens)
-                    or protocol_header
-                    or javascript_template_identifier(text, index)
-                ),
+                copy_literal=copy_literal,
                 parse_jsx=parse_jsx,
             )
+            if machine_template:
+                mask_span(output, text, template_start, index)
             remember_javascript_token(
                 tokens,
                 "<header-argument>" if protocol_header else "<template>",

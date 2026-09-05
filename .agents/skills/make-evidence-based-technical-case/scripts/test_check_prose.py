@@ -589,6 +589,26 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_ignores_machine_templates_but_checks_reader_templates(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "templates.ts"
+            path.write_text(
+                "const style = css`color: red; display: block;`;\n"
+                "const query = sql`SELECT 1; SELECT 2;`;\n"
+                'const dynamic = css`color: ${"red; blue"};`;\n'
+                "const button = styled.button`color: red; display: block;`;\n"
+                "const reader = readerText`Unlock the potential.`;\n"
+                'const message = `Do not deploy; wait.`;\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(5, "promotional cliche"), (6, "semicolon")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_checks_html_text_and_reader_facing_attributes(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "index.html"

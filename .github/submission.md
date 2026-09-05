@@ -268,6 +268,7 @@ issue existed.
 - Child-process shell commands remain machine syntax while adjacent user messages remain visible.
 - Python process commands follow standard import aliases and remain machine syntax.
 - Destructive `drop` utilities in each application subsystem require Red review.
+- Known CSS, SQL, and GraphQL template tags remain machine syntax while reader templates remain visible.
 - Red review stops for specialist and human escalation, including ETL credential and secret paths.
 
 ## Evidence
@@ -277,7 +278,7 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass. Startup creates and closes a temporary SQLite database, and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 163 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 164 communication and submission tests |
 | Routing policy | Pass | 44 routing, hook-context, manifest-integrity, and model-route tests |
 | Review policy and model routing | Pass | 32 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation, schema validation, and commit-stage and push-stage runs |
@@ -323,6 +324,7 @@ Examine access-control routing and generic header-call text visibility.
 Examine protocol-header recognition on aliased response objects.
 Examine literal-only Python f-string output and child-process command classification.
 Examine Python process-command aliases and destructive `drop` routing.
+Examine tagged machine templates and reader-template boundaries.
 Examine Python resource identifiers, heading termination, hook suffix coverage, and the
 Red workflow risk floor. Confirm the deployment reconcile step verifies the selected
 run has an unexpired client artifact before it marks the deployment ready. Confirm
