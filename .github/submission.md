@@ -48,6 +48,7 @@ issue existed.
 - Add code-change standards for ownership, failure, recovery, and refactor boundaries.
 - Add capability defaults for deterministic tools, Luna, Terra, Sol, specialists, and humans.
 - Add self-explanatory implementation and independent review skills.
+- Route destructive utilities throughout each subsystem to Red review while excluding fixture data.
 - Declare the server's existing SQLite runtime and types, and use its emitted JavaScript import path.
 - Refresh the locked Node dependency graph to include the native SQLite package.
 - Add the pinned ETL lint toolchain and format existing ETL code without changing its data contracts.
@@ -68,6 +69,7 @@ issue existed.
 - JavaScript route paths remain outside prose checks while reader-facing strings remain inside.
 - Python mapping keys remain outside prose checks while string values remain inside.
 - Authentication and security workflow paths require Red review.
+- Destructive utilities outside source directories require Red review, while fixture data remains Yellow.
 - Uncommitted review routing unions staged, unstaged, and untracked paths before applying the risk floor.
 - Unrelated CI completions cannot cancel an active qualifying Pages deployment.
 - Hosted frontend CI rejects generated client files that differ after the build.

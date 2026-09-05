@@ -188,12 +188,15 @@ class LocalReviewRunnerTests(unittest.TestCase):
         paths = (
             "client/src/pages/settings/delete-account.tsx",
             "client/src/admin/delete-organization.tsx",
+            "client/scripts/reset-tenant-data.ts",
             "server/src/users/delete-user.ts",
             "server/src/admin/purge-expired-records.ts",
             "server/src/maintenance/resetDatabase.ts",
+            "server/scripts/reset-database.ts",
             "etl/src/jobs/delete-records.py",
             "etl/src/etl/jobs/reset-data.py",
             "etl/src/etl/jobs/purge-snapshots.py",
+            "etl/maintenance/purge-snapshots.py",
         )
         policy = load_risk_policy()
 

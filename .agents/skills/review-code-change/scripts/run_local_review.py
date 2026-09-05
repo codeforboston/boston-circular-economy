@@ -24,7 +24,12 @@ def load_risk_policy(path: Path = RISK_POLICY) -> dict[str, Any]:
         raise ValueError("review risk policy schema_version must be 1")
     if policy.get("unknown_path_risk") not in RISK_ORDER:
         raise ValueError("review risk policy has an invalid unknown_path_risk")
-    for key in ("green_paths", "yellow_paths", "red_paths"):
+    for key in (
+        "green_paths",
+        "yellow_paths",
+        "red_exempt_paths",
+        "red_paths",
+    ):
         values = policy.get(key)
         if not isinstance(values, list) or not all(
             isinstance(value, str) and value for value in values
@@ -65,7 +70,12 @@ def infer_minimum_risk(files: list[str], policy: dict[str, Any]) -> dict[str, ob
     reasons: list[str] = []
     for path in sorted(set(files)):
         matches: list[str] = []
+        red_exempt = any(
+            path_matches(path, pattern) for pattern in policy["red_exempt_paths"]
+        )
         for risk in RISK_ORDER:
+            if risk == "red" and red_exempt:
+                continue
             patterns = policy[f"{risk}_paths"]
             if any(path_matches(path, pattern) for pattern in patterns):
                 matches.append(risk)

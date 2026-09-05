@@ -21,6 +21,11 @@
     "package.json",
     "server/**"
   ],
+  "red_exempt_paths": [
+    "client/**/fixtures/**",
+    "etl/**/fixtures/**",
+    "server/**/fixtures/**"
+  ],
   "red_paths": [
     ".github/workflows/*auth*",
     ".github/workflows/*credential*",
@@ -47,13 +52,13 @@
     "client/src/**/a11y/**",
     "client/src/**/accessibility/**",
     "client/src/**/*aria*live*",
-    "client/src/**/delete*",
+    "client/**/delete*",
     "client/src/**/*focus*trap*",
     "client/src/**/*keyboard*navigation*",
-    "client/src/**/purge*",
-    "client/src/**/reset*data*",
-    "client/src/**/reset*database*",
-    "client/src/**/reset*tenant*",
+    "client/**/purge*",
+    "client/**/reset*data*",
+    "client/**/reset*database*",
+    "client/**/reset*tenant*",
     "etl/**/migration*",
     "etl/**/migrations/**",
     "etl/src/**/auth.*",
@@ -68,11 +73,11 @@
     "etl/src/**/*privacy*",
     "etl/src/**/*secret*",
     "etl/src/**/*session*",
-    "etl/src/**/delete*",
-    "etl/src/**/purge*",
-    "etl/src/**/reset*data*",
-    "etl/src/**/reset*database*",
-    "etl/src/**/reset*tenant*",
+    "etl/**/delete*",
+    "etl/**/purge*",
+    "etl/**/reset*data*",
+    "etl/**/reset*database*",
+    "etl/**/reset*tenant*",
     "server/src/**/auth.*",
     "server/src/**/auth/**",
     "server/src/**/*authentication*",
@@ -87,10 +92,10 @@
     "server/src/**/*privacy*",
     "server/src/**/*secret*",
     "server/src/**/*session*",
-    "server/src/**/delete*",
-    "server/src/**/purge*",
-    "server/src/**/reset*data*",
-    "server/src/**/reset*database*",
-    "server/src/**/reset*tenant*"
+    "server/**/delete*",
+    "server/**/purge*",
+    "server/**/reset*data*",
+    "server/**/reset*database*",
+    "server/**/reset*tenant*"
   ]
 }
