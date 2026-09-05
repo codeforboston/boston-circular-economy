@@ -89,6 +89,8 @@ issue existed.
 - Run the schema validator from a repository lock that fixes its full dependency graph.
 - Start the built server with temporary SQLite and verify `/ping` in local push checks and CI.
 - Route every GitHub Actions workflow change to Red review because any workflow can change permissions or authorization.
+- Route trusted submission-status helpers to Red review because they run with a status-writing token.
+- Route `migrate` utility names to Red review in the ETL and server subsystems.
 - Add authorization to the Red risk option in the work-unit issue form.
 - Check contractions and semicolons in visible Markdown table cells while keeping inline code inert.
 - Reject backticks in backtick-fence info strings so invalid fences cannot hide visible prose.
@@ -153,6 +155,8 @@ issue existed.
 - Assignment JSON decodes and checks reader-facing values while paths, identifiers, and status values remain outside the scan.
 - Assignment step labels fail on prohibited wording while adjacent model and routing fields remain inert.
 - Every workflow path requires Red review, including ordinary names such as `ci.yml` that can still change permissions.
+- Trusted submission checkers require Red review before they can control a commit status.
+- ETL and server utilities named with `migrate` require Red review.
 - The work-unit issue form identifies authorization changes as Red.
 - Documentation manifests retain the Green review route.
 - Destructive utilities outside source directories require Red review, while fixture data remains Yellow.
@@ -234,7 +238,7 @@ issue existed.
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
 | Technical prose and editorial style | Pass | Full repository scan and 150 communication and submission tests |
 | Routing policy | Pass | 42 routing, hook-context, manifest-integrity, and model-route tests |
-| Review policy and model routing | Pass | 26 local-runner tests and independent delivery challenges |
+| Review policy and model routing | Pass | 27 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation, schema validation, and commit-stage and push-stage runs |
 | Workflow syntax | Pass | Actionlint 1.7.11 and YAML parsing |
 | Hosted pull-request CI | Not run | Hosted CI starts after this record enters the commit |
@@ -272,6 +276,7 @@ run has an unexpired client artifact before it marks the deployment ready. Confi
 accepted work units identify substantive review metadata and destructive utility synonyms
 retain the Red checkpoint. Confirm accepted records contain complete review metadata,
 manifest IDs match unique filenames, and schema validation uses the committed lock.
+Confirm submission-status helpers and `migrate` utilities retain the Red checkpoint.
 Check SQLite shutdown order, native lockfile changes, path mapping, evidence threshold,
 model defaults, and protected-branch activation steps.
 

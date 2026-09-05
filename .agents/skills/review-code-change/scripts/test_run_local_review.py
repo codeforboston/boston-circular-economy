@@ -130,14 +130,18 @@ class LocalReviewRunnerTests(unittest.TestCase):
 
     def test_migration_path_requires_red_review(self) -> None:
         paths = (
+            "etl/migrate.py",
             "etl/migration.py",
             "etl/migrations/0001_initial.py",
+            "etl/src/etl/migrate.py",
             "etl/src/migration.py",
             "etl/src/etl/migrations/0001_initial.py",
+            "server/src/db/migrate.ts",
             "server/src/db/migrations/add-column.ts",
             "server/migration.sql",
             "server/migrations/0001.sql",
             "server/db/migrations/0002.sql",
+            "server/scripts/migrate-database.ts",
         )
         policy = load_risk_policy()
 
@@ -145,6 +149,24 @@ class LocalReviewRunnerTests(unittest.TestCase):
             with self.subTest(path=path):
                 assessment = infer_minimum_risk([path], policy)
                 self.assertEqual("red", assessment["risk"])
+
+    def test_trusted_submission_helpers_require_red_review(self) -> None:
+        paths = (
+            ".agents/skills/make-evidence-based-technical-case/scripts/"
+            "check_submission.py",
+            ".agents/skills/make-evidence-based-technical-case/scripts/"
+            "check_submission_freshness.py",
+        )
+        policy = load_risk_policy()
+
+        for path in paths:
+            with self.subTest(path=path):
+                assessment = infer_minimum_risk([path], policy)
+                self.assertEqual("red", assessment["risk"])
+                self.assertEqual(
+                    "red",
+                    effective_risk("yellow", str(assessment["risk"])),
+                )
 
     def test_etl_privacy_path_requires_red_review(self) -> None:
         paths = (
