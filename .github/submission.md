@@ -101,6 +101,7 @@ issue existed.
 - Exclude reusable-workflow `uses` targets while retaining reader-facing job names.
 - End required submission sections at the next level-one or level-two heading.
 - Keep the pre-commit prose filter synchronized with every scanned suffix, including HTML.
+- Scan literal React `children` props while retaining machine-only JSX prop exclusions.
 
 ## Challenge cases
 
@@ -168,6 +169,7 @@ issue existed.
 - A reusable-workflow path remains machine input, while its job name remains subject to prose checks.
 - A level-one heading ends the preceding required section, so later labels cannot fill it.
 - An HTML-only change selects the commit-stage prose hook.
+- Static and expression `children` text remains visible, while `data-children` remains machine metadata.
 - Red review stops for specialist and human escalation, including ETL credential and secret paths.
 
 ## Evidence
@@ -177,7 +179,7 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass. Startup creates and closes a temporary SQLite database, and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 135 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 136 communication and submission tests |
 | Routing policy | Pass | 37 routing, hook-context, and manifest-discovery tests plus model-route samples |
 | Review policy and model routing | Pass | 25 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation, schema validation, and commit-stage and push-stage runs |
@@ -202,8 +204,9 @@ Review the versioned first-parent record boundary and terminal-only status publi
 Examine Markdown fence, paragraph, table, image-alt, and code-span boundaries. Examine
 link-label, reference-link, and heading boundaries. Examine YAML escape handling,
 TypeScript generic classification, and JSX character references. Examine
-element-specific HTML and JSX attributes, JavaScript property keys, Python resource
-identifiers, heading termination, hook suffix coverage, and the Red workflow risk floor.
+element-specific HTML and JSX attributes, React children, and JavaScript property keys.
+Examine Python resource identifiers, heading termination, hook suffix coverage, and the
+Red workflow risk floor.
 Check SQLite shutdown order, native lockfile changes, path mapping, evidence threshold,
 model defaults, and protected-branch activation steps.
 

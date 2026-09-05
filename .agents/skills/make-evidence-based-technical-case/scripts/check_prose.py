@@ -83,6 +83,7 @@ HTML_READER_ATTRIBUTES = {
     "placeholder",
     "title",
 }
+JSX_READER_ATTRIBUTES = HTML_READER_ATTRIBUTES | {"children"}
 HTML_READER_LABEL_ELEMENTS = {"optgroup", "option", "track"}
 HTML_READER_VALUE_INPUT_TYPES = {
     "",
@@ -1451,7 +1452,7 @@ JSX_STATIC_INPUT_TYPE = re.compile(
 def jsx_reader_attributes(text: str, start: int, end: int) -> set[str]:
     """Return static JSX attributes that present text to a reader."""
 
-    attributes = set(HTML_READER_ATTRIBUTES)
+    attributes = set(JSX_READER_ATTRIBUTES)
     tag_text = text[start:end]
     tag_match = JSX_TAG_NAME.match(tag_text)
     if tag_match is None:

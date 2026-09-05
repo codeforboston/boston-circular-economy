@@ -698,6 +698,23 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_checks_literal_jsx_children_props_only(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.tsx"
+            path.write_text(
+                'const direct = <div children="Unlock the potential." />;\n'
+                'const expression = <div children={"Unlock the potential."} />;\n'
+                'const metadata = <div data-children="Unlock the potential." />;\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(1, "promotional cliche"), (2, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_ignores_python_identifiers_and_checks_reader_text(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.py"
