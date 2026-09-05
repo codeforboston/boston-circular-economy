@@ -54,7 +54,13 @@ def require_checked_out_commit(target: str, checked_out: str) -> None:
         )
 
 
-def require_clean_worktree() -> None:
+def require_clean_worktree(
+    *,
+    failure_message: str = (
+        "local push checks require a clean worktree; "
+        "commit, stash, or remove local changes before pushing"
+    ),
+) -> None:
     """Reject local evidence that includes content outside the pushed commit."""
 
     completed = subprocess.run(
@@ -65,10 +71,7 @@ def require_clean_worktree() -> None:
         text=True,
     )
     if completed.stdout:
-        raise ValueError(
-            "local push checks require a clean worktree; "
-            "commit, stash, or remove local changes before pushing"
-        )
+        raise ValueError(failure_message)
 
 
 def resolve_commit(revision: str) -> str:
@@ -189,6 +192,12 @@ def main(argv: list[str] | None = None) -> int:
         run(["uv", "run", "ruff", "check", "."], cwd=etl)
         run(["uv", "run", "ruff", "format", "--check", "."], cwd=etl)
         run(["uv", "run", "pytest"], cwd=etl)
+    require_clean_worktree(
+        failure_message=(
+            "local push checks modified the worktree; review and commit generated "
+            "or formatted files before pushing"
+        )
+    )
     return 0
 
 

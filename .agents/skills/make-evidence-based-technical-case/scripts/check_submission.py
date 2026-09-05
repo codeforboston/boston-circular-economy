@@ -232,7 +232,10 @@ def evidence_findings(content: str) -> list[SubmissionFinding]:
         check, result, evidence = cells
         normalized_check = " ".join(check.split()).casefold()
         supplied_checks[normalized_check] = supplied_checks.get(normalized_check, 0) + 1
-        if not check or not result or not evidence:
+        if not all(
+            has_meaningful_section_content(value)
+            for value in (check, result, evidence)
+        ):
             findings.append(
                 SubmissionFinding(
                     "evidence-table", "fill the check, result, and evidence cells"
@@ -288,7 +291,7 @@ def check_submission(body: str) -> list[SubmissionFinding]:
                 findings.append(
                     SubmissionFinding("missing-label", f"{section_name}: {label}")
                 )
-            elif not value.strip():
+            elif not has_meaningful_section_content(value):
                 findings.append(
                     SubmissionFinding("empty-label", f"{section_name}: {label}")
                 )

@@ -6,6 +6,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest import mock
 
 from run_local_checks import (
@@ -102,6 +103,36 @@ class LocalCheckRunnerTests(unittest.TestCase):
             capture_output=True,
             text=True,
         )
+
+    @mock.patch("run_local_checks.run")
+    @mock.patch("run_local_checks.route_work.classify_files")
+    @mock.patch("run_local_checks.route_work.load_policy", return_value={})
+    @mock.patch("run_local_checks.require_clean_worktree")
+    @mock.patch("run_local_checks.resolve_commit", return_value="1111111")
+    def test_rechecks_worktree_after_commands_can_generate_files(
+        self,
+        resolve_commit: mock.Mock,
+        require_clean: mock.Mock,
+        load_policy: mock.Mock,
+        classify_files: mock.Mock,
+        run_check: mock.Mock,
+    ) -> None:
+        classify_files.return_value = SimpleNamespace(
+            checks={"frontend": False, "server": False, "etl": False},
+            as_dict=lambda: {},
+        )
+        require_clean.side_effect = [
+            None,
+            ValueError("local push checks modified the worktree"),
+        ]
+
+        with self.assertRaisesRegex(ValueError, "modified the worktree"):
+            main(["--all", "--head", "HEAD"])
+
+        self.assertEqual(2, require_clean.call_count)
+        self.assertEqual(4, run_check.call_count)
+        resolve_commit.assert_has_calls([mock.call("HEAD"), mock.call("HEAD")])
+        load_policy.assert_called_once_with()
 
     def test_all_files_mode_does_not_resolve_a_base(self) -> None:
         self.assertEqual([], files_for_run(True, "missing/main", "HEAD"))
