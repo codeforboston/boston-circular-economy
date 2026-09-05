@@ -59,19 +59,22 @@ issue existed.
 - Align the managed-review decision record with the review severities observed during this validation.
 - Route ACL and RBAC modules in every application subsystem to Red review.
 - Route destructive utilities throughout each subsystem to Red review while excluding fixture data.
+- Route `destroy` utility paths to Red review across all three application subsystems.
 - Route `wipe` and `truncate` utility paths to Red review across all three application subsystems.
 - Declare the server's existing SQLite runtime and types, and use its emitted JavaScript import path.
 - Refresh the locked Node dependency graph to include the native SQLite package.
 - Add the pinned ETL lint toolchain and format existing ETL code without changing its data contracts.
-- Deploy the exact client artifact produced by successful main-branch CI.
+- Deploy the newest unexpired client artifact from a successful CI commit in current `main` history.
 - Confirm that the selected CI run contains an unexpired client artifact before deployment.
 - Serialize qualifying Pages deployments so an artifact-free successor cannot cancel an active publisher.
+- Carry tested client output across successful later commits that did not run the client job.
 - Import and extend the Library of Context communication layer with Toulmin and ASD-STE100-aligned guidance.
 - Scan reader-facing assignment-manifest values while excluding machine-only JSON metadata.
 - Scan reader-facing assignment step labels while retaining machine-only step metadata exclusions.
 - Mask valid Markdown inline-code spans that cross a line break.
 - Apply the same multiline inline-code boundary to committed submission validation.
 - Keep Python environment keys outside prose checks and decode JavaScript reader strings before checking them.
+- Track uniquely assigned Python path variables when classifying later path components.
 - Use one Markdown inline-code parser that keeps escaped backticks visible to both prose and submission checks.
 - Reject an unclosed visible HTML comment in a submission record while allowing comment syntax in code examples.
 - Publish one terminal submission status after the final live-head check instead of publishing an intermediate pending status.
@@ -160,6 +163,7 @@ issue existed.
 - Pull-request CI cannot satisfy the deployment condition.
 - A successful documentation-only main run without a client artifact leaves Pages unchanged.
 - An artifact-free successor waits for an active qualifying Pages publisher.
+- A later non-client commit can publish the preceding tested client artifact.
 - A mutable pull request description cannot alter the committed submission result.
 - Two pull requests at one head commit receive the same result, even when their bases differ.
 - Different trusted checker revisions cannot publish to the same versioned submission context.
@@ -271,7 +275,9 @@ issue existed.
 - Literal-only Python f-string fields render as reader text without executing expressions.
 - Child-process shell commands remain machine syntax while adjacent user messages remain visible.
 - Python process commands follow standard import aliases and remain machine syntax.
+- Components appended to a uniquely assigned Python path variable remain machine syntax.
 - Destructive `drop` utilities in each application subsystem require Red review.
+- Destructive `destroy` utilities in each application subsystem require Red review.
 - ACL and RBAC modules in each application subsystem require Red review.
 - Known CSS, SQL, and GraphQL template tags remain machine syntax while reader templates remain visible.
 - Chained styled-components tags remain machine syntax while unrelated tagged templates remain visible.
@@ -284,9 +290,9 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass. Startup creates and closes a temporary SQLite database, and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 164 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 165 communication and submission tests |
 | Routing policy | Pass | 44 routing, hook-context, manifest-integrity, and model-route tests |
-| Review policy and model routing | Pass | 32 local-runner tests and independent delivery challenges |
+| Review policy and model routing | Pass | 33 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation, schema validation, and commit-stage and push-stage runs |
 | Workflow syntax | Pass | Actionlint 1.7.11 and YAML parsing |
 | Hosted pull-request CI | Not run | Hosted CI starts after this record enters the commit |
@@ -332,10 +338,12 @@ Examine literal-only Python f-string output and child-process command classifica
 Examine Python process-command aliases and destructive `drop` routing.
 Examine tagged and chained styled machine templates, reader-template boundaries, and
 ACL and RBAC risk routing.
+Examine Python path-variable propagation and destructive `destroy` routing.
 Examine Python resource identifiers, heading termination, hook suffix coverage, and the
 Red workflow risk floor. Confirm the deployment reconcile step verifies the selected
 run has an unexpired client artifact before it marks the deployment ready. Confirm
 the Pages concurrency group serializes qualifying runs without cancellation. Confirm
+artifact selection carries tested client output through non-client commits. Confirm
 accepted work units identify substantive review metadata and destructive utility synonyms
 retain the Red checkpoint. Confirm accepted records contain complete review metadata,
 manifest IDs match unique filenames, and schema validation uses the committed lock.

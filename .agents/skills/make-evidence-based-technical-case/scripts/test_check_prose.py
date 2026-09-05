@@ -1326,6 +1326,11 @@ class ProseCheckerTests(unittest.TestCase):
                 'handle = open(file="/robust")\n'
                 'child = Path("/tmp") / "scalable" / "exciting"\n'
                 'joined = os.path.join("/tmp", "powerful")\n'
+                'base = Path("/tmp")\n'
+                'aliased_child = base / "robust"\n'
+                'from pathlib import Path as FilePath\n'
+                'alias_base = FilePath("/tmp")\n'
+                'alias_child = alias_base / "powerful"\n'
                 'message = "Unlock the potential."\n',
                 encoding="utf-8",
             )
@@ -1333,7 +1338,24 @@ class ProseCheckerTests(unittest.TestCase):
             findings = editorial_findings(path)
 
         self.assertEqual(
-            [(5, "promotional cliche")],
+            [(10, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
+    def test_checks_components_after_a_path_variable_is_reassigned(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.py"
+            path.write_text(
+                'base = Path("/tmp")\n'
+                "base = message\n"
+                'reader = base / "Unlock the potential."\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(3, "promotional cliche")],
             [(finding.line, finding.rule) for finding in findings],
         )
 

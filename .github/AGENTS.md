@@ -21,10 +21,11 @@ This file adds review rules for workflows and repository automation. Apply the r
   artifact.
 - Flag a deployment that can publish an older successful rerun after `main` advances.
   Safe path: treat the completion event as a reconciliation signal. Resolve current
-  `main`, select its successful push-CI artifact, and compare that commit with live
-  `main` before deployment. Revalidate after publication so a detected race points to
-  the next tested forward deployment. Put intentional rollback in a separate,
-  human-approved path.
+  `main`, select the newest unexpired client artifact from a successful push-CI commit
+  in its history, and compare the reconciled commit with live `main` before deployment.
+  This carries tested client output across later commits that did not run the client
+  job. Revalidate after publication so a detected race points to the next tested
+  forward deployment. Put intentional rollback in a separate, human-approved path.
 
 ### Required check continuity
 

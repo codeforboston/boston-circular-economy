@@ -321,9 +321,11 @@ class LocalReviewRunnerTests(unittest.TestCase):
             "client/src/pages/settings/delete-account.tsx",
             "client/src/admin/delete-organization.tsx",
             "client/scripts/drop-local-cache.ts",
+            "client/scripts/destroy-local-cache.ts",
             "client/scripts/reset-tenant-data.ts",
             "server/src/users/delete-user.ts",
             "server/scripts/drop-tables.ts",
+            "server/scripts/destroy-database.ts",
             "server/src/admin/purge-expired-records.ts",
             "server/src/maintenance/resetDatabase.ts",
             "server/scripts/truncate-tables.ts",
@@ -331,6 +333,7 @@ class LocalReviewRunnerTests(unittest.TestCase):
             "server/scripts/reset-database.ts",
             "etl/src/jobs/delete-records.py",
             "etl/scripts/drop_staging_tables.py",
+            "etl/scripts/destroy_staging_tables.py",
             "etl/src/etl/jobs/reset-data.py",
             "etl/src/etl/jobs/purge-snapshots.py",
             "etl/maintenance/purge-snapshots.py",
@@ -807,20 +810,27 @@ class LocalReviewRunnerTests(unittest.TestCase):
             deployment,
         )
         self.assertIn("cancel-in-progress: false", deployment)
-        self.assertIn("Resolve the successful CI run for current main", deployment)
+        self.assertIn(
+            "Resolve the latest tested client artifact for current main", deployment
+        )
         self.assertIn('actions/workflows/ci.yml/runs"', deployment)
-        self.assertIn('-f head_sha="$current_sha"', deployment)
+        self.assertNotIn('-f head_sha="$current_sha"', deployment)
         self.assertIn("-f status=success", deployment)
         self.assertIn("ready=false", deployment)
-        self.assertIn('actions/runs/$run_id/artifacts"', deployment)
+        self.assertIn('actions/runs/$candidate_run_id/artifacts"', deployment)
         self.assertIn('.name == "github-pages-client"', deployment)
         self.assertIn(".expired == false", deployment)
+        self.assertIn("compare/$candidate_sha...$current_sha", deployment)
+        self.assertIn('"$relation" == "ahead"', deployment)
         self.assertLess(
-            deployment.index('actions/runs/$run_id/artifacts"'),
+            deployment.index('actions/runs/$candidate_run_id/artifacts"'),
             deployment.index('echo "ready=true"'),
         )
         self.assertIn("run-id: ${{ needs.reconcile.outputs.run_id }}", deployment)
-        self.assertEqual(2, deployment.count("needs.reconcile.outputs.sha"))
+        self.assertEqual(2, deployment.count("needs.reconcile.outputs.main_sha"))
+        self.assertIn(
+            "artifact_sha: ${{ steps.source.outputs.artifact_sha }}", deployment
+        )
         self.assertIn(
             'gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main"',
             deployment,
@@ -829,7 +839,9 @@ class LocalReviewRunnerTests(unittest.TestCase):
             3,
             deployment.count('gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main"'),
         )
-        self.assertIn('if [[ "$TESTED_SHA" != "$current_sha" ]]', deployment)
+        self.assertIn(
+            'if [[ "$RECONCILED_MAIN_SHA" != "$current_sha" ]]', deployment
+        )
         self.assertIn("Detect main advancing during deployment", deployment)
         self.assertIn("will trigger a forward deployment", deployment)
 
@@ -839,9 +851,13 @@ class LocalReviewRunnerTests(unittest.TestCase):
         self.assertIn("'deploy-to-github-pages'", deployment)
         self.assertIn("cancel-in-progress: false", deployment)
         self.assertIn(
-            'echo "::notice::Current main CI did not produce a client artifact."',
+            "actions/workflows/ci.yml/runs",
             deployment,
         )
+        self.assertNotIn('-f head_sha="$current_sha"', deployment)
+        self.assertIn("actions/runs/$candidate_run_id/artifacts", deployment)
+        self.assertIn("continue", deployment)
+        self.assertIn("compare/$candidate_sha...$current_sha", deployment)
         self.assertIn('echo "ready=false"', deployment)
 
 

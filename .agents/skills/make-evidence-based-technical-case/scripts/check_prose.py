@@ -1232,15 +1232,31 @@ def python_resource_identifier_spans(
             source_offset(node.end_lineno, node.end_col_offset),
         )
 
-    path_constructors = {
+    bare_path_constructors = {
         "Path",
         "PurePath",
         "PurePosixPath",
         "PureWindowsPath",
-        "pathlib.Path",
-        "pathlib.PurePath",
-        "pathlib.PurePosixPath",
-        "pathlib.PureWindowsPath",
+    }
+    path_constructor_names = set(bare_path_constructors)
+    pathlib_module_names = {"pathlib"}
+    for node in ast.walk(syntax_tree):
+        if isinstance(node, ast.Import):
+            pathlib_module_names.update(
+                item.asname or item.name
+                for item in node.names
+                if item.name == "pathlib"
+            )
+        elif isinstance(node, ast.ImportFrom) and node.module == "pathlib":
+            path_constructor_names.update(
+                item.asname or item.name
+                for item in node.names
+                if item.name in bare_path_constructors
+            )
+    path_constructors = path_constructor_names | {
+        f"{module}.{constructor}"
+        for module in pathlib_module_names
+        for constructor in bare_path_constructors
     }
     file_calls = {"io.open", "open", "os.open"}
     path_calls = {
@@ -1255,6 +1271,7 @@ def python_resource_identifier_spans(
     }
     spans: list[tuple[int, int]] = []
     path_expressions: set[ast.AST] = set()
+    path_variables: set[str] = set()
     for node in ast.walk(syntax_tree):
         if not isinstance(node, ast.Call):
             continue
@@ -1280,6 +1297,8 @@ def python_resource_identifier_spans(
     def mark_path_expression(node: ast.AST) -> bool:
         if node in path_expressions:
             return True
+        if isinstance(node, ast.Name) and node.id in path_variables:
+            return True
         if (
             isinstance(node, ast.BinOp)
             and isinstance(node.op, ast.Div)
@@ -1290,6 +1309,28 @@ def python_resource_identifier_spans(
                 spans.append(span)
             return True
         return False
+
+    assigned_values: dict[str, list[ast.AST]] = {}
+    for node in ast.walk(syntax_tree):
+        if isinstance(node, ast.Assign):
+            targets = node.targets
+        elif isinstance(node, (ast.AnnAssign, ast.NamedExpr)) and node.value is not None:
+            targets = [node.target]
+        else:
+            continue
+        for target in targets:
+            if isinstance(target, ast.Name):
+                assigned_values.setdefault(target.id, []).append(node.value)
+
+    while True:
+        known_paths = len(path_variables)
+        path_variables.update(
+            name
+            for name, values in assigned_values.items()
+            if len(values) == 1 and mark_path_expression(values[0])
+        )
+        if len(path_variables) == known_paths:
+            break
 
     for node in ast.walk(syntax_tree):
         mark_path_expression(node)
