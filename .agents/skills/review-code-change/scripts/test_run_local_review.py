@@ -8,11 +8,13 @@ import unittest
 from pathlib import Path
 
 from run_local_review import (
+    build_codex_command,
     changed_files,
     effective_risk,
     infer_minimum_risk,
     load_risk_policy,
     path_matches,
+    select_route,
 )
 
 ROOT = Path(__file__).resolve().parents[4]
@@ -312,9 +314,9 @@ class LocalReviewRunnerTests(unittest.TestCase):
         self.assertEqual(route["reasoning_effort"], "high")
 
     def test_uncommitted_scope_does_not_use_the_base(self) -> None:
-        result = self.dry_run("--risk", "green", "--scope", "uncommitted")
-        command = result["command"]
-        self.assertIsInstance(command, list)
+        route = select_route("bounded", "green")
+        command = build_codex_command(route, "HEAD", "uncommitted")
+
         self.assertIn("--uncommitted", command)
         self.assertNotIn("--base", command)
         self.assertNotIn("-", command)
@@ -514,6 +516,13 @@ class LocalReviewRunnerTests(unittest.TestCase):
         self.assertIn('-f head_sha="$current_sha"', deployment)
         self.assertIn("-f status=success", deployment)
         self.assertIn("ready=false", deployment)
+        self.assertIn('actions/runs/$run_id/artifacts"', deployment)
+        self.assertIn('.name == "github-pages-client"', deployment)
+        self.assertIn(".expired == false", deployment)
+        self.assertLess(
+            deployment.index('actions/runs/$run_id/artifacts"'),
+            deployment.index('echo "ready=true"'),
+        )
         self.assertIn("run-id: ${{ needs.reconcile.outputs.run_id }}", deployment)
         self.assertEqual(2, deployment.count("needs.reconcile.outputs.sha"))
         self.assertIn(

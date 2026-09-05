@@ -53,14 +53,17 @@ issue existed.
 - Add code-change standards for ownership, failure, recovery, and refactor boundaries.
 - Add capability defaults for deterministic tools, Luna, Terra, Sol, specialists, and humans.
 - Add self-explanatory implementation and independent review skills.
+- Keep review command-construction tests independent of the caller's working-tree risk.
 - Align the managed-review decision record with the review severities observed during this validation.
 - Route destructive utilities throughout each subsystem to Red review while excluding fixture data.
 - Declare the server's existing SQLite runtime and types, and use its emitted JavaScript import path.
 - Refresh the locked Node dependency graph to include the native SQLite package.
 - Add the pinned ETL lint toolchain and format existing ETL code without changing its data contracts.
 - Deploy the exact client artifact produced by successful main-branch CI.
+- Confirm that the selected CI run contains an unexpired client artifact before deployment.
 - Import and extend the Library of Context communication layer with Toulmin and ASD-STE100-aligned guidance.
 - Scan reader-facing assignment-manifest values while excluding machine-only JSON metadata.
+- Scan reader-facing assignment step labels while retaining machine-only step metadata exclusions.
 - Mask valid Markdown inline-code spans that cross a line break.
 - Apply the same multiline inline-code boundary to committed submission validation.
 - Keep Python environment keys outside prose checks and decode JavaScript reader strings before checking them.
@@ -97,6 +100,7 @@ issue existed.
 - Require a reference destination before treating its identifier as hidden Markdown control text.
 - Keep TypeScript generic arrows as code while retaining JSX parsing for JSX-capable source files.
 - Decode YAML quoted-scalar escapes before checking reader-facing values.
+- Decode TOML basic and multiline-basic strings while retaining literal-string semantics.
 - Decode character references in direct JSX text and static reader-facing attributes.
 - Exclude reusable-workflow `uses` targets while retaining reader-facing job names.
 - End required submission sections at the next level-one or level-two heading.
@@ -110,6 +114,7 @@ issue existed.
 - A routing failure causes required application checks to fail rather than disappear.
 - A pull request retargeted to `main` receives both required workflows without another push.
 - Pull-request CI cannot satisfy the deployment condition.
+- A successful documentation-only main run without a client artifact leaves Pages unchanged.
 - A mutable pull request description cannot alter the committed submission result.
 - Two pull requests at one head commit receive the same result, even when their bases differ.
 - Different trusted checker revisions cannot publish to the same versioned submission context.
@@ -122,11 +127,13 @@ issue existed.
 - Python environment-variable names remain outside prose checks while reader-facing values remain inside.
 - Incomplete Python keeps plain, formatted, byte, and nested mapping keys outside prose checks.
 - Assignment JSON decodes and checks reader-facing values while paths, identifiers, and status values remain outside the scan.
+- Assignment step labels fail on prohibited wording while adjacent model and routing fields remain inert.
 - Every workflow path requires Red review, including ordinary names such as `ci.yml` that can still change permissions.
 - The work-unit issue form identifies authorization changes as Red.
 - Documentation manifests retain the Green review route.
 - Destructive utilities outside source directories require Red review, while fixture data remains Yellow.
 - Uncommitted review routing unions staged, unstaged, and untracked paths before applying the risk floor.
+- Command construction retains uncommitted scope even while workflow edits raise the live tree to Red.
 - Unrelated CI completions cannot cancel an active qualifying Pages deployment.
 - Hosted frontend CI rejects generated client files that differ after the build.
 - List-marker fences stay masked, including tilde fences and nested quotes.
@@ -165,6 +172,7 @@ issue existed.
 - A blank reference definition leaves its unresolved identifier visible to submission checks.
 - TypeScript generic arrows remain inert at top level and inside template expressions.
 - YAML double-quoted Unicode escapes and doubled single quotes are checked as rendered text.
+- TOML basic and multiline-basic Unicode escapes are checked as rendered text, while literal strings retain their backslashes.
 - JSX character references decode in direct text and static attributes, but not inside JavaScript expression strings.
 - A reusable-workflow path remains machine input, while its job name remains subject to prose checks.
 - A level-one heading ends the preceding required section, so later labels cannot fill it.
@@ -179,7 +187,7 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass. Startup creates and closes a temporary SQLite database, and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 136 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 137 communication and submission tests |
 | Routing policy | Pass | 37 routing, hook-context, and manifest-discovery tests plus model-route samples |
 | Review policy and model routing | Pass | 25 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation, schema validation, and commit-stage and push-stage runs |
@@ -203,10 +211,12 @@ I read and understand the submitted diff. I verified the evidence above and rema
 Review the versioned first-parent record boundary and terminal-only status publication.
 Examine Markdown fence, paragraph, table, image-alt, and code-span boundaries. Examine
 link-label, reference-link, and heading boundaries. Examine YAML escape handling,
-TypeScript generic classification, and JSX character references. Examine
+TOML basic-string escape handling, assignment step labels, TypeScript generic
+classification, and JSX character references. Examine
 element-specific HTML and JSX attributes, React children, and JavaScript property keys.
 Examine Python resource identifiers, heading termination, hook suffix coverage, and the
-Red workflow risk floor.
+Red workflow risk floor. Confirm the deployment reconcile step verifies the selected
+run has an unexpired client artifact before it marks the deployment ready.
 Check SQLite shutdown order, native lockfile changes, path mapping, evidence threshold,
 model defaults, and protected-branch activation steps.
 

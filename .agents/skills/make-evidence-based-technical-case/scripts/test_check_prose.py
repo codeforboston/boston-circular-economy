@@ -852,7 +852,8 @@ class ProseCheckerTests(unittest.TestCase):
                 '  "status": "robust",\n'
                 '  "reference": "/unlock",\n'
                 '  "objective": "Unlock the potential for residents.",\n'
-                '  "constraints": ["Do not use a game-changing claim."]\n'
+                '  "constraints": ["Do not use a game-changing claim."],\n'
+                '  "ai_steps": [{"step": "Unlock the potential."}]\n'
                 "}\n",
                 encoding="utf-8",
             )
@@ -863,6 +864,7 @@ class ProseCheckerTests(unittest.TestCase):
             [
                 (5, "promotional cliche"),
                 (6, "promotional cliche"),
+                (7, "promotional cliche"),
             ],
             [(finding.line, finding.rule) for finding in findings],
         )
@@ -943,6 +945,26 @@ class ProseCheckerTests(unittest.TestCase):
 
         self.assertEqual(
             [(1, "contraction"), (2, "contraction")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
+    def test_decodes_toml_basic_string_escapes_but_not_literal_strings(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.toml"
+            path.write_text(
+                'description = "Don\\u0027t deploy."\n'
+                'multiline = """\n'
+                "Don\\u0027t deploy.\n"
+                '"""\n'
+                "literal = 'Don\\u0027t deploy.'\n"
+                "multiline_literal = '''Don\\u0027t deploy.'''\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(1, "contraction"), (3, "contraction")],
             [(finding.line, finding.rule) for finding in findings],
         )
 

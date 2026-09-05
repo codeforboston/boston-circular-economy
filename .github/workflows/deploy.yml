@@ -58,6 +58,20 @@ jobs:
             echo "ready=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
+          artifact_id="$(
+            gh api -X GET \
+              "repos/$GITHUB_REPOSITORY/actions/runs/$run_id/artifacts" \
+              -f per_page=100 \
+              --jq '.artifacts[] | select(
+                .name == "github-pages-client" and .expired == false
+              ) | .id' \
+              | head -n 1
+          )"
+          if [[ -z "$artifact_id" ]]; then
+            echo "::notice::Current main CI did not produce a client artifact."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           echo "ready=true" >> "$GITHUB_OUTPUT"
           echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
           echo "sha=$current_sha" >> "$GITHUB_OUTPUT"

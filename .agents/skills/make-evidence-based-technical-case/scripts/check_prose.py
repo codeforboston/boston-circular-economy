@@ -6,6 +6,7 @@ import html
 import io
 import json
 import re
+import tomllib
 import sys
 import tokenize
 from dataclasses import dataclass
@@ -2175,7 +2176,78 @@ def mask_toml_code(text: str) -> str:
             comment_start = len(code)
             copy_span(output, text, offset + comment_start, offset + len(body))
         offset += len(line)
+    decode_copied_toml_basic_strings(output, text)
     return "".join(output)
+
+
+def toml_string_end(text: str, start: int, delimiter: str) -> tuple[int, int]:
+    """Return the content end and offset after one TOML string."""
+
+    index = start + len(delimiter)
+    basic = delimiter.startswith('"')
+    while index < len(text):
+        if text.startswith(delimiter, index):
+            return index, index + len(delimiter)
+        if basic and text[index] == "\\":
+            index += 2
+            continue
+        if len(delimiter) == 1 and text[index] in "\r\n":
+            return index, index
+        index += 1
+    return len(text), len(text)
+
+
+def toml_basic_string_spans(text: str) -> list[tuple[int, int, str]]:
+    """Locate TOML basic strings while excluding comments and literal strings."""
+
+    spans: list[tuple[int, int, str]] = []
+    index = 0
+    while index < len(text):
+        if text[index] == "#":
+            newline = text.find("\n", index)
+            index = len(text) if newline == -1 else newline + 1
+            continue
+        delimiter = next(
+            (
+                candidate
+                for candidate in ('"""', "'''", '"', "'")
+                if text.startswith(candidate, index)
+            ),
+            None,
+        )
+        if delimiter is None:
+            index += 1
+            continue
+        content_start = index + len(delimiter)
+        content_end, string_end = toml_string_end(text, index, delimiter)
+        if delimiter.startswith('"'):
+            spans.append((content_start, content_end, delimiter))
+        index = max(string_end, index + len(delimiter))
+    return spans
+
+
+def decode_toml_basic_string(value: str, delimiter: str) -> str:
+    """Decode a TOML basic string without evaluating arbitrary code."""
+
+    try:
+        decoded = tomllib.loads(f"value = {delimiter}{value}{delimiter}\n")["value"]
+    except (tomllib.TOMLDecodeError, KeyError):
+        return value
+    return decoded if isinstance(decoded, str) else value
+
+
+def decode_copied_toml_basic_strings(output: list[str], text: str) -> None:
+    """Decode reader-facing TOML basic strings in an offset-stable mask."""
+
+    for start, end, delimiter in toml_basic_string_spans(text):
+        if not any(
+            output[index] == text[index] and not text[index].isspace()
+            for index in range(start, end)
+        ):
+            continue
+        decoded = decode_toml_basic_string(text[start:end], delimiter)
+        mask_span(output, text, start, end)
+        copy_decoded_text(output, text, start, end, decoded)
 
 
 JSON_TOKEN = re.compile(r'"(?:\\.|[^"\\])*"|[{}\[\]:,]')
@@ -2194,6 +2266,7 @@ JSON_PROSE_FIELDS = {
     "prompt",
     "purpose",
     "reviewer_roles",
+    "step",
     "title",
 }
 
