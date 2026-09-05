@@ -39,7 +39,7 @@ The repository fixes these inputs:
 - GitHub-hosted jobs use the named Ubuntu 24.04 image.
 - `delivery-routing.json` fixes changed-path and agent-routing rules.
 - tests fix expected classifier and submission behavior.
-- deployment consumes the client artifact produced by the successful CI run.
+- deployment consumes the newest reachable, unexpired client artifact from successful CI.
 
 The Ubuntu image can receive platform updates under the same image name. A container
 digest is required if the project later needs byte-identical operating-system inputs.
@@ -242,35 +242,40 @@ explain ordinary behavior. This rule avoids comments that repeat implementation 
 
 The deployment workflow starts only after a successful push-triggered `CI` workflow on
 `main`. The completion event is a reconciliation signal, not the artifact identity.
-The job resolves live `main` and selects a successful push-CI run for that exact commit.
-It then downloads the artifact by the selected run identifier.
+The job resolves live `main` and requires successful push CI for that exact commit. It
+then searches successful `main` runs from newest to oldest. It selects the first
+unexpired client artifact whose tested commit is an ancestor of live `main`. The run
+identifier and tested commit identify that artifact.
 
-Only successful push-CI completions on `main` share the canceling deployment concurrency
-group. Pull request, manual, and failed CI completions receive groups unique to their
-workflow-run identifiers. They skip reconciliation without canceling an active Pages
-publication.
+Only successful push-CI completions on `main` share the serialized deployment group.
+They do not cancel an active publisher. Pull request, manual, and failed CI completions
+receive groups unique to their workflow-run identifiers. They skip reconciliation and
+cannot cancel an active Pages publication.
 
-A stale rerun therefore selects current tested `main`, not its own artifact. If current
-CI is incomplete, the reconciliation stops without an error. Completion of current CI
-starts another reconciliation. A final live-reference check rejects the selected run if
-`main` advances while the job waits or prepares its artifact. A post-deploy check
-detects a race during publication. The successful CI for the newer commit then starts
-the next serialized deployment.
+A stale rerun therefore resolves current `main` instead of trusting its event artifact.
+If current CI is incomplete or failed, reconciliation stops without an error. Completion
+of successful current CI starts another reconciliation. A successful non-client commit
+can carry the preceding tested client artifact forward because its CI run has no client
+artifact of its own. This fallback never uses an artifact outside current `main` history.
+
+A final live-reference check stops publication if `main` advances while the job waits or
+prepares its artifact. A post-deploy check detects a race during publication. Successful
+CI for the newer commit then starts the next serialized reconciliation.
 
 The `Frontend` job builds and uploads `github-pages-client` during main-branch CI. The
-deployment workflow downloads that artifact from the successful run selected for live
-`main`. It does not rebuild the client.
+deployment workflow downloads the newest reachable artifact by its successful run
+identifier. It does not rebuild the client. The selected artifact can precede live
+`main` only when later successful runs produced no newer client artifact.
 
 The deploy job verifies `client/dist/index.html`, packages the Pages artifact, and uses
 the Pages environment. Its token can read Actions and repository contents. It can write
 Pages and request an identity token.
 
-A failed CI run creates no deployment. A missing or expired artifact fails deployment.
-The previous Pages deployment remains the recovery point until another tested artifact
-succeeds. A stale completion cannot select its own older artifact. A commit that arrives
-during publication can make the active artifact briefly stale. The post-deploy guard
-reports that state, and the newer successful CI rolls it forward. Intentional rollback
-requires a separate guarded procedure.
+A failed CI run creates no qualifying deployment. A missing or expired artifact leaves
+the previous Pages deployment unchanged. A new client build is required after all
+reachable artifacts expire. A commit that arrives during publication can make the
+active artifact briefly stale. The post-deploy guard reports that state, and newer
+successful CI reconciles it. Intentional rollback requires a separate guarded procedure.
 
 ## Change and failure records
 

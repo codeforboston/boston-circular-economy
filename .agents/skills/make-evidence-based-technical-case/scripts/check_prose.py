@@ -1269,6 +1269,18 @@ def python_resource_identifier_spans(
         "os.path.normpath",
         "os.path.realpath",
     }
+    path_methods = {
+        "absolute",
+        "expanduser",
+        "joinpath",
+        "readlink",
+        "rename",
+        "replace",
+        "resolve",
+        "with_name",
+        "with_stem",
+        "with_suffix",
+    }
     spans: list[tuple[int, int]] = []
     path_expressions: set[ast.AST] = set()
     path_variables: set[str] = set()
@@ -1298,6 +1310,25 @@ def python_resource_identifier_spans(
         if node in path_expressions:
             return True
         if isinstance(node, ast.Name) and node.id in path_variables:
+            return True
+        if (
+            isinstance(node, ast.Attribute)
+            and node.attr == "parent"
+            and mark_path_expression(node.value)
+        ):
+            path_expressions.add(node)
+            return True
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr in path_methods
+            and mark_path_expression(node.func.value)
+        ):
+            path_expressions.add(node)
+            candidates = [*node.args, *(keyword.value for keyword in node.keywords)]
+            spans.extend(
+                span for candidate in candidates if (span := string_span(candidate))
+            )
             return True
         if (
             isinstance(node, ast.BinOp)

@@ -69,6 +69,7 @@ issue existed.
 - Confirm that the selected CI run contains an unexpired client artifact before deployment.
 - Serialize qualifying Pages deployments so an artifact-free successor cannot cancel an active publisher.
 - Carry tested client output across successful later commits that did not run the client job.
+- Require successful CI for live `main` before selecting an ancestor client artifact.
 - Import and extend the Library of Context communication layer with Toulmin and ASD-STE100-aligned guidance.
 - Scan reader-facing assignment-manifest values while excluding machine-only JSON metadata.
 - Scan reader-facing assignment step labels while retaining machine-only step metadata exclusions.
@@ -76,6 +77,7 @@ issue existed.
 - Apply the same multiline inline-code boundary to committed submission validation.
 - Keep Python environment keys outside prose checks and decode JavaScript reader strings before checking them.
 - Track uniquely assigned Python path variables when classifying later path components.
+- Recognize path-producing methods only on tracked Python path values.
 - Use one Markdown inline-code parser that keeps escaped backticks visible to both prose and submission checks.
 - Reject an unclosed visible HTML comment in a submission record while allowing comment syntax in code examples.
 - Publish one terminal submission status after the final live-head check instead of publishing an intermediate pending status.
@@ -165,6 +167,7 @@ issue existed.
 - A successful documentation-only main run without a client artifact leaves Pages unchanged.
 - An artifact-free successor waits for an active qualifying Pages publisher.
 - A later non-client commit can publish the preceding tested client artifact.
+- An incomplete or failed live `main` revision cannot start an ancestor-artifact deployment.
 - A mutable pull request description cannot alter the committed submission result.
 - Two pull requests at one head commit receive the same result, even when their bases differ.
 - Different trusted checker revisions cannot publish to the same versioned submission context.
@@ -278,6 +281,7 @@ issue existed.
 - Child-process shell commands remain machine syntax while adjacent user messages remain visible.
 - Python process commands follow standard import aliases and remain machine syntax.
 - Components appended to a uniquely assigned Python path variable remain machine syntax.
+- Path-method components remain machine syntax only when the receiver is a tracked path.
 - Destructive `drop` utilities in each application subsystem require Red review.
 - Destructive `destroy` utilities in each application subsystem require Red review.
 - Destructive `remove` utilities in each application subsystem require Red review.
@@ -341,13 +345,16 @@ Examine literal-only Python f-string output and child-process command classifica
 Examine Python process-command aliases and destructive `drop` routing.
 Examine tagged and chained styled machine templates, reader-template boundaries, and
 ACL and RBAC risk routing.
-Examine Python path-variable propagation and destructive `destroy` and `remove` routing.
+Examine Python path-variable and path-method propagation.
+Examine destructive `destroy` and `remove` routing.
 Examine Python resource identifiers, heading termination, hook suffix coverage, and the
 Red workflow risk floor. Confirm the deployment reconcile step verifies the selected
 run has an unexpired client artifact before it marks the deployment ready. Confirm
 the Pages concurrency group serializes qualifying runs without cancellation. Confirm
 artifact selection carries tested client output through non-client commits. Confirm
-accepted work units identify substantive review metadata and destructive utility synonyms
+live `main` has successful CI before an ancestor artifact is selected.
+
+Confirm accepted work units identify substantive review metadata and destructive utility synonyms
 retain the Red checkpoint. Confirm accepted records contain complete review metadata,
 manifest IDs match unique filenames, and schema validation uses the committed lock.
 Confirm submission-status helpers and `migrate` utilities retain the Red checkpoint.

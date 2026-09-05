@@ -819,6 +819,8 @@ class LocalReviewRunnerTests(unittest.TestCase):
         self.assertIn('actions/workflows/ci.yml/runs"', deployment)
         self.assertNotIn('-f head_sha="$current_sha"', deployment)
         self.assertIn("-f status=success", deployment)
+        self.assertIn('"$candidate_sha" == "$current_sha"', deployment)
+        self.assertIn('"$current_ci_succeeded" != "true"', deployment)
         self.assertIn("ready=false", deployment)
         self.assertIn('actions/runs/$candidate_run_id/artifacts"', deployment)
         self.assertIn('.name == "github-pages-client"', deployment)
@@ -858,6 +860,7 @@ class LocalReviewRunnerTests(unittest.TestCase):
             deployment,
         )
         self.assertNotIn('-f head_sha="$current_sha"', deployment)
+        self.assertIn('"$candidate_sha" == "$current_sha"', deployment)
         self.assertIn("actions/runs/$candidate_run_id/artifacts", deployment)
         self.assertIn("continue", deployment)
         self.assertIn("compare/$candidate_sha...$current_sha", deployment)

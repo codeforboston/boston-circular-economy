@@ -1328,6 +1328,8 @@ class ProseCheckerTests(unittest.TestCase):
                 'joined = os.path.join("/tmp", "powerful")\n'
                 'base = Path("/tmp")\n'
                 'aliased_child = base / "robust"\n'
+                'method_child = base.joinpath("robust")\n'
+                'renamed_child = method_child.with_name("powerful")\n'
                 'from pathlib import Path as FilePath\n'
                 'alias_base = FilePath("/tmp")\n'
                 'alias_child = alias_base / "powerful"\n'
@@ -1338,7 +1340,7 @@ class ProseCheckerTests(unittest.TestCase):
             findings = editorial_findings(path)
 
         self.assertEqual(
-            [(10, "promotional cliche")],
+            [(12, "promotional cliche")],
             [(finding.line, finding.rule) for finding in findings],
         )
 
@@ -1348,14 +1350,15 @@ class ProseCheckerTests(unittest.TestCase):
             path.write_text(
                 'base = Path("/tmp")\n'
                 "base = message\n"
-                'reader = base / "Unlock the potential."\n',
+                'reader = base / "Unlock the potential."\n'
+                'method_reader = base.joinpath("Unlock the potential.")\n',
                 encoding="utf-8",
             )
 
             findings = editorial_findings(path)
 
         self.assertEqual(
-            [(3, "promotional cliche")],
+            [(3, "promotional cliche"), (4, "promotional cliche")],
             [(finding.line, finding.rule) for finding in findings],
         )
 

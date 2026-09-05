@@ -55,6 +55,18 @@ jobs:
           )"
           run_id=""
           artifact_sha=""
+          current_ci_succeeded="false"
+          while IFS=$'\t' read -r candidate_run_id candidate_sha; do
+            if [[ "$candidate_sha" == "$current_sha" ]]; then
+              current_ci_succeeded="true"
+              break
+            fi
+          done <<< "$successful_runs"
+          if [[ "$current_ci_succeeded" != "true" ]]; then
+            echo "::notice::Current main does not have successful push CI yet."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           while IFS=$'\t' read -r candidate_run_id candidate_sha; do
             if [[ -z "$candidate_run_id" || -z "$candidate_sha" ]]; then
               continue
