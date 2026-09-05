@@ -19,7 +19,7 @@ def main() -> None:
     data_dir = Path(os.environ.get("ETL_DATA_DIR", "data"))
     store = LocalDataStore(data_dir)
 
-    for args in google_places_query_args:
+    for _args in google_places_query_args:
         # queries the Google Places API
         querier = GooglePlacesQuerier()
         raw_locations = querier.fetch()
@@ -31,7 +31,7 @@ def main() -> None:
         # writes the normalized locations to the local output file
         store.write_source_snapshot(DataSource.GOOGLE_PLACES, normalized_locations)
 
-    for args in openstreetmap_query_args:
+    for _args in openstreetmap_query_args:
         # queries the OpenStreetMap API
         querier = OpenStreetMapQuerier()
         raw_locations = querier.fetch()

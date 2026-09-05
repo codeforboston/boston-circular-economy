@@ -30,5 +30,5 @@ class BaseDataStore(ABC):
         self,
         output_locations: list[NormalizedLocation],
     ) -> None:
-        """Persist the merged locations after they've been deduplicated across sources."""
+        """Persist locations after they have been deduplicated across sources."""
         pass

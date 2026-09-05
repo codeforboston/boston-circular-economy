@@ -1,0 +1,293 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Frontend AI assignment manifest",
+  "type": "object",
+  "required": [
+    "manifest_version",
+    "id",
+    "title",
+    "kind",
+    "status",
+    "risk",
+    "timebox_minutes",
+    "journey",
+    "owner_role",
+    "reviewer_roles",
+    "related_issues",
+    "depends_on",
+    "inputs",
+    "objective",
+    "in_scope",
+    "out_of_scope",
+    "constraints",
+    "ai_steps",
+    "deliverables",
+    "acceptance",
+    "learning_check",
+    "handoff",
+    "completion_record"
+  ],
+  "properties": {
+    "manifest_version": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^UI-[0-9]{3}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 10
+    },
+    "kind": {
+      "enum": [
+        "research",
+        "specification",
+        "wireframe",
+        "visual_design",
+        "api_contract"
+      ]
+    },
+    "status": {
+      "enum": [
+        "ready_for_research",
+        "waiting_for_reviewed_input",
+        "claimed",
+        "in_review",
+        "accepted",
+        "needs_revision"
+      ]
+    },
+    "risk": {
+      "enum": [
+        "Green",
+        "Yellow",
+        "Red"
+      ]
+    },
+    "timebox_minutes": {
+      "type": "integer",
+      "minimum": 30,
+      "maximum": 120
+    },
+    "github_issue": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "journey": {
+      "type": "string",
+      "minLength": 10
+    },
+    "owner_role": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reviewer_roles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "related_issues": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "depends_on": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^UI-[0-9]{3}$"
+      }
+    },
+    "inputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "reference",
+          "purpose"
+        ],
+        "properties": {
+          "reference": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "objective": {
+      "type": "string",
+      "minLength": 20
+    },
+    "in_scope": {
+      "$ref": "#/$defs/list"
+    },
+    "out_of_scope": {
+      "$ref": "#/$defs/list"
+    },
+    "constraints": {
+      "$ref": "#/$defs/list"
+    },
+    "ai_steps": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "required": [
+          "step",
+          "prompt"
+        ],
+        "properties": {
+          "step": {
+            "type": "string"
+          },
+          "prompt": {
+            "type": "string",
+            "minLength": 30
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "deliverables": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "format",
+          "contents"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "format": {
+            "type": "string"
+          },
+          "contents": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "acceptance": {
+      "$ref": "#/$defs/list"
+    },
+    "learning_check": {
+      "type": "string"
+    },
+    "handoff": {
+      "type": "string"
+    },
+    "completion_record": {
+      "type": "object",
+      "required": [
+        "artifact_links",
+        "reviewed_by",
+        "review_date",
+        "accepted_revision"
+      ],
+      "properties": {
+        "artifact_links": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "reviewed_by": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "review_date": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "accepted_revision": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "list": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "accepted"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "completion_record": {
+            "properties": {
+              "artifact_links": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "\\S"
+                }
+              },
+              "reviewed_by": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              },
+              "review_date": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              },
+              "accepted_revision": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              }
+            },
+            "required": [
+              "accepted_revision"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

@@ -44,16 +44,18 @@ class Contact(BaseModel):
 
 # Activities describe what you can do at a location, from the visitor's perspective.
 class Activity(str, Enum):
-    REPAIR_FREE   = "repair_free"   # repair your items here for free (e.g. repair cafes)
-    REPAIR_PAID   = "repair_paid"   # repair your items here for a fee
-    DONATION_DROP = "donation_drop" # drop off items you no longer need
-    DONATION_PICK = "donation_pick" # pick up free items (e.g. free stores, give-away shops)
-    RESALE_BUY    = "resale_buy"    # buy secondhand items here
-    RESALE_SELL   = "resale_sell"   # sell or consign your items here
-    REFILL        = "refill"        # refill your own container here
-    BORROWING     = "borrowing"     # borrow items here for free (e.g. tool libraries)
-    RENTING       = "renting"       # rent items here for a fee
-    LENDING       = "lending"       # lend your items out through this location
+    REPAIR_FREE = "repair_free"  # repair your items here for free (e.g. repair cafes)
+    REPAIR_PAID = "repair_paid"  # repair your items here for a fee
+    DONATION_DROP = "donation_drop"  # drop off items you no longer need
+    DONATION_PICK = (
+        "donation_pick"  # pick up free items (e.g. free stores, give-away shops)
+    )
+    RESALE_BUY = "resale_buy"  # buy secondhand items here
+    RESALE_SELL = "resale_sell"  # sell or consign your items here
+    REFILL = "refill"  # refill your own container here
+    BORROWING = "borrowing"  # borrow items here for free (e.g. tool libraries)
+    RENTING = "renting"  # rent items here for a fee
+    LENDING = "lending"  # lend your items out through this location
 
 
 class ItemCategory(str, Enum):
@@ -90,6 +92,6 @@ class NormalizedLocation(BaseModel):
 
 
 # MatchGroup is the boundary between MergeProcessor.match() and .prioritize().
-# Keyed by DataSource; a source is only present if it has a NormalizedLocation
+# Keyed by DataSource. A source is only present if it has a NormalizedLocation
 # for this business. Never empty.
 MatchGroup = dict[DataSource, NormalizedLocation]

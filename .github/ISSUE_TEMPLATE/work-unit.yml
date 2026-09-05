@@ -1,0 +1,123 @@
+name: Ready work unit
+description: Propose a small, testable unit of product or engineering work.
+title: "[Work]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A ready work unit should fit one pull request and normally take one or two hack nights. Draft larger ideas first, then split them with a mentor.
+
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Observable outcome
+      description: Describe who benefits and what they will be able to observe.
+      placeholder: After this change, a Boston resident can...
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context and evidence
+      description: Explain the need. Link the product requirement, research, parent issue, design, or incident.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: List concrete, independently testable results.
+      placeholder: |
+        - [ ] Given ..., when ..., then ...
+        - [ ] The failure state tells the user how to recover.
+        - [ ] Automated tests cover ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: In scope
+      description: Name the behavior, components, or data included in this unit.
+    validations:
+      required: true
+
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: Out of scope
+      description: Name nearby work that belongs in another issue.
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies and decisions
+      description: Link blocking issues or state "None." Record unresolved product or architecture choices.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: size
+    attributes:
+      label: Expected size
+      description: If the work is larger than four focused sessions, split it before implementation.
+      options:
+        - Less than one focused session
+        - One to two focused sessions
+        - Three to four focused sessions
+        - Larger or unknown — needs splitting
+    validations:
+      required: true
+
+  - type: dropdown
+    id: risk
+    attributes:
+      label: Risk lane
+      description: Use Yellow if uncertain. The playbook defines the lanes.
+      options:
+        - Green — docs, prototype, isolated style, or safe internal refactor
+        - Yellow — user behavior, API, data transformation, or business logic
+        - Red — authentication, authorization, privacy, destructive action, migration, or critical accessibility
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: evidence
+    attributes:
+      label: Expected evidence
+      description: Select every check that can prove the observable outcome.
+      options:
+        - label: Unit or component test
+        - label: Integration or contract test
+        - label: End-to-end journey test
+        - label: Accessibility or responsive check
+        - label: Security, privacy, or recovery check
+        - label: Screenshot, recording, log, or data sample
+        - label: Documentation-only review
+    validations:
+      required: true
+
+  - type: textarea
+    id: mentoring
+    attributes:
+      label: Mentoring support requested
+      description: Name the decision, skill, or checkpoint where a contributor wants help. State "None" if no support is needed.
+      placeholder: I would like a 15-minute checkpoint before changing the API contract.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: ready
+    attributes:
+      label: Ready-for-work check
+      options:
+        - label: The outcome and acceptance criteria are testable.
+          required: true
+        - label: The unit can be completed without an unstated product or architecture decision.
+          required: true
+        - label: The issue contains no secret, credential, or personally identifiable information.
+          required: true

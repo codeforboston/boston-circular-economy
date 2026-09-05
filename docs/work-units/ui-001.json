@@ -1,0 +1,93 @@
+{
+  "manifest_version": 1,
+  "journey": "MVP M2: senior resident finds a textile repair clinic",
+  "owner_role": "Frontend work lead (Hubert)",
+  "github_issue": null,
+  "inputs": [
+    {
+      "reference": "https://docs.google.com/document/d/1eI7OL8zppM01br13fuhXvWKAKnKWhRBOJ45NMYenpHU/edit",
+      "purpose": "Prototype requirements M2.1 and M2.2, screens 5 and 6"
+    },
+    {
+      "reference": "https://patterns.boston.gov/",
+      "purpose": "Official Boston component and visual guidance"
+    },
+    {
+      "reference": "client/README.md",
+      "purpose": "Existing React, TypeScript, Vite, and TanStack Router boundaries"
+    }
+  ],
+  "constraints": [
+    "Use the current textile MVP, a 390-pixel mobile viewport, and Fleet conventions.",
+    "Treat the older television persona and technical prototypes as historical context.",
+    "Use two synthetic clinics. Do not infer that the backend supports the mock fields.",
+    "Separate source facts, AI suggestions, and unresolved decisions.",
+    "Do not implement production code, query paid APIs, collect personal data, or publish to Slack."
+  ],
+  "completion_record": {
+    "artifact_links": [],
+    "reviewed_by": null,
+    "review_date": null,
+    "accepted_revision": null
+  },
+  "id": "UI-001",
+  "title": "Research clinic result cards and filters",
+  "kind": "research",
+  "status": "ready_for_research",
+  "risk": "Green",
+  "timebox_minutes": 60,
+  "reviewer_roles": [
+    "Frontend work lead",
+    "Product or design owner"
+  ],
+  "related_issues": [
+    "https://github.com/codeforboston/boston-circular-economy/issues/38"
+  ],
+  "depends_on": [],
+  "objective": "Identify the minimum information and interactions needed to compare two textile repair clinics.",
+  "in_scope": [
+    "M2.1 result cards and M2.2 filters",
+    "Official Fleet patterns",
+    "Existing design links and data gaps"
+  ],
+  "out_of_scope": [
+    "New interviews or participant recruitment",
+    "Choosing a frontend component library",
+    "Maps, registration, accounts, and the full directory"
+  ],
+  "ai_steps": [
+    {
+      "step": "Brainstorm",
+      "prompt": "Read this manifest and its sources. Propose three ways to organize a mobile clinic card and the five MVP filters. For each, explain the resident benefit, uncertainty, and maintenance cost. Cite sources. Do not invent interviews, approved designs, or available data. Stop after a 250-word comparison."
+    },
+    {
+      "step": "Challenge",
+      "prompt": "Act as a critical reviewer of the three proposals. Identify up to three assumptions about digital literacy, accessibility, and data availability. Compare each with M2.1 and M2.2. Reject unsupported claims. Give the contributor one question to answer from an actual source."
+    },
+    {
+      "step": "Produce",
+      "prompt": "Draft research-note.md in at most 600 words. Include an evidence table, three alternatives, one recommendation, open decisions, and a component-source list. Mark each claim as source fact, inference, or proposal. Ask me to verify every citation and explain one rejected AI suggestion."
+    }
+  ],
+  "deliverables": [
+    {
+      "name": "research-note.md",
+      "format": "Markdown or linked Google Doc",
+      "contents": "At most 600 words with evidence, alternatives, recommendation, and open decisions."
+    },
+    {
+      "name": "source-and-pattern-list",
+      "format": "Table in the research note",
+      "contents": "MVP references, two inspected Fleet component pages, and the current design frame link or an explicit access gap."
+    }
+  ],
+  "acceptance": [
+    "The note covers services, cost, date, distance, and partial matches from M2.1.",
+    "The note covers free, zip repair, machines, access/seating, and date filters from M2.2.",
+    "Every reference is opened and checked by the contributor.",
+    "The note identifies which clinic fields are absent or unproven in current DTOs.",
+    "Hubert can select a recommendation or state one decision needed before specification."
+  ],
+  "learning_check": "Explain one AI suggestion rejected after checking a source.",
+  "handoff": "Hubert reviews the research and selects the constraints for UI-002."
+}

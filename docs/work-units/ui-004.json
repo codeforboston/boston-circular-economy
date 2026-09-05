@@ -1,0 +1,101 @@
+{
+  "manifest_version": 1,
+  "journey": "MVP M2: senior resident finds a textile repair clinic",
+  "owner_role": "Frontend work lead (Hubert)",
+  "github_issue": null,
+  "inputs": [
+    {
+      "reference": "https://docs.google.com/document/d/1eI7OL8zppM01br13fuhXvWKAKnKWhRBOJ45NMYenpHU/edit",
+      "purpose": "Prototype requirements M2.1 and M2.2, screens 5 and 6"
+    },
+    {
+      "reference": "https://patterns.boston.gov/",
+      "purpose": "Official Boston component and visual guidance"
+    },
+    {
+      "reference": "client/README.md",
+      "purpose": "Existing React, TypeScript, Vite, and TanStack Router boundaries"
+    }
+  ],
+  "constraints": [
+    "Use the current textile MVP, a 390-pixel mobile viewport, and Fleet conventions.",
+    "Treat the older television persona and technical prototypes as historical context.",
+    "Use two synthetic clinics. Do not infer that the backend supports the mock fields.",
+    "Separate source facts, AI suggestions, and unresolved decisions.",
+    "Do not implement production code, query paid APIs, collect personal data, or publish to Slack."
+  ],
+  "completion_record": {
+    "artifact_links": [],
+    "reviewed_by": null,
+    "review_date": null,
+    "accepted_revision": null
+  },
+  "id": "UI-004",
+  "title": "Apply a modern Fleet visual treatment",
+  "kind": "visual_design",
+  "status": "waiting_for_reviewed_input",
+  "risk": "Yellow",
+  "timebox_minutes": 90,
+  "reviewer_roles": [
+    "Frontend work lead",
+    "Design owner"
+  ],
+  "related_issues": [
+    "https://github.com/codeforboston/boston-circular-economy/issues/38"
+  ],
+  "depends_on": [
+    "UI-003"
+  ],
+  "objective": "Produce one polished clinic-results screen that preserves the approved interaction and Boston identity.",
+  "in_scope": [
+    "One results screen at 390 pixels",
+    "Typography, spacing, hierarchy, and Fleet component mapping",
+    "Visible focus and selected states"
+  ],
+  "out_of_scope": [
+    "A replacement design system",
+    "Whole-app redesign",
+    "New font or component dependencies",
+    "Desktop or tablet designs"
+  ],
+  "ai_steps": [
+    {
+      "step": "Explore",
+      "prompt": "Use the selected UI-003 wireframe, the MVP, and inspected Fleet sources. Suggest two visual treatments using the existing Boston vocabulary. Compare hierarchy, density, readability, and maintenance in 200 words. Do not introduce a new brand or invent design tokens."
+    },
+    {
+      "step": "Produce",
+      "prompt": "After I select a treatment, create one editable polished 390-pixel screen and a PNG preview. Preserve all information and actions. Use at least 16-pixel body text, clear grouping, and explicit selected/focus states. List the source of each font, color, spacing value, and component. Label proposals."
+    },
+    {
+      "step": "Challenge",
+      "prompt": "Audit the rendered screen against the accepted wireframe. Check text clipping, hierarchy, contrast measurements, focus visibility, and whether partial-match meaning survives without color. Report observed results and limitations. Do not claim accessibility compliance from an image or AI opinion."
+    }
+  ],
+  "deliverables": [
+    {
+      "name": "clinic-results-visual",
+      "format": "Editable design link or self-contained HTML, plus PNG",
+      "contents": "One polished results screen at 390 pixels."
+    },
+    {
+      "name": "visual-manifest.yaml",
+      "format": "YAML",
+      "contents": "Component/style source mapping, sizes, states, measured checks, and approved design revision."
+    },
+    {
+      "name": "visual-review.md",
+      "format": "Markdown or linked Google Doc",
+      "contents": "At most 300 words with checks, trade-offs, and human review."
+    }
+  ],
+  "acceptance": [
+    "The rendered screen retains the accepted content and actions.",
+    "Body text is at least 16 pixels and no content clips at 390 pixels.",
+    "Fonts, colors, and components trace to Fleet or an explicitly reviewed exception.",
+    "The contributor records contrast measurements and keyboard/focus annotations without claiming a full audit.",
+    "The design owner approves the visual revision before implementation tickets use it."
+  ],
+  "learning_check": "Explain one visual choice in terms of readability or task completion rather than taste.",
+  "handoff": "Hubert uses the approved screen and component mapping to shape a small implementation issue."
+}

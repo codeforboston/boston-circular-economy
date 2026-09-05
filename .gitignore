@@ -32,4 +32,8 @@ __pycache__/
 *.egg-info/
 
 # ETL local data store
+etl/data/
 etl/src/etl/data/
+
+# Server local data store
+server/*.db*

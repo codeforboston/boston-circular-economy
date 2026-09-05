@@ -1,0 +1,62 @@
+{
+  "manifest_version": 1,
+  "id": "UI-999",
+  "title": "Accepted assignment without a revision",
+  "kind": "research",
+  "status": "accepted",
+  "risk": "Green",
+  "timebox_minutes": 30,
+  "journey": "A resident compares two repair services.",
+  "owner_role": "Frontend work lead",
+  "reviewer_roles": [
+    "Product owner"
+  ],
+  "related_issues": [],
+  "depends_on": [],
+  "inputs": [
+    {
+      "reference": "docs/work-units/README.md",
+      "purpose": "Assignment completion requirements."
+    }
+  ],
+  "objective": "Prove that an accepted assignment records its reviewed revision.",
+  "in_scope": [
+    "Accepted assignment records"
+  ],
+  "out_of_scope": [
+    "Production implementation"
+  ],
+  "constraints": [
+    "Keep the invalid state limited to the accepted revision."
+  ],
+  "ai_steps": [
+    {
+      "step": "Inspect",
+      "prompt": "Inspect the assignment record and list the evidence that supports acceptance."
+    },
+    {
+      "step": "Challenge",
+      "prompt": "Check whether the completion record identifies the exact reviewed artifact revision."
+    }
+  ],
+  "deliverables": [
+    {
+      "name": "completion-record",
+      "format": "JSON",
+      "contents": "A completion record tied to the reviewed artifact revision."
+    }
+  ],
+  "acceptance": [
+    "The reviewed artifact revision is explicit."
+  ],
+  "learning_check": "Explain why acceptance must identify one artifact revision.",
+  "handoff": "Give the accepted record to the next work unit.",
+  "completion_record": {
+    "artifact_links": [
+      "https://example.com/artifact"
+    ],
+    "reviewed_by": "Product owner",
+    "review_date": "2026-09-05",
+    "accepted_revision": null
+  }
+}

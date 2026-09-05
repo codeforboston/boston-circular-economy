@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "application_checks": {
+    "frontend": {
+      "paths": [
+        "client/**",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    "server": {
+      "paths": [
+        "server/**",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    "etl": {
+      "paths": [
+        "etl/**",
+        "data-explorations/**"
+      ]
+    }
+  },
+  "all_checks_paths": [
+    ".github/workflows/**",
+    ".pre-commit-config.yaml",
+    ".node-version",
+    ".agents/skills/route-agent-work/**"
+  ],
+  "known_non_application_paths": [
+    "*.md",
+    "docs/**",
+    ".github/ISSUE_TEMPLATE/**",
+    ".github/pull_request_template.md",
+    ".github/dependabot.yml",
+    ".agents/skills/**",
+    ".gitignore",
+    "LICENSE"
+  ],
+  "unknown_path_policy": "all_application_checks",
+  "model_routes": {
+    "mechanical": {
+      "executor": "deterministic_tool",
+      "model": null,
+      "reasoning_effort": null,
+      "human_checkpoint": "on_failure"
+    },
+    "repeated_method": {
+      "executor": "repository_skill",
+      "model": null,
+      "reasoning_effort": null,
+      "human_checkpoint": "at_review"
+    },
+    "bounded_green": {
+      "executor": "general_agent",
+      "model": "gpt-5.6-luna",
+      "reasoning_effort": "low",
+      "human_checkpoint": "at_review"
+    },
+    "bounded_yellow": {
+      "executor": "general_agent",
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "medium",
+      "human_checkpoint": "before_contract_change"
+    },
+    "integration": {
+      "executor": "integration_agent",
+      "model": "gpt-5.6-sol",
+      "reasoning_effort": "high",
+      "human_checkpoint": "before_scope_or_architecture_change"
+    },
+    "specialist_red": {
+      "executor": "specialist_plus_human",
+      "model": null,
+      "reasoning_effort": null,
+      "human_checkpoint": "before_implementation"
+    },
+    "intent": {
+      "executor": "accountable_human",
+      "model": null,
+      "reasoning_effort": null,
+      "human_checkpoint": "required"
+    }
+  },
+  "delegation_contract": {
+    "required_fields": [
+      "objective",
+      "inputs",
+      "constraints",
+      "output",
+      "validation",
+      "stop_condition"
+    ],
+    "context_rules": [
+      "provide only required files, issues, and evidence",
+      "prefer stable paths and links to pasted history",
+      "avoid duplicate exploration",
+      "set a concise output limit"
+    ],
+    "verification_rules": [
+      "inspect subordinate evidence",
+      "run applicable deterministic checks",
+      "resolve conflicting findings",
+      "report remaining uncertainty",
+      "do not treat an agent success message as proof"
+    ]
+  }
+}

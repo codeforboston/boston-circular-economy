@@ -1,0 +1,118 @@
+name: Submission
+
+# Version 1 is immutable. A change to its validation semantics requires a new status
+# context and a protected-branch migration. This rule prevents checker revisions from
+# publishing different results to one shared head commit.
+
+on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, reopened, synchronize, edited]
+
+permissions:
+  contents: read
+  pull-requests: read
+  statuses: write
+
+concurrency:
+  group: submission-${{ github.event.pull_request.head.sha || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  record:
+    name: Submission policy v1
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository history
+        if: github.event_name == 'pull_request_target'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+      - name: Set up Python
+        if: github.event_name == 'pull_request_target'
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.14.3'
+      - name: Check committed submission record
+        if: github.event_name == 'pull_request_target'
+        id: check
+        continue-on-error: true
+        env:
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" \
+            > "$RUNNER_TEMP/current-pr.json"
+          jq -e \
+            --arg expected_head "$EXPECTED_HEAD_SHA" \
+            '.head.sha == $expected_head' \
+            "$RUNNER_TEMP/current-pr.json"
+          gh api "repos/$GITHUB_REPOSITORY/commits/$HEAD_SHA" \
+            > "$RUNNER_TEMP/head-commit.json"
+          HEAD_PARENT_SHA="$(
+            python -B \
+              .agents/skills/make-evidence-based-technical-case/scripts/check_submission_freshness.py \
+              --expected-head "$HEAD_SHA" \
+              --head-commit-json "$RUNNER_TEMP/head-commit.json" \
+              --print-first-parent
+          )"
+          gh api \
+            "repos/$GITHUB_REPOSITORY/contents/.github/submission.md?ref=$HEAD_PARENT_SHA" \
+            > "$RUNNER_TEMP/parent-submission.json"
+          gh api \
+            "repos/$GITHUB_REPOSITORY/contents/.github/submission.md?ref=$HEAD_SHA" \
+            > "$RUNNER_TEMP/head-submission.json"
+          python -B \
+            .agents/skills/make-evidence-based-technical-case/scripts/check_submission_freshness.py \
+            --expected-head "$HEAD_SHA" \
+            --head-commit-json "$RUNNER_TEMP/head-commit.json" \
+            --parent-record-json "$RUNNER_TEMP/parent-submission.json" \
+            --head-record-json "$RUNNER_TEMP/head-submission.json"
+          jq -r .content "$RUNNER_TEMP/head-submission.json" \
+            | base64 --decode \
+            > "$RUNNER_TEMP/submission.md"
+          python -B \
+            .agents/skills/make-evidence-based-technical-case/scripts/check_submission.py \
+            --body-file "$RUNNER_TEMP/submission.md"
+      - name: Publish the committed record result
+        if: >-
+          always() && !cancelled() &&
+          github.event_name == 'pull_request_target'
+        id: publish
+        continue-on-error: true
+        env:
+          CHECK_OUTCOME: ${{ steps.check.outcome }}
+          CONTEXT: Submission record v1
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" \
+            > "$RUNNER_TEMP/latest-pr.json"
+          jq -e \
+            --arg expected_head "$EXPECTED_HEAD_SHA" \
+            '.head.sha == $expected_head' \
+            "$RUNNER_TEMP/latest-pr.json"
+          if [ "$CHECK_OUTCOME" = success ]; then
+            result=success
+          else
+            result=failure
+          fi
+          gh api --method POST \
+            "repos/$GITHUB_REPOSITORY/statuses/$HEAD_SHA" \
+            -f state="$result" \
+            -f context="$CONTEXT" \
+            -f description="The committed submission check completed." \
+            -f target_url="$TARGET_URL"
+      - name: Fail when the committed record is invalid
+        if: >-
+          github.event_name == 'pull_request_target' &&
+          (steps.check.outcome != 'success' ||
+          steps.publish.outcome != 'success')
+        run: exit 1

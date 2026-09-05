@@ -1,0 +1,62 @@
+{
+  "manifest_version": 1,
+  "id": "UI-997",
+  "title": "Accepted assignment with blank review metadata",
+  "kind": "research",
+  "status": "accepted",
+  "risk": "Green",
+  "timebox_minutes": 30,
+  "journey": "A resident compares two repair services.",
+  "owner_role": "Frontend work lead",
+  "reviewer_roles": [
+    "Product owner"
+  ],
+  "related_issues": [],
+  "depends_on": [],
+  "inputs": [
+    {
+      "reference": "docs/work-units/README.md",
+      "purpose": "Assignment completion requirements."
+    }
+  ],
+  "objective": "Prove that accepted assignments contain substantive review metadata.",
+  "in_scope": [
+    "Accepted assignment records"
+  ],
+  "out_of_scope": [
+    "Production implementation"
+  ],
+  "constraints": [
+    "Keep the invalid state limited to blank review metadata."
+  ],
+  "ai_steps": [
+    {
+      "step": "Inspect",
+      "prompt": "Inspect the assignment record and identify blank acceptance evidence."
+    },
+    {
+      "step": "Challenge",
+      "prompt": "Check whether the completion record contains substantive review metadata."
+    }
+  ],
+  "deliverables": [
+    {
+      "name": "completion-record",
+      "format": "JSON",
+      "contents": "A completion record tied to substantive evidence and a human decision."
+    }
+  ],
+  "acceptance": [
+    "The reviewed artifacts and human decision contain substantive text."
+  ],
+  "learning_check": "Explain why whitespace cannot identify acceptance evidence.",
+  "handoff": "Give the accepted record to the next work unit.",
+  "completion_record": {
+    "artifact_links": [
+      "   "
+    ],
+    "reviewed_by": "   ",
+    "review_date": "   ",
+    "accepted_revision": "   "
+  }
+}

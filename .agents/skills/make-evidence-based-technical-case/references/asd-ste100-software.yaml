@@ -1,0 +1,44 @@
+standard_name: ASD-STE100 Simplified Technical English
+standard_issue: 9
+standard_date: 2025-01-15
+official_home: https://www.asd-ste100.org/
+official_pdf: https://www.asd-ste100.org/assets/files/ASD-STE100_ISSUE9.pdf
+language: en-US
+descriptive_sentence_max_words: 25
+procedural_sentence_max_words: 20
+paragraph_max_sentences: 6
+permit_semicolon_in_prose: false
+permit_contractions_in_prose: false
+prefer_active_voice: true
+require_first_use_definition: true
+require_stable_term_meaning: true
+preserve:
+  - code identifiers
+  - command examples
+  - quoted user-interface text
+  - publication titles
+  - protocol names
+  - version identifiers
+  - citations
+translation_output_parts:
+  - Part 1: Plain-English Translation with one or two direct sentences
+  - Part 2: Key Concepts Explained with one bullet for each necessary technical term
+preserve_technical_semantics:
+  - state and resource ownership
+  - operation order
+  - atomic and transaction boundaries
+  - lock and lease behavior
+  - timeout interruption and failure behavior
+  - queue memory worker time and retry limits
+prohibited_vague_terms:
+  - amazing
+  - cutting-edge
+  - exciting
+  - game-changing
+  - leverage
+  - next-generation
+  - powerful
+  - robust
+  - scalable
+  - seamless
+  - world-class

@@ -1,0 +1,54 @@
+manifest_version: 1
+status: proposed
+screen_id: clinic-results
+journey: Textile MVP M2.1 and M2.2
+source:
+  product: https://docs.google.com/document/d/1eI7OL8zppM01br13fuhXvWKAKnKWhRBOJ45NMYenpHU/edit
+  accepted_research_revision: null
+  approved_design_frame: null
+viewport:
+  width_px: 390
+  body_text_min_px: 16
+  other_viewports: Outside this prototype assignment
+user_outcome: Compare two textile repair clinics and narrow them with filters
+route:
+  proposed_path: null
+  entry: null
+  back_behavior: null
+components:
+  - id: clinic-card
+    fleet_reference: null
+    fields: [name, services, cost, date, distance, partial_match]
+    missing_data_behavior: null
+  - id: clinic-filters
+    fleet_reference: null
+    controls: [free_only, zip_repair, machines, access_and_seating, date_range]
+    labels_and_defaults: null
+states:
+  required_by_mvp: [two_clinics, machine_filter_one_clinic, partial_match]
+  proposed_for_engineering_review: [loading, empty, error, missing_data]
+  specifications: []
+actions:
+  - id: apply-machine-filter
+    trigger: null
+    local_state_change: null
+    navigation_effect: null
+    backend_operation_id: null
+    expected_visible_result: One of the two synthetic clinics remains
+    focus_and_announcement: null
+data:
+  mode: synthetic_prototype
+  ui_to_source_field_map: []
+  backend_contract_revision: null
+  unresolved_fields: []
+acceptance_cases:
+  - id: M2-MACHINES
+    given: Two synthetic clinics with distinct machine availability
+    when: The resident applies the machine filter
+    then: One clinic remains
+    evidence: null
+open_decisions: []
+approval:
+  frontend_lead: null
+  product_design_owner: null
+  accepted_revision: null

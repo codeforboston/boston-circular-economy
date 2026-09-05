@@ -1,13 +1,14 @@
+import json
+from pathlib import Path
+
 from etl.base.data_store import BaseDataStore
 from etl.dtos import DataSource, NormalizedLocation
-from pathlib import Path
-import json
 
-loc_key = 'locations'
+loc_key = "locations"
+
 
 # Reads and writes normalized locations to a local file.
 class LocalDataStore(BaseDataStore):
-
     def __init__(self, data_dir: Path) -> None:
         self.data_dir = data_dir
         self.snapshots_dir = data_dir / "snapshots"
@@ -29,10 +30,13 @@ class LocalDataStore(BaseDataStore):
         if not file_path.exists():
             raise FileNotFoundError(file_path)
 
-        with open(file_path, "r") as file:
+        with open(file_path) as file:
             snapshot_serialized = json.load(file)
 
-        return [NormalizedLocation.model_validate(location) for location in snapshot_serialized[loc_key]]
+        return [
+            NormalizedLocation.model_validate(location)
+            for location in snapshot_serialized[loc_key]
+        ]
 
     def write_output_locations(
         self,
@@ -46,8 +50,10 @@ class LocalDataStore(BaseDataStore):
         file_path: Path,
         locations: list[NormalizedLocation],
     ) -> None:
-        locations_serialized = [location.model_dump(mode="json") for location in locations]
-        payload = { loc_key: locations_serialized }
+        locations_serialized = [
+            location.model_dump(mode="json") for location in locations
+        ]
+        payload = {loc_key: locations_serialized}
 
         file_path.parent.mkdir(parents=True, exist_ok=True)
         with open(file_path, "w") as file:

@@ -1,0 +1,66 @@
+repos:
+  - repo: local
+    hooks:
+      - id: technical-prose
+        name: Check technical prose
+        entry: >-
+          python -B
+          .agents/skills/make-evidence-based-technical-case/scripts/check_prose.py
+        language: python
+        files: '\.(cjs|css|html|js|jsx|json|md|mjs|py|svg|toml|ts|tsx|yaml|yml)$'
+      - id: submission-record
+        name: Check committed submission record
+        entry: >-
+          python -B
+          .agents/skills/make-evidence-based-technical-case/scripts/check_submission.py
+          --body-file .github/submission.md
+        language: python
+        always_run: true
+        pass_filenames: false
+      - id: work-unit-manifests
+        name: Validate work-unit manifests
+        entry: >-
+          python -B
+          .agents/skills/route-agent-work/scripts/validate_work_units.py
+        language: python
+        files: '^docs/work-units/(manifest\.schema\.json|ui-[0-9]{3}\.json)$'
+        pass_filenames: false
+      - id: routing-policy
+        name: Test delivery routing policy
+        entry: >-
+          python -B -m unittest discover
+          -s .agents/skills/route-agent-work/scripts
+          -p test_*.py -v
+        language: python
+        files: >-
+          ^(\.agents/skills/route-agent-work/|\.github/workflows/|\.pre-commit-config\.yaml$)
+        pass_filenames: false
+      - id: communication-policy
+        name: Test communication and submission policy
+        entry: >-
+          python -B -m unittest discover
+          -s .agents/skills/make-evidence-based-technical-case/scripts
+          -p test_*.py -v
+        language: python
+        files: >-
+          ^(\.agents/skills/make-evidence-based-technical-case/|\.github/ISSUE_TEMPLATE/work-unit\.yml$|\.github/pull_request_template\.md$|\.github/submission\.md$|\.github/workflows/ci\.yml$|docs/CODE_CHANGE_STANDARD\.md$)
+        pass_filenames: false
+      - id: code-review-policy
+        name: Test code review policy and model routing
+        entry: >-
+          python -B -m unittest discover
+          -s .agents/skills/review-code-change/scripts
+          -p test_*.py -v
+        language: python
+        files: >-
+          ^(AGENTS\.md$|\.github/AGENTS\.md$|\.agents/skills/review-code-change/|\.agents/skills/route-agent-work/|docs/CODE_CHANGE_STANDARD\.md$)
+        pass_filenames: false
+      - id: routed-quality
+        name: Run checks selected for this branch
+        entry: >-
+          python -B
+          .agents/skills/route-agent-work/scripts/run_local_checks.py
+        language: python
+        stages: [pre-push]
+        always_run: true
+        pass_filenames: false
