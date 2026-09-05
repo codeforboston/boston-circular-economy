@@ -61,6 +61,34 @@ class ProseCheckerTests(unittest.TestCase):
 
         self.assertIn("formulaic AI opening", rules)
 
+    def test_unclosed_frontmatter_marker_does_not_hide_markdown_prose(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            unclosed = Path(directory) / "unclosed.md"
+            unclosed.write_text(
+                "---\n"
+                "Don't deploy; wait.\n",
+                encoding="utf-8",
+            )
+            closed = Path(directory) / "closed.md"
+            closed.write_text(
+                "---\n"
+                "title: Don't deploy; wait.\n"
+                "---\n"
+                "Publish the tested artifact.\n",
+                encoding="utf-8",
+            )
+
+            unclosed_findings = markdown_findings(
+                unclosed, load_profile(DEFAULT_PROFILE)
+            )
+            closed_findings = markdown_findings(closed, load_profile(DEFAULT_PROFILE))
+
+        self.assertEqual(
+            {(2, "contraction"), (2, "semicolon")},
+            {(finding.line, finding.rule) for finding in unclosed_findings},
+        )
+        self.assertEqual([], closed_findings)
+
     def test_allows_behavioral_after_this_change_claim(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.md"
@@ -452,6 +480,23 @@ class ProseCheckerTests(unittest.TestCase):
 
         self.assertEqual(
             [(1, "semicolon")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
+    def test_ignores_database_query_syntax_but_checks_reader_text(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "database.ts"
+            path.write_text(
+                'db.exec("CREATE TABLE a(id); CREATE TABLE b(id);");\n'
+                "database.query(`SELECT id FROM a; SELECT id FROM b;`);\n"
+                'const message = "Do not deploy; wait.";\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(3, "semicolon")],
             [(finding.line, finding.rule) for finding in findings],
         )
 

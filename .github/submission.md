@@ -128,6 +128,8 @@ issue existed.
 - Scan reader-facing text and accessible attributes in standalone SVG files.
 - Preserve suppressed HTML element state across complete Markdown documents.
 - Use the trusted-base local review command in contributor guidance.
+- Keep JavaScript and TypeScript database operation strings outside prose checks.
+- Scan an unclosed Markdown front-matter region as visible prose.
 
 ## Challenge cases
 
@@ -219,6 +221,8 @@ issue existed.
 - SVG titles, descriptions, text, and accessible attributes remain visible while metadata and scripts remain inert.
 - Language syntax stays inert while semicolons in reader-facing source values fail.
 - Multiline Markdown `pre` and `script` elements keep their content outside prose checks.
+- SQL statement separators remain machine syntax while adjacent reader text is checked.
+- An unclosed front-matter marker cannot hide the Markdown content that follows it.
 - Red review stops for specialist and human escalation, including ETL credential and secret paths.
 
 ## Evidence
@@ -228,7 +232,7 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass. Startup creates and closes a temporary SQLite database, and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 148 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 150 communication and submission tests |
 | Routing policy | Pass | 42 routing, hook-context, manifest-integrity, and model-route tests |
 | Review policy and model routing | Pass | 26 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation, schema validation, and commit-stage and push-stage runs |
@@ -261,6 +265,7 @@ Examine ordinary JavaScript additions and adjacent Python reader strings. Examin
 element-specific HTML and JSX attributes, React children, and JavaScript property keys.
 Examine trusted-base local review execution and standalone SVG reader-text boundaries.
 Examine semicolon coverage and multiline HTML suppression in Markdown.
+Examine database-operation string classification and front-matter closure detection.
 Examine Python resource identifiers, heading termination, hook suffix coverage, and the
 Red workflow risk floor. Confirm the deployment reconcile step verifies the selected
 run has an unexpired client artifact before it marks the deployment ready. Confirm

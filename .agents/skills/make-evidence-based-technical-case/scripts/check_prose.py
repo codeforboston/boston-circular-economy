@@ -426,26 +426,31 @@ def markdown_findings(path: Path, profile: dict[str, object]) -> list[Finding]:
 
     findings: list[Finding] = []
     paragraph: list[tuple[int, str]] = []
-    in_frontmatter = False
-
     def flush() -> None:
         findings.extend(paragraph_findings(path, paragraph, profile))
         paragraph.clear()
 
     source_text = path.read_text(encoding="utf-8")
+    source_lines = source_text.splitlines()
+    frontmatter_closing_line: int | None = None
+    if source_lines and source_lines[0].strip() == "---":
+        frontmatter_closing_line = next(
+            (
+                number
+                for number, line in enumerate(source_lines[1:], start=2)
+                if line.strip() == "---"
+            ),
+            None,
+        )
     masked_markdown = mask_markdown_reference_controls(
         mask_markdown_code(source_text)
     )
     masked_lines = mask_html_code(masked_markdown).splitlines()
     for number, (raw_line, checked_line) in enumerate(
-        zip(source_text.splitlines(), masked_lines, strict=True), start=1
+        zip(source_lines, masked_lines, strict=True), start=1
     ):
         stripped = raw_line.strip()
-        if number == 1 and stripped == "---":
-            in_frontmatter = True
-            continue
-        if in_frontmatter:
-            in_frontmatter = stripped != "---"
+        if frontmatter_closing_line is not None and number <= frontmatter_closing_line:
             continue
         raw_content = markdown_blockquote_content(raw_line)
         checked_content = markdown_blockquote_content(checked_line)
@@ -1468,6 +1473,23 @@ JAVASCRIPT_ROUTE_FUNCTIONS = {
     "navigate",
     "redirect",
 }
+JAVASCRIPT_DATABASE_METHODS = {
+    "all",
+    "exec",
+    "execute",
+    "get",
+    "prepare",
+    "query",
+    "run",
+}
+JAVASCRIPT_DATABASE_RECEIVERS = {
+    "connection",
+    "database",
+    "db",
+    "pool",
+    "sql",
+    "statement",
+}
 
 
 def javascript_route_argument(tokens: list[str]) -> bool:
@@ -1482,6 +1504,18 @@ def javascript_route_argument(tokens: list[str]) -> bool:
         and tokens[-2] in JAVASCRIPT_ROUTE_METHODS
         and tokens[-3] == "."
         and tokens[-4] in JAVASCRIPT_ROUTE_RECEIVERS
+    )
+
+
+def javascript_database_argument(tokens: list[str]) -> bool:
+    """Return whether the next literal is a database operation's first argument."""
+
+    return bool(
+        len(tokens) >= 4
+        and tokens[-1] == "("
+        and tokens[-2] in JAVASCRIPT_DATABASE_METHODS
+        and tokens[-3] == "."
+        and tokens[-4] in JAVASCRIPT_DATABASE_RECEIVERS
     )
 
 
@@ -2172,6 +2206,7 @@ def mask_javascript_code(
             if not (
                 javascript_module_specifier(tokens)
                 or javascript_route_argument(tokens)
+                or javascript_database_argument(tokens)
                 or javascript_identifier_literal(text, index, end)
                 or javascript_property_key(text, index, end, tokens)
             ):
@@ -2187,6 +2222,7 @@ def mask_javascript_code(
                 copy_literal=not (
                     javascript_module_specifier(tokens)
                     or javascript_route_argument(tokens)
+                    or javascript_database_argument(tokens)
                     or javascript_template_identifier(text, index)
                 ),
                 parse_jsx=parse_jsx,
