@@ -75,6 +75,17 @@ HTML_READER_ATTRIBUTES = {
     "placeholder",
     "title",
 }
+HTML_READER_VALUE_INPUT_TYPES = {
+    "",
+    "button",
+    "email",
+    "reset",
+    "search",
+    "submit",
+    "tel",
+    "text",
+    "url",
+}
 HTML_SUPPRESSED_ELEMENTS = {"code", "pre", "script", "style", "template"}
 HTML_ATTRIBUTE = re.compile(
     r"""(?P<name>[A-Za-z_:][-A-Za-z0-9_:.]*)[ \t\r\n]*=[ \t\r\n]*"""
@@ -543,11 +554,11 @@ class ReaderFacingHtmlParser(HTMLParser):
         start = self.current_offset()
         copy_span(self.output, self.source, start, start + len(value))
 
-    def expose_attributes(self) -> None:
+    def expose_attributes(self, names: set[str]) -> None:
         raw_tag = self.get_starttag_text()
         tag_start = self.current_offset()
         for match in HTML_ATTRIBUTE.finditer(raw_tag):
-            if match.group("name").casefold() not in HTML_READER_ATTRIBUTES:
+            if match.group("name").casefold() not in names:
                 continue
             value_group = next(
                 group
@@ -563,21 +574,26 @@ class ReaderFacingHtmlParser(HTMLParser):
             )
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        del attrs
         normalized_tag = tag.casefold()
         if normalized_tag in HTML_SUPPRESSED_ELEMENTS:
             self.suppressed_elements.append(normalized_tag)
             return
         if not self.suppressed_elements:
-            self.expose_attributes()
+            reader_attributes = set(HTML_READER_ATTRIBUTES)
+            attributes = {
+                name.casefold(): value for name, value in attrs if value is not None
+            }
+            if (
+                normalized_tag == "input"
+                and attributes.get("type", "").casefold()
+                in HTML_READER_VALUE_INPUT_TYPES
+            ):
+                reader_attributes.add("value")
+            self.expose_attributes(reader_attributes)
 
     def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        del attrs
-        if (
-            not self.suppressed_elements
-            and tag.casefold() not in HTML_SUPPRESSED_ELEMENTS
-        ):
-            self.expose_attributes()
+        self.handle_starttag(tag, attrs)
+        self.handle_endtag(tag)
 
     def handle_endtag(self, tag: str) -> None:
         normalized_tag = tag.casefold()
@@ -866,6 +882,108 @@ def python_environment_key_spans(
     return sorted(spans)
 
 
+def python_resource_identifier_spans(
+    text: str, offsets: list[int]
+) -> list[tuple[int, int]]:
+    """Locate string arguments that identify files or path components."""
+
+    try:
+        syntax_tree = ast.parse(text)
+    except SyntaxError:
+        return []
+
+    lines = text.splitlines(keepends=True)
+
+    def source_offset(line: int, byte_column: int) -> int:
+        line_prefix = lines[line - 1].encode("utf-8")[:byte_column]
+        character_column = len(line_prefix.decode("utf-8"))
+        return offsets[line - 1] + character_column
+
+    def qualified_name(node: ast.AST) -> str | None:
+        if isinstance(node, ast.Name):
+            return node.id
+        if isinstance(node, ast.Attribute):
+            owner = qualified_name(node.value)
+            if owner is not None:
+                return f"{owner}.{node.attr}"
+        return None
+
+    def string_span(node: ast.AST) -> tuple[int, int] | None:
+        if not isinstance(node, (ast.Constant, ast.JoinedStr)):
+            return None
+        if isinstance(node, ast.Constant) and not isinstance(node.value, (str, bytes)):
+            return None
+        if node.end_lineno is None or node.end_col_offset is None:
+            return None
+        return (
+            source_offset(node.lineno, node.col_offset),
+            source_offset(node.end_lineno, node.end_col_offset),
+        )
+
+    path_constructors = {
+        "Path",
+        "PurePath",
+        "PurePosixPath",
+        "PureWindowsPath",
+        "pathlib.Path",
+        "pathlib.PurePath",
+        "pathlib.PurePosixPath",
+        "pathlib.PureWindowsPath",
+    }
+    file_calls = {"io.open", "open", "os.open"}
+    path_calls = {
+        "os.path.abspath",
+        "os.path.basename",
+        "os.path.dirname",
+        "os.path.exists",
+        "os.path.expanduser",
+        "os.path.join",
+        "os.path.normpath",
+        "os.path.realpath",
+    }
+    spans: list[tuple[int, int]] = []
+    path_expressions: set[ast.AST] = set()
+    for node in ast.walk(syntax_tree):
+        if not isinstance(node, ast.Call):
+            continue
+        name = qualified_name(node.func)
+        if name in path_constructors:
+            path_expressions.add(node)
+            candidates = [*node.args, *(keyword.value for keyword in node.keywords)]
+        elif name in path_calls:
+            candidates = [*node.args, *(keyword.value for keyword in node.keywords)]
+        elif name in file_calls:
+            candidates = [*node.args[:1]]
+            candidates.extend(
+                keyword.value
+                for keyword in node.keywords
+                if keyword.arg in {"file", "path"}
+            )
+        else:
+            continue
+        spans.extend(
+            span for candidate in candidates if (span := string_span(candidate))
+        )
+
+    def mark_path_expression(node: ast.AST) -> bool:
+        if node in path_expressions:
+            return True
+        if (
+            isinstance(node, ast.BinOp)
+            and isinstance(node.op, ast.Div)
+            and mark_path_expression(node.left)
+        ):
+            path_expressions.add(node)
+            if span := string_span(node.right):
+                spans.append(span)
+            return True
+        return False
+
+    for node in ast.walk(syntax_tree):
+        mark_path_expression(node)
+    return sorted(set(spans))
+
+
 def token_mapping_key_spans(
     tokens: list[tokenize.TokenInfo], offsets: list[int]
 ) -> list[tuple[int, int]]:
@@ -941,6 +1059,7 @@ def mask_python_code(text: str) -> str:
         set(
             python_mapping_key_spans(text, offsets)
             + python_environment_key_spans(text, offsets)
+            + python_resource_identifier_spans(text, offsets)
             + token_mapping_key_spans(tokens, offsets)
         )
     )

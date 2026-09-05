@@ -74,6 +74,21 @@ class ProseCheckerTests(unittest.TestCase):
         self.assertEqual([], editorial)
         self.assertEqual([], sentence)
 
+    def test_backslash_does_not_escape_a_backtick_inside_code(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.md"
+            path.write_text(
+                "Use `code\\` Unlock the potential.`\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(1, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_inline_code_can_cross_a_line_break(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.md"
@@ -359,6 +374,23 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_checks_visible_html_input_values_only(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "index.html"
+            path.write_text(
+                '<input type="hidden" value="Unlock the potential.">\n'
+                '<input type="submit" value="Unlock the potential.">\n'
+                '<input value="Unlock the potential.">\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(2, "promotional cliche"), (3, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_ignores_javascript_identifiers_but_checks_reader_text(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.ts"
@@ -586,6 +618,25 @@ class ProseCheckerTests(unittest.TestCase):
 
         self.assertEqual(
             [(6, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
+    def test_ignores_python_resource_identifiers(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.py"
+            path.write_text(
+                'root = Path("/unlock")\n'
+                'handle = open(file="/robust")\n'
+                'child = Path("/tmp") / "scalable" / "exciting"\n'
+                'joined = os.path.join("/tmp", "powerful")\n'
+                'message = "Unlock the potential."\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(5, "promotional cliche")],
             [(finding.line, finding.rule) for finding in findings],
         )
 

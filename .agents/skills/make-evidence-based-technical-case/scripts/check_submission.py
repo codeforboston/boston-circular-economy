@@ -165,9 +165,6 @@ def inline_code_spans(content: str) -> list[tuple[int, int, int, int]]:
             candidate = content.find("`", search)
             if candidate < 0:
                 break
-            if escaped_backtick(content, candidate):
-                search = candidate + 1
-                continue
             run_end = candidate
             while run_end < len(content) and content[run_end] == "`":
                 run_end += 1

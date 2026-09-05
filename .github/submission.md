@@ -84,6 +84,9 @@ issue existed.
 - Check visible Markdown image alt text while excluding the image destination.
 - Scan visible HTML text and reader-facing attributes while excluding code and implementation-only values.
 - Close the smoke-test SQLite connection before removing its temporary directory.
+- Treat every matching backtick inside an open code span as a closing delimiter, even after a backslash.
+- Scan values on visible HTML input types while excluding hidden and choice-control values.
+- Exclude Python file and path arguments from reader prose while retaining ordinary messages.
 
 ## Challenge cases
 
@@ -133,6 +136,9 @@ issue existed.
 - A contraction or semicolon in image alt text fails while its image destination remains inert.
 - HTML text and alt text fail editorial checks, while script content and image source paths remain inert.
 - The server smoke test closes SQLite before deleting its database directory on every platform.
+- A backslash before a closing code-span backtick cannot hide the prose that follows it.
+- Submit and text-input values fail editorial checks, while hidden-input values remain machine data.
+- Python path constructors, file calls, path joins, and path composition remain outside prose checks.
 - Red review stops for specialist and human escalation, including ETL credential and secret paths.
 
 ## Evidence
@@ -142,7 +148,7 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass. Startup creates and closes a temporary SQLite database, and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 119 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 122 communication and submission tests |
 | Routing policy | Pass | 37 routing, hook-context, and manifest-discovery tests plus model-route samples |
 | Review policy and model routing | Pass | 25 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation, schema validation, and commit-stage and push-stage runs |
@@ -163,11 +169,11 @@ I read and understand the submitted diff. I verified the evidence above and rema
 
 ## Review focus and uncertainty
 
-Review the versioned first-parent record boundary, terminal-only status publication,
-Markdown fence, paragraph, table, image-alt boundaries, Python escape decoding, and the
-HTML reader-text boundary. Examine the Red workflow risk floor, SQLite shutdown order,
-native lockfile changes, path mapping, evidence threshold, model defaults, and
-protected-branch activation steps.
+Review the versioned first-parent record boundary and terminal-only status publication.
+Examine Markdown fence, paragraph, table, image-alt, and code-span boundaries. Examine
+HTML control-value classification, Python resource identifiers, and the Red workflow
+risk floor. Check SQLite shutdown order, native lockfile changes, path mapping, evidence
+threshold, model defaults, and protected-branch activation steps.
 
 The repository has not observed the submission workflow from `main`. A repository
 administrator must configure the named required checks only after the hosted evidence
