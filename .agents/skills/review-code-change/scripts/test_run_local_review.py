@@ -380,7 +380,6 @@ class LocalReviewRunnerTests(unittest.TestCase):
             encoding="utf-8"
         )
 
-        self.assertNotIn("edited", ci_workflow)
         self.assertNotIn("github.event.action != 'edited'", ci_workflow)
         self.assertIn(
             "ci-${{ github.workflow }}-${{ github.event_name }}-${{",
@@ -389,7 +388,7 @@ class LocalReviewRunnerTests(unittest.TestCase):
         self.assertIn("github.event.pull_request.number || github.sha }}", ci_workflow)
         self.assertIn("cancel-in-progress: true", ci_workflow)
         self.assertIn(
-            "types: [opened, reopened, synchronize]",
+            "types: [opened, reopened, synchronize, edited]",
             submission_workflow,
         )
         self.assertIn("name: Submission policy v1", submission_workflow)
@@ -449,6 +448,21 @@ class LocalReviewRunnerTests(unittest.TestCase):
         final_status = submission_workflow.index('-f state="$result"')
         self.assertLess(first_live_read, pending_status)
         self.assertLess(final_live_read, final_status)
+
+    def test_required_status_workflows_handle_pull_request_retargets(self) -> None:
+        workflows = (
+            ROOT / ".github/workflows/ci.yml",
+            ROOT / ".github/workflows/submission.yml",
+        )
+
+        for path in workflows:
+            with self.subTest(path=path):
+                workflow = path.read_text(encoding="utf-8")
+                self.assertIn(
+                    "types: [opened, reopened, synchronize, edited]",
+                    workflow,
+                )
+                self.assertNotIn("github.event.action != 'edited'", workflow)
 
     def test_deployment_reconciles_to_current_tested_main(self) -> None:
         deployment = (ROOT / ".github/workflows/deploy.yml").read_text(encoding="utf-8")

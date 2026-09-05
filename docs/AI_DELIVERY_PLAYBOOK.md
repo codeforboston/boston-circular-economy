@@ -197,10 +197,12 @@ a durable cross-system contract, dependency, external service, or high-impact ri
 
 ## 7. Deterministic CI and deployment
 
-The `CI` workflow starts for every code revision to a pull request against `main` and
-every push to `main`. The changed-file router selects applicable application checks
-from one versioned policy. The `Submission` workflow validates the committed record on
-each pull request head revision. Its concurrency group cannot cancel code CI.
+The `CI` workflow starts when a pull request against `main` opens, reopens, receives a
+new head revision, or is edited. It also starts for every push to `main`. The edit event
+ensures that a pull request retargeted to `main` receives the required contexts. The
+changed-file router selects applicable application checks from one versioned policy.
+The `Submission` workflow validates the committed record for the same pull request
+events. Its concurrency group cannot cancel code CI.
 
 | Check | Evidence |
 |---|---|

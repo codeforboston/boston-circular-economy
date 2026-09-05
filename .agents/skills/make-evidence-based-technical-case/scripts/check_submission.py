@@ -52,9 +52,7 @@ ACCOUNTABILITY = (
     "I read and understand the submitted diff. I verified the evidence above and "
     "remain accountable for the change."
 )
-ACCOUNTABILITY_PARAGRAPH = re.compile(
-    rf"(?m)^[ \t]*{re.escape(ACCOUNTABILITY)}[ \t]*$"
-)
+ACCOUNTABILITY_PARAGRAPH = re.compile(rf"(?m)^[ \t]*{re.escape(ACCOUNTABILITY)}[ \t]*$")
 ISSUE_REFERENCE = re.compile(r"(?im)^\s*(?:closes|fixes|resolves)\s+#\d+\s*$")
 ISSUE_EXCEPTION = re.compile(r"(?im)^\s*issue exception:\s*\S.+$")
 SELECTED_AI_BOX = re.compile(r"(?im)^\s*-\s*\[[xX]]\s+(.+?)\s*$")
@@ -92,12 +90,10 @@ EMPTY_MARKDOWN_LINE = re.compile(
     r"(?:[*_-][ \t]*){3,}|>+|#{1,6})[ \t]*$"
 )
 MARKDOWN_CHECKBOX = re.compile(r"\[[ xX]\]")
-RAW_HTML_TAG = re.compile(
-    r"</?[A-Za-z][A-Za-z0-9-]*(?:[ \t\r\n][^>]*|/?)>"
-)
+RAW_HTML_TAG = re.compile(r"</?[A-Za-z][A-Za-z0-9-]*(?:[ \t\r\n][^>]*|/?)>")
 HTML_ENTITY = re.compile(r"&(?:#[0-9]+|#x[0-9A-Fa-f]+|[A-Za-z][A-Za-z0-9]+);")
 INLINE_CODE_SPAN = re.compile(
-    r"(?<!`)(?P<ticks>`+)(?!`)(?P<code>[^\r\n]*?)(?<!`)(?P=ticks)(?!`)"
+    r"(?<!`)(?P<ticks>`+)(?!`)(?P<code>[\s\S]*?)(?<!`)(?P=ticks)(?!`)"
 )
 BLOCKQUOTE_MARKER = re.compile(r"[ ]{0,3}>[ \t]?")
 TEMPLATE_GUIDANCE = (
@@ -134,7 +130,12 @@ def normalize_section_name(name: str) -> str:
 def mask_inline_code_spans(content: str) -> str:
     """Hide visible code spans before checking for raw HTML controls."""
 
-    return INLINE_CODE_SPAN.sub(lambda match: " " * len(match.group(0)), content)
+    return INLINE_CODE_SPAN.sub(
+        lambda match: "".join(
+            character if character in "\r\n" else " " for character in match.group(0)
+        ),
+        content,
+    )
 
 
 def expose_inline_code_text(content: str) -> str:
@@ -216,10 +217,7 @@ def mask_markdown_code_blocks(body: str) -> str:
             fence_stripped = fence_content.lstrip()
             current_quote_depth = outer_quote_depth + inner_quote_depth
             outside_fence_container = content.strip() and (
-                (
-                    fence_container_indent > 0
-                    and indentation < fence_container_indent
-                )
+                (fence_container_indent > 0 and indentation < fence_container_indent)
                 or current_quote_depth < fence_quote_depth
             )
             if outside_fence_container:
@@ -237,9 +235,7 @@ def mask_markdown_code_blocks(body: str) -> str:
                     fence_length = 0
                     fence_container_indent = 0
                     fence_quote_depth = 0
-                output.append(
-                    "".join("\n" if value == "\n" else " " for value in line)
-                )
+                output.append("".join("\n" if value == "\n" else " " for value in line))
                 continue
 
         list_item = LIST_ITEM_START.match(container_content)
@@ -247,9 +243,7 @@ def mask_markdown_code_blocks(body: str) -> str:
             marker_indent = len(list_item.group("indent").expandtabs(4))
             while list_indents and marker_indent <= list_indents[-1][0]:
                 list_indents.pop()
-            content_indent = len(
-                container_content[: list_item.end()].expandtabs(4)
-            )
+            content_indent = len(container_content[: list_item.end()].expandtabs(4))
             list_indents.append((marker_indent, content_indent))
         elif content.strip():
             while list_indents and indentation < list_indents[-1][1]:
@@ -287,16 +281,12 @@ def mask_markdown_code_blocks(body: str) -> str:
             fence_length = len(marker)
             fence_container_indent = container_indent
             fence_quote_depth = outer_quote_depth + inner_quote_depth
-            output.append(
-                "".join("\n" if value == "\n" else " " for value in line)
-            )
+            output.append("".join("\n" if value == "\n" else " " for value in line))
             continue
 
         code_indent = (list_indents[-1][1] + 4) if list_indents else 4
         if list_item is None and indentation >= code_indent:
-            output.append(
-                "".join("\n" if value == "\n" else " " for value in line)
-            )
+            output.append("".join("\n" if value == "\n" else " " for value in line))
             continue
         output.append(line)
     return "".join(output)
@@ -374,8 +364,10 @@ def evidence_findings(content: str) -> list[SubmissionFinding]:
         if delimiter_index < len(lines)
         else None
     )
-    if delimiter is None or len(delimiter) != 3 or not all(
-        re.fullmatch(r":?-{3,}:?", cell) for cell in delimiter
+    if (
+        delimiter is None
+        or len(delimiter) != 3
+        or not all(re.fullmatch(r":?-{3,}:?", cell) for cell in delimiter)
     ):
         return [
             SubmissionFinding(
@@ -403,8 +395,7 @@ def evidence_findings(content: str) -> list[SubmissionFinding]:
         normalized_check = " ".join(check.split()).casefold()
         supplied_checks[normalized_check] = supplied_checks.get(normalized_check, 0) + 1
         if not all(
-            has_meaningful_section_content(value)
-            for value in (check, result, evidence)
+            has_meaningful_section_content(value) for value in (check, result, evidence)
         ):
             findings.append(
                 SubmissionFinding(
@@ -521,7 +512,10 @@ def check_submission(body: str) -> list[SubmissionFinding]:
             )
         )
     no_assistance = AI_DISCLOSURE_OPTIONS[0].casefold()
-    if no_assistance in selected_supported_options and len(selected_supported_options) > 1:
+    if (
+        no_assistance in selected_supported_options
+        and len(selected_supported_options) > 1
+    ):
         findings.append(
             SubmissionFinding(
                 "ai-disclosure",

@@ -47,7 +47,9 @@ This file adds review rules for workflows and repository automation. Apply the r
   labels. Safe path: validate a versioned record fetched from the exact head as inert
   data. Require the head commit to change that record from its first parent. This rule
   keeps the result intrinsic to the head and rejects inherited evidence.
-- Flag a change to a versioned submission workflow or checker that retains its status
-  context. A shared head can receive conflicting results from two checker revisions.
-  Safe path: create a new context version, migrate the protected-branch rule, and retire
-  the old context after open pull requests move to the new policy.
+- Flag a change to versioned submission validation or publication logic that retains
+  its status context. A shared head can receive conflicting results from two checker
+  revisions. Safe path: create a new context version, migrate the protected-branch
+  rule, and retire the old context after open pull requests move to the new policy. A
+  trigger-only change can keep the context when it does not change the predicate or
+  target commit.

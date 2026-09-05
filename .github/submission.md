@@ -21,7 +21,7 @@ issue existed.
 
 - Why this design: One versioned path policy selects checks for local hooks and CI. A committed record and immutable status version make submission results commit-bound. The server workspace declares the dependency owned by its database module.
 - Why not the closest alternative: A mutable pull request body can differ between pull requests that share one status. Reusing a status context across checker revisions can also conflict. Omitting SQLite leaves the server's clean-install contract incomplete.
-- Trade-off accepted: The final head commit must update one versioned record. A submission-policy change requires a new status context and branch-rule migration. Native SQLite adds a platform dependency.
+- Trade-off accepted: The final head commit must update one versioned record. A validation-result change requires a new status context and branch-rule migration. Native SQLite adds a platform dependency.
 - Revisit when: Use a PR-scoped check when the repository plan supports one. Revisit SQLite when the server selects its production persistence design.
 
 ## Code quality
@@ -49,6 +49,7 @@ issue existed.
 - Add local commit and push hooks that consume the same routing policy.
 - Add a committed submission record for rationale, alternatives, risk, evidence, and accountability.
 - Version the trusted submission status and bind helper checkout to the exact workflow revision.
+- Run required workflows when a pull request is edited so retargeting to `main` cannot omit their contexts.
 - Add code-change standards for ownership, failure, recovery, and refactor boundaries.
 - Add capability defaults for deterministic tools, Luna, Terra, Sol, specialists, and humans.
 - Add self-explanatory implementation and independent review skills.
@@ -61,12 +62,14 @@ issue existed.
 - Import and extend the Library of Context communication layer with Toulmin and ASD-STE100-aligned guidance.
 - Scan reader-facing assignment-manifest values while excluding machine-only JSON metadata.
 - Mask valid Markdown inline-code spans that cross a line break.
+- Apply the same multiline inline-code boundary to committed submission validation.
 
 ## Challenge cases
 
 - A documentation-only diff skips application work while preserving named check results.
 - An unknown path and a CI policy change select all application checks.
 - A routing failure causes required application checks to fail rather than disappear.
+- A pull request retargeted to `main` receives both required workflows without another push.
 - Pull-request CI cannot satisfy the deployment condition.
 - A mutable pull request description cannot alter the committed submission result.
 - Two pull requests at one head commit receive the same result, even when their bases differ.
@@ -99,9 +102,9 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass; startup creates temporary SQLite and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 99 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 100 communication and submission tests |
 | Routing policy | Pass | 34 routing and hook-context tests, policy validation, and model-route samples |
-| Review policy and model routing | Pass | 24 local-runner tests and independent delivery challenges |
+| Review policy and model routing | Pass | 25 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation plus commit-stage and push-stage runs |
 | Workflow syntax | Pass | Actionlint 1.7.11 and YAML parsing |
 | Hosted pull-request CI | Not run | Hosted CI starts after this record enters the commit |

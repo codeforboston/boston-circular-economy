@@ -108,6 +108,14 @@ class CheckSubmissionTests(unittest.TestCase):
 
         self.assertEqual(check_submission.check_submission(record), [])
 
+    def test_multiline_inline_code_does_not_scan_html(self) -> None:
+        body = VALID_BODY.replace(
+            "Review the stale-data boundary.",
+            "Review the `<div>\nvalue` boundary.",
+        )
+
+        self.assertEqual(check_submission.check_submission(body), [])
+
     def test_missing_section_fails(self) -> None:
         body = VALID_BODY.replace("## Code quality", "## Quality")
         rules = [finding.rule for finding in check_submission.check_submission(body)]
@@ -123,11 +131,7 @@ class CheckSubmissionTests(unittest.TestCase):
 
         self.assertIn(
             "What changed",
-            [
-                finding.detail
-                for finding in findings
-                if finding.rule == "empty-section"
-            ],
+            [finding.detail for finding in findings if finding.rule == "empty-section"],
         )
 
     def test_markdown_without_explanatory_text_does_not_fill_a_section(self) -> None:
@@ -410,10 +414,7 @@ class CheckSubmissionTests(unittest.TestCase):
     def test_list_contained_fence_cannot_supply_a_missing_section(self) -> None:
         body = VALID_BODY.replace(
             "## Claim\n\nResidents can find services under the stated data limits.",
-            "- ```markdown\n"
-            "  ## Claim\n"
-            "  Residents can find services.\n"
-            "  ```",
+            "- ```markdown\n  ## Claim\n  Residents can find services.\n  ```",
         )
 
         rules = [finding.rule for finding in check_submission.check_submission(body)]
@@ -423,8 +424,7 @@ class CheckSubmissionTests(unittest.TestCase):
     def test_unclosed_list_fence_ends_when_the_list_dedents(self) -> None:
         body = VALID_BODY.replace(
             "- Empty input returns an empty result.",
-            "- ```text\n"
-            "  Example only; the fence is intentionally unclosed.",
+            "- ```text\n  Example only; the fence is intentionally unclosed.",
         )
 
         masked = check_submission.mask_markdown_code_blocks(body)
@@ -444,12 +444,7 @@ class CheckSubmissionTests(unittest.TestCase):
     def test_unclosed_nested_quote_fence_ends_when_quote_depth_decreases(
         self,
     ) -> None:
-        body = (
-            "> > ```text\n"
-            "> > Example only.\n"
-            "> Visible quote text.\n"
-            "## Evidence\n"
-        )
+        body = "> > ```text\n> > Example only.\n> Visible quote text.\n## Evidence\n"
 
         masked = check_submission.mask_markdown_code_blocks(body)
 
@@ -458,12 +453,7 @@ class CheckSubmissionTests(unittest.TestCase):
         self.assertIn("## Evidence", masked)
 
     def test_unclosed_list_quote_fence_preserves_the_list_continuation(self) -> None:
-        body = (
-            "- > ```text\n"
-            "  > Example only.\n"
-            "  Visible list text.\n"
-            "After the list.\n"
-        )
+        body = "- > ```text\n  > Example only.\n  Visible list text.\nAfter the list.\n"
 
         masked = check_submission.mask_markdown_code_blocks(body)
 
@@ -576,8 +566,7 @@ class CheckSubmissionTests(unittest.TestCase):
                 body = VALID_BODY.replace(visible, hidden)
 
                 rules = [
-                    finding.rule
-                    for finding in check_submission.check_submission(body)
+                    finding.rule for finding in check_submission.check_submission(body)
                 ]
 
                 self.assertIn("raw-html", rules)
@@ -671,8 +660,7 @@ class CheckSubmissionTests(unittest.TestCase):
                 )
 
                 rules = [
-                    finding.rule
-                    for finding in check_submission.check_submission(body)
+                    finding.rule for finding in check_submission.check_submission(body)
                 ]
 
                 self.assertIn("evidence-table", rules)
@@ -686,8 +674,7 @@ class CheckSubmissionTests(unittest.TestCase):
                 )
 
                 rules = [
-                    finding.rule
-                    for finding in check_submission.check_submission(body)
+                    finding.rule for finding in check_submission.check_submission(body)
                 ]
 
                 self.assertIn("evidence-table", rules)
@@ -781,8 +768,7 @@ class CheckSubmissionTests(unittest.TestCase):
                 body = VALID_BODY.replace(ACCOUNTABILITY, replacement)
 
                 rules = [
-                    finding.rule
-                    for finding in check_submission.check_submission(body)
+                    finding.rule for finding in check_submission.check_submission(body)
                 ]
 
                 self.assertIn("accountability", rules)
