@@ -570,6 +570,25 @@ class ProseCheckerTests(unittest.TestCase):
 
         self.assertEqual([], findings)
 
+    def test_ignores_shell_commands_but_checks_adjacent_reader_text(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "commands.ts"
+            path.write_text(
+                'exec("echo first; echo second");\n'
+                'childProcess.execSync("echo first; echo second");\n'
+                'cp.exec("echo first; echo second");\n'
+                'section.exec("Unlock the potential.");\n'
+                'const message = "Do not deploy; wait.";\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(4, "promotional cliche"), (5, "semicolon")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_checks_html_text_and_reader_facing_attributes(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "index.html"
@@ -1181,6 +1200,33 @@ class ProseCheckerTests(unittest.TestCase):
                     [(1, "contraction")],
                     [(finding.line, finding.rule) for finding in findings],
                 )
+
+    def test_renders_literal_only_python_fstring_fields(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.py"
+            path.write_text(
+                "message = f\"{'Do not deploy; wait.'}\"\n"
+                "tagline = f\"{'Unlock the potential.'}\"\n"
+                "split = f\"\"\"{\"Don\"}{\"'t deploy.\"}\"\"\"\n"
+                "adjacent = f\"{'Don'}\" \"'t deploy.\"\n"
+                "metadata = {f\"{'Unlock the potential.'}\": 1}\n"
+                "converted = f\"{'Do not deploy; wait.'!s}\"\n"
+                'dynamic = f"{message}"\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [
+                (3, "contraction"),
+                (4, "contraction"),
+                (2, "promotional cliche"),
+                (1, "semicolon"),
+                (6, "semicolon"),
+            ],
+            [(finding.line, finding.rule) for finding in findings],
+        )
 
     def test_ignores_python_mapping_keys_but_checks_string_values(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

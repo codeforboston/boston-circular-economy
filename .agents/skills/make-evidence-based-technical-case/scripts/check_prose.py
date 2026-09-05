@@ -983,6 +983,108 @@ def copy_python_string(text: str, output: list[str], start: int, end: int) -> No
     copy_span(output, text, content_end, end)
 
 
+def render_static_python_fstring(node: ast.JoinedStr) -> str | None:
+    """Render an f-string whose replacement fields contain only literals."""
+
+    parts: list[str] = []
+    for part in node.values:
+        if isinstance(part, ast.Constant) and isinstance(part.value, str):
+            parts.append(part.value)
+            continue
+        if not isinstance(part, ast.FormattedValue):
+            return None
+        if isinstance(part.value, ast.Constant) and isinstance(
+            part.value.value, (str, bytes, int, float, complex, bool, type(None))
+        ):
+            value = part.value.value
+        elif isinstance(part.value, ast.JoinedStr):
+            value = render_static_python_fstring(part.value)
+            if value is None:
+                return None
+        else:
+            return None
+        if part.conversion == ord("s"):
+            value = str(value)
+        elif part.conversion == ord("r"):
+            value = repr(value)
+        elif part.conversion == ord("a"):
+            value = ascii(value)
+        elif part.conversion != -1:
+            return None
+        format_spec = ""
+        if part.format_spec is not None:
+            format_spec = render_static_python_fstring(part.format_spec)
+            if format_spec is None:
+                return None
+        try:
+            parts.append(format(value, format_spec))
+        except (TypeError, ValueError):
+            return None
+    return "".join(parts)
+
+
+def python_static_fstring_spans(
+    text: str, offsets: list[int]
+) -> list[tuple[int, int, str]]:
+    """Locate complete f-strings that can be rendered without executing code."""
+
+    try:
+        syntax_tree = ast.parse(text)
+    except SyntaxError:
+        return []
+
+    lines = text.splitlines(keepends=True)
+
+    def source_offset(line: int, byte_column: int) -> int:
+        line_prefix = lines[line - 1].encode("utf-8")[:byte_column]
+        character_column = len(line_prefix.decode("utf-8"))
+        return offsets[line - 1] + character_column
+
+    candidates: list[tuple[int, int, str]] = []
+    for node in ast.walk(syntax_tree):
+        if not isinstance(node, ast.JoinedStr):
+            continue
+        if node.end_lineno is None or node.end_col_offset is None:
+            continue
+        rendered = render_static_python_fstring(node)
+        if rendered is None:
+            continue
+        candidates.append(
+            (
+                source_offset(node.lineno, node.col_offset),
+                source_offset(node.end_lineno, node.end_col_offset),
+                rendered,
+            )
+        )
+
+    candidates.sort(key=lambda item: (item[0], -(item[1] - item[0])))
+    selected: list[tuple[int, int, str]] = []
+    for candidate in candidates:
+        start, end, _ = candidate
+        if any(
+            selected_start <= start and end <= selected_end
+            for selected_start, selected_end, _ in selected
+        ):
+            continue
+        selected.append(candidate)
+    return selected
+
+
+def copy_rendered_python_fstring(
+    text: str,
+    output: list[str],
+    start: int,
+    end: int,
+    rendered: str,
+) -> None:
+    """Copy rendered static text while removing its non-rendered syntax."""
+
+    for position in range(start, end):
+        if text[position] not in "\r\n":
+            output[position] = LOGICAL_JOIN
+    copy_decoded_text(output, text, start, end, rendered)
+
+
 def python_mapping_key_spans(text: str, offsets: list[int]) -> list[tuple[int, int]]:
     """Locate string-like dictionary keys, which are executable metadata."""
 
@@ -1274,6 +1376,7 @@ def mask_python_code(text: str) -> str:
         )
     )
     hidden_string_index = 0
+    static_fstrings = python_static_fstring_spans(text, offsets)
     fstring_start = getattr(tokenize, "FSTRING_START", None)
     fstring_middle = getattr(tokenize, "FSTRING_MIDDLE", None)
     fstring_end = getattr(tokenize, "FSTRING_END", None)
@@ -1316,7 +1419,21 @@ def mask_python_code(text: str) -> str:
             copy_python_string(text, output, start, end)
         elif token.type == tokenize.COMMENT and fstring_depth == 0:
             copy_span(output, text, start, end)
-    join_python_string_tokens(text, output, tokens, offsets, hidden_string_spans)
+    for start, end, rendered in static_fstrings:
+        if any(
+            hidden_start <= start and end <= hidden_end
+            for hidden_start, hidden_end in hidden_string_spans
+        ):
+            continue
+        copy_rendered_python_fstring(text, output, start, end, rendered)
+    join_python_string_tokens(
+        text,
+        output,
+        tokens,
+        offsets,
+        hidden_string_spans,
+        static_fstrings,
+    )
     return "".join(output)
 
 
@@ -1326,13 +1443,14 @@ def join_python_string_tokens(
     tokens: list[tokenize.TokenInfo],
     offsets: list[int],
     hidden_string_spans: list[tuple[int, int]],
+    static_fstrings: list[tuple[int, int, str]],
 ) -> None:
     """Join visible Python string tokens linked implicitly or with addition."""
 
     literal_spans: list[tuple[int, int, int, int]] = []
     fstring_start = getattr(tokenize, "FSTRING_START", None)
     fstring_end = getattr(tokenize, "FSTRING_END", None)
-    fstring_middle = getattr(tokenize, "FSTRING_MIDDLE", None)
+    static_spans = {(start, end) for start, end, _ in static_fstrings}
     token_index = 0
     while token_index < len(tokens):
         token = tokens[token_index]
@@ -1347,6 +1465,11 @@ def join_python_string_tokens(
             if hidden or match is None:
                 token_index += 1
                 continue
+            if "f" in match.group(1).casefold():
+                if (start, end) in static_spans:
+                    literal_spans.append((token_index, token_index, start, end))
+                token_index += 1
+                continue
             delimiter = match.group(2)
             content_start = start + match.end()
             content_end = (
@@ -1359,17 +1482,13 @@ def join_python_string_tokens(
             token_index += 1
             continue
         depth = 1
-        static = True
         closing_index = token_index + 1
         while closing_index < len(tokens) and depth:
             candidate = tokens[closing_index]
             if candidate.type == fstring_start:
                 depth += 1
-                static = False
             elif fstring_end is not None and candidate.type == fstring_end:
                 depth -= 1
-            elif depth == 1 and candidate.type != fstring_middle:
-                static = False
             closing_index += 1
         if depth:
             return
@@ -1380,13 +1499,13 @@ def join_python_string_tokens(
             hidden_start <= start and group_end <= hidden_end
             for hidden_start, hidden_end in hidden_string_spans
         )
-        if static and not hidden:
+        if (start, group_end) in static_spans and not hidden:
             literal_spans.append(
                 (
                     token_index,
                     closing_token_index,
-                    end,
-                    position_offset(offsets, closing_token.start),
+                    start,
+                    group_end,
                 )
             )
         token_index = closing_index
@@ -1564,6 +1683,8 @@ JAVASCRIPT_DATABASE_RECEIVERS = {
     "sql",
     "statement",
 }
+JAVASCRIPT_SHELL_COMMAND_FUNCTIONS = {"exec", "execsync"}
+JAVASCRIPT_SHELL_COMMAND_RECEIVERS = {"child_process", "childprocess", "cp"}
 JAVASCRIPT_CSS_CALL_METHODS = {"insertrule", "replace", "replacesync"}
 JAVASCRIPT_CSS_STYLESHEET_RECEIVERS = {"sheet", "stylesheet"}
 JAVASCRIPT_PROTOCOL_HEADER_METHODS = {"appendheader", "setheader"}
@@ -1596,6 +1717,26 @@ def javascript_database_argument(tokens: list[str]) -> bool:
         and tokens[-2] in JAVASCRIPT_DATABASE_METHODS
         and tokens[-3] == "."
         and tokens[-4] in JAVASCRIPT_DATABASE_RECEIVERS
+    )
+
+
+def javascript_shell_command_argument(tokens: list[str]) -> bool:
+    """Return whether the next literal is a child-process shell command."""
+
+    normalized = [token.casefold() for token in tokens]
+    if not normalized or normalized[-1] != "(":
+        return False
+    if (
+        len(normalized) >= 2
+        and normalized[-2] in JAVASCRIPT_SHELL_COMMAND_FUNCTIONS
+        and (len(normalized) < 3 or normalized[-3] != ".")
+    ):
+        return True
+    return bool(
+        len(normalized) >= 4
+        and normalized[-2] in JAVASCRIPT_SHELL_COMMAND_FUNCTIONS
+        and normalized[-3] == "."
+        and normalized[-4] in JAVASCRIPT_SHELL_COMMAND_RECEIVERS
     )
 
 
@@ -2385,6 +2526,7 @@ def mask_javascript_code(
                 javascript_module_specifier(tokens)
                 or javascript_route_argument(tokens)
                 or javascript_database_argument(tokens)
+                or javascript_shell_command_argument(tokens)
                 or javascript_css_payload(tokens)
                 or protocol_header
                 or javascript_identifier_literal(text, index, end)
@@ -2407,6 +2549,7 @@ def mask_javascript_code(
                     javascript_module_specifier(tokens)
                     or javascript_route_argument(tokens)
                     or javascript_database_argument(tokens)
+                    or javascript_shell_command_argument(tokens)
                     or javascript_css_payload(tokens)
                     or protocol_header
                     or javascript_template_identifier(text, index)
