@@ -176,7 +176,8 @@ is necessary.
 
 ## 6. Open an evidence-backed pull request
 
-Use the repository pull request template. A reviewable PR includes:
+Complete and commit `.github/submission.md` from the repository pull request template.
+A reviewable change includes:
 
 - one linked work unit.
 - one behavioral claim.
@@ -198,12 +199,12 @@ a durable cross-system contract, dependency, external service, or high-impact ri
 
 The `CI` workflow starts for every code revision to a pull request against `main` and
 every push to `main`. The changed-file router selects applicable application checks
-from one versioned policy. The `Submission` workflow validates the pull request record
-on code revisions and description edits. Its concurrency group cannot cancel code CI.
+from one versioned policy. The `Submission` workflow validates the committed record on
+each pull request head revision. Its concurrency group cannot cancel code CI.
 
 | Check | Evidence |
 |---|---|
-| `Submission / Submission record` | Current pull request structure, reasoning fields, evidence, and accountability |
+| `Submission / Submission record` | Committed reasoning fields, evidence, and accountability for the exact head revision |
 | `CI / Prose` | Selected language rules, editorial patterns, and high-signal AI cliché checks |
 | `CI / Frontend` | Client lint and production build |
 | `CI / Server` | Server lint and TypeScript build |
@@ -241,7 +242,10 @@ contexts to the **Protect Main Branch** ruleset:
 - `Server`
 - `ETL`
 
-Keep the current requirements for one approval, last-push approval, resolved threads, squash merge, deletion protection, and non-fast-forward protection. Required checks cannot be selected safely until GitHub has observed their names.
+Keep the current requirements for one approval, last-push approval, resolved threads,
+squash merge, deletion protection, and non-fast-forward protection. Require branches
+to be up to date before merge. Required checks cannot be selected safely until GitHub
+has observed their names.
 
 After branch protection is active, connect the repository in Codex settings. Enable
 managed Code Review for all pull requests. Automatic review also requires a
@@ -305,18 +309,22 @@ The default scope reviews the current tracked state against the base. Add
 `--scope uncommitted` to review staged, unstaged, and untracked work without branch
 history. The runner forces a read-only Codex sandbox.
 
-The `Submission record` job enforces the pull request evidence structure. Its read-only
+The `Submission record` job enforces the committed evidence structure. Its read-only
 `pull_request_target` workflow runs from the default branch and checks out only the base
-revision. It treats the pull request description as untrusted data and never runs pull
-request code. A status-only token publishes the result on the pull request head. The
-workflow becomes active for subsequent pull requests after this pilot enters `main`.
+revision. The trusted workflow fetches `.github/submission.md` from the base and exact
+head commits, requires different blob identifiers, and decodes the head file as inert
+data. It never runs pull request code. A status-only token publishes the result on the
+pull request head. The workflow becomes active for subsequent pull requests after this
+pilot enters `main`.
 
-The workflow fetches the live pull request before validation and immediately before it
-publishes a result. It compares the head commit and description with the triggering
-event. Its concurrency group serializes status writers without canceling an active
-writer. A manually canceled or stale run publishes no final status. Keep merge queues
-disabled while this metadata status is required. A merge-group event cannot revalidate
-every constituent pull request body.
+The workflow confirms the live pull request head before validation and immediately
+before it publishes a result. Its head-commit concurrency group serializes status
+writers without canceling an active writer. A manually canceled or stale run publishes
+no final status. Two pull requests at one head use the same committed record and
+correctly share the same commit status. Mutable pull request text cannot change it.
+
+Keep merge queues disabled while this status is required. The current workflow does not
+handle `merge_group` or publish the context on the temporary merge-group commit.
 
 The `Prose` job enforces deterministic language rules in repository files. It applies
 sentence rules to Markdown and high-signal editorial checks to prose-bearing files.

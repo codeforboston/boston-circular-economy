@@ -10,7 +10,10 @@ the code, evidence, explanation, and decision to request review.
 
 ## Required submission record
 
-Use the pull request template. Complete every section before requesting review.
+Replace `.github/submission.md` with a completed copy of the pull request template for
+each change. Commit that record with the code before requesting review. The pull request
+description can mirror the record for convenience, but CI validates only the committed
+file from the exact head revision.
 
 The submission record must contain:
 
@@ -33,6 +36,13 @@ standard `Evidence` rows. Use Pass, Fail, Not run, or Not affected for each resu
 The `Submission record` job checks the required sections, labels, risk lane, issue
 reference, AI disclosure, and submitter attestation. The `Prose` CI job checks selected
 language rules in repository files.
+
+`Submission record` is a commit status, so its evidence must also belong to the commit.
+The trusted workflow fetches `.github/submission.md` from the exact head as inert data
+and requires its blob to differ from the base revision. Two pull requests at one head
+therefore use the same record and correctly receive the same result. Human approval
+remains a separate required judgment because a cosmetic file change can satisfy the
+blob check without making the evidence accurate.
 
 CI cannot decide whether the stated rationale is true or complete. The contributor and
 human reviewer must compare the explanation with the implementation and evidence.

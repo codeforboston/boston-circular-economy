@@ -102,6 +102,12 @@ class CheckSubmissionTests(unittest.TestCase):
     def test_valid_submission_passes(self) -> None:
         self.assertEqual(check_submission.check_submission(VALID_BODY), [])
 
+    def test_repository_committed_submission_record_passes(self) -> None:
+        root = Path(__file__).resolve().parents[4]
+        record = (root / ".github/submission.md").read_text(encoding="utf-8")
+
+        self.assertEqual(check_submission.check_submission(record), [])
+
     def test_missing_section_fails(self) -> None:
         body = VALID_BODY.replace("## Code quality", "## Quality")
         rules = [finding.rule for finding in check_submission.check_submission(body)]

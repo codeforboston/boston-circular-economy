@@ -29,9 +29,9 @@ not prove GitHub event delivery or status permissions.
 4. Confirm `Deploy to GitHub Pages` downloads that CI run's `github-pages-client` artifact.
 5. Check the published page and record the CI run, deployment run, commit, and artifact identifiers.
 6. Open the first agreed work unit as a draft PR from the merged `main`.
-7. Complete its submission record and confirm the `Submission record` commit status succeeds.
+7. Replace and commit `.github/submission.md`, then confirm the `Submission record` status succeeds.
 8. An administrator adds the five contexts to `Protect Main Branch` and reads back the rule.
-9. Verify the merge box requires those contexts and the existing human approval.
+9. Require branches to be up to date, then verify the merge box requires those contexts and the existing human approval.
 10. Configure managed review and observe one completed review before declaring that integration active.
 
 `Submission` responds to pull request events, not main pushes. Do not wait for
@@ -47,8 +47,9 @@ Require these exact context names:
 - `ETL`
 
 Retain the designated-team approval, stale-review dismissal, last-push approval,
-resolved-thread, squash-merge, deletion, and force-push protections. Keep merge queues
-disabled while the submission policy lacks merge-group support.
+resolved-thread, squash-merge, deletion, and force-push protections. Require branches
+to be up to date. Keep merge queues disabled while the submission policy lacks
+merge-group support.
 
 Use GitHub Actions as the expected check source when GitHub offers the observed
 producer. Record the producer and rule settings. Repository write access alone does
@@ -67,8 +68,10 @@ defect before human review.
 
 | Exercise | Expected observation |
 |---|---|
-| Remove one required submission field, then restore it | `Submission record` fails and later succeeds on the same head commit |
-| Edit only the PR description | Application CI remains independent of the submission run |
+| Remove one required field from `.github/submission.md`, commit, then restore it in another commit | `Submission record` fails and later succeeds on the respective revisions |
+| Edit only the PR description | No submission or application result changes because the record belongs to the commit |
+| Open two pull requests at the same head commit | Both use the same committed record and receive the same submission result |
+| Leave `.github/submission.md` unchanged from the base | `Submission record` fails before publishing success |
 | Push a documented lint violation, then repair it | The affected application job fails and succeeds on the respective revisions |
 | Open a docs-only PR after the pilot merges | Named application jobs skip successfully and prose still runs |
 | Inspect a PR CI run | It publishes no Pages artifact or deployment |

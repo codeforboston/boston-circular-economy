@@ -1,9 +1,12 @@
 name: Submission
 
+# The validated record is part of the head commit. A shared head therefore has one
+# record and one correct commit-scoped result, independent of pull request metadata.
+
 on:
   pull_request_target:
     branches: [main]
-    types: [opened, reopened, synchronize, edited]
+    types: [opened, reopened, synchronize]
 
 permissions:
   contents: read
@@ -11,7 +14,7 @@ permissions:
   statuses: write
 
 concurrency:
-  group: submission-${{ github.event.pull_request.number || github.ref }}
+  group: submission-${{ github.event.pull_request.head.sha || github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -31,12 +34,13 @@ jobs:
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.14.3'
-      - name: Check pull request submission record
+      - name: Check committed submission record
         if: github.event_name == 'pull_request_target'
         id: check
         continue-on-error: true
         env:
           CONTEXT: Submission record
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
           EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
@@ -47,23 +51,33 @@ jobs:
             > "$RUNNER_TEMP/current-pr.json"
           jq -e \
             --arg expected_head "$EXPECTED_HEAD_SHA" \
-            --slurpfile expected "$GITHUB_EVENT_PATH" \
-            '.head.sha == $expected_head and
-             (.body // "") == ($expected[0].pull_request.body // "")' \
+            '.head.sha == $expected_head' \
             "$RUNNER_TEMP/current-pr.json"
           gh api --method POST \
             "repos/$GITHUB_REPOSITORY/statuses/$HEAD_SHA" \
             -f state=pending \
             -f context="$CONTEXT" \
-            -f description="Checking the current pull request record." \
+            -f description="Checking the committed submission record." \
             -f target_url="$TARGET_URL"
-          jq '{pull_request: {body: (.body // "")}}' \
-            "$RUNNER_TEMP/current-pr.json" \
-            > "$RUNNER_TEMP/submission-event.json"
+          gh api \
+            "repos/$GITHUB_REPOSITORY/contents/.github/submission.md?ref=$BASE_SHA" \
+            > "$RUNNER_TEMP/base-submission.json"
+          gh api \
+            "repos/$GITHUB_REPOSITORY/contents/.github/submission.md?ref=$HEAD_SHA" \
+            > "$RUNNER_TEMP/head-submission.json"
+          jq -e '.type == "file" and .encoding == "base64"' \
+            "$RUNNER_TEMP/base-submission.json" \
+            "$RUNNER_TEMP/head-submission.json"
+          test \
+            "$(jq -r .sha "$RUNNER_TEMP/base-submission.json")" != \
+            "$(jq -r .sha "$RUNNER_TEMP/head-submission.json")"
+          jq -r .content "$RUNNER_TEMP/head-submission.json" \
+            | base64 --decode \
+            > "$RUNNER_TEMP/submission.md"
           python -B \
             .agents/skills/make-evidence-based-technical-case/scripts/check_submission.py \
-            --event "$RUNNER_TEMP/submission-event.json"
-      - name: Publish the pull request record result
+            --body-file "$RUNNER_TEMP/submission.md"
+      - name: Publish the committed record result
         if: >-
           always() && !cancelled() &&
           github.event_name == 'pull_request_target'
@@ -82,9 +96,7 @@ jobs:
             > "$RUNNER_TEMP/latest-pr.json"
           jq -e \
             --arg expected_head "$EXPECTED_HEAD_SHA" \
-            --slurpfile expected "$GITHUB_EVENT_PATH" \
-            '.head.sha == $expected_head and
-             (.body // "") == ($expected[0].pull_request.body // "")' \
+            '.head.sha == $expected_head' \
             "$RUNNER_TEMP/latest-pr.json"
           if [ "$CHECK_OUTCOME" = success ]; then
             result=success
@@ -95,9 +107,9 @@ jobs:
             "repos/$GITHUB_REPOSITORY/statuses/$HEAD_SHA" \
             -f state="$result" \
             -f context="$CONTEXT" \
-            -f description="The pull request record check completed." \
+            -f description="The committed submission check completed." \
             -f target_url="$TARGET_URL"
-      - name: Fail when the pull request record is invalid
+      - name: Fail when the committed record is invalid
         if: >-
           github.event_name == 'pull_request_target' &&
           (steps.check.outcome != 'success' ||

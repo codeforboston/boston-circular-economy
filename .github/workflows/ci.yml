@@ -73,6 +73,11 @@ jobs:
           python -B
           .agents/skills/make-evidence-based-technical-case/scripts/check_prose.py
           .
+      - name: Check committed submission record
+        run: >-
+          python -B
+          .agents/skills/make-evidence-based-technical-case/scripts/check_submission.py
+          --body-file .github/submission.md
       - name: Test prose checker
         run: >-
           python -B -m unittest discover

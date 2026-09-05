@@ -347,7 +347,7 @@ def editorial_findings(path: Path) -> list[Finding]:
     if suffix == ".md":
         text = mask_markdown_code(source_text)
     else:
-        text = mask_source_code(suffix, source_text)
+        text = mask_source_code(path, source_text)
     for name, pattern in EDITORIAL_PATTERNS.items():
         if name in TEMPORAL_PATTERN_NAMES and path.name in TEMPORAL_EXEMPT_NAMES:
             continue
@@ -810,12 +810,39 @@ def mask_inline_mapping_keys(
         index += 1
 
 
-def mask_yaml_code(text: str) -> str:
+def yaml_mapping_key(code: str, separator: int) -> str:
+    """Return a normalized key for one block-style YAML mapping entry."""
+
+    key = code[:separator].strip()
+    if key.startswith("- "):
+        key = key[2:].strip()
+    if len(key) >= 2 and key[0] == key[-1] and key[0] in "'\"":
+        key = key[1:-1]
+    return key
+
+
+def yaml_block_scalar(value: str) -> bool:
+    """Return whether a YAML value starts an optionally annotated block scalar."""
+
+    tokens = value.lstrip().split()
+    while tokens and tokens[0].startswith(("&", "!")):
+        tokens.pop(0)
+    return bool(
+        tokens
+        and re.fullmatch(r"[|>](?:[1-9][+-]?|[+-][1-9]?|[+-]?)", tokens[0])
+    )
+
+
+def mask_yaml_code(text: str, *, mask_actions_commands: bool = False) -> str:
     """Keep YAML values and comments while hiding mapping identifiers."""
 
     output = list(blank_like(text))
     offset = 0
     block_indent: int | None = None
+    copy_block = True
+    steps_indent: int | None = None
+    step_sequence_indent: int | None = None
+    step_mapping_indent: int | None = None
     for line in text.splitlines(keepends=True):
         body = line.rstrip("\r\n")
         code, comment = split_config_comment(body)
@@ -823,21 +850,69 @@ def mask_yaml_code(text: str) -> str:
         if block_indent is not None and code.strip() and indentation <= block_indent:
             block_indent = None
         if block_indent is not None and code.strip():
-            copy_span(output, text, offset, offset + len(code))
+            if copy_block:
+                copy_span(output, text, offset, offset + len(code))
         else:
+            stripped = code.lstrip()
+            sequence_item = stripped == "-" or stripped.startswith("- ")
+            if code.strip() and steps_indent is not None:
+                if indentation < steps_indent or (
+                    indentation == steps_indent and not sequence_item
+                ):
+                    steps_indent = None
+                    step_sequence_indent = None
+                    step_mapping_indent = None
+                elif sequence_item:
+                    if step_sequence_indent is None:
+                        step_sequence_indent = indentation
+                    if indentation == step_sequence_indent:
+                        step_mapping_indent = None
+
             separator = unquoted_index(code, ":")
             if separator is not None:
                 value_start = separator + 1
-                copy_span(output, text, offset + value_start, offset + len(code))
-                mask_inline_mapping_keys(
-                    text,
-                    output,
-                    offset + value_start,
-                    offset + len(code),
-                    ":",
+                key = yaml_mapping_key(code, separator)
+                direct_step_key = bool(
+                    steps_indent is not None
+                    and step_sequence_indent is not None
+                    and (
+                        (sequence_item and indentation == step_sequence_indent)
+                        or (
+                            not sequence_item
+                            and indentation > step_sequence_indent
+                            and (
+                                step_mapping_indent is None
+                                or indentation == step_mapping_indent
+                            )
+                        )
+                    )
                 )
-                if code[value_start:].lstrip().startswith(("|", ">")):
+                if (
+                    direct_step_key
+                    and not sequence_item
+                    and step_mapping_indent is None
+                ):
+                    step_mapping_indent = indentation
+
+                copy_value = not (
+                    mask_actions_commands and direct_step_key and key == "run"
+                )
+                if copy_value:
+                    copy_span(output, text, offset + value_start, offset + len(code))
+                    mask_inline_mapping_keys(
+                        text,
+                        output,
+                        offset + value_start,
+                        offset + len(code),
+                        ":",
+                    )
+                if yaml_block_scalar(code[value_start:]):
                     block_indent = indentation
+                    copy_block = copy_value
+                if mask_actions_commands and key == "steps" and not sequence_item:
+                    steps_indent = indentation
+                    step_sequence_indent = None
+                    step_mapping_indent = None
             elif code.lstrip().startswith("- "):
                 value_start = code.index("-") + 2
                 copy_span(output, text, offset + value_start, offset + len(code))
@@ -892,9 +967,20 @@ def mask_toml_code(text: str) -> str:
     return "".join(output)
 
 
-def mask_source_code(suffix: str, text: str) -> str:
+def github_actions_yaml(path: Path) -> bool:
+    """Return whether a YAML path defines a GitHub workflow or action."""
+
+    parts = path.parts
+    return any(
+        parts[index] == ".github" and parts[index + 1] in {"actions", "workflows"}
+        for index in range(len(parts) - 1)
+    )
+
+
+def mask_source_code(path: Path, text: str) -> str:
     """Return only reader-facing source text with original line positions."""
 
+    suffix = path.suffix.casefold()
     if suffix == ".py":
         return mask_python_code(text)
     if suffix in {".cjs", ".js", ".jsx", ".mjs", ".ts", ".tsx"}:
@@ -902,7 +988,7 @@ def mask_source_code(suffix: str, text: str) -> str:
         mask_javascript_code(text, output)
         return "".join(output)
     if suffix in {".yaml", ".yml"}:
-        return mask_yaml_code(text)
+        return mask_yaml_code(text, mask_actions_commands=github_actions_yaml(path))
     if suffix == ".toml":
         return mask_toml_code(text)
     return text

@@ -481,7 +481,7 @@ def body_from_event(path: Path) -> str | None:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Check a pull request body against the submission standard."
+        description="Check a submission record against the repository standard."
     )
     source = parser.add_mutually_exclusive_group(required=True)
     source.add_argument("--event", type=Path)

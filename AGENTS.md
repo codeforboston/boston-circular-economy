@@ -138,7 +138,8 @@ could defeat it.
 
 Follow [`docs/CODE_CHANGE_STANDARD.md`](docs/CODE_CHANGE_STANDARD.md). Explain why the
 selected mechanism supports the claim and why the closest credible alternative loses.
-State ownership, failure, recovery, and complexity effects in the pull request.
+State ownership, failure, recovery, and complexity effects in the committed submission
+record.
 
 ## Risk lanes
 
@@ -167,7 +168,11 @@ Use Yellow when the lane is unclear. A file under `client/src/pages/dev/` may mo
 
 ## Pull requests and review
 
-Use `.github/pull_request_template.md`. Link the issue, state the risk lane, list checks that ran and did not run, and disclose substantial AI assistance. The disclosure is about review context, not authorship.
+Replace `.github/submission.md` with a completed copy of
+`.github/pull_request_template.md` and commit it with the change. Link the issue, state
+the risk lane, list checks that ran and did not run, and disclose substantial AI
+assistance. The disclosure is about review context, not authorship. The pull request
+description can mirror the committed record for reviewer convenience.
 
 Every agent that reviews a code change must read and apply
 [`review-code-change`](.agents/skills/review-code-change/SKILL.md). Keep the review
@@ -188,8 +193,8 @@ See `docs/AI_DELIVERY_PLAYBOOK.md` for issue selection, mentoring checkpoints, a
 
 ### Contract and claim
 
-- Flag code that contradicts the pull request claim, scope, qualifier, or a documented
-  public contract. Cite the conflicting behavior and its shortest useful location.
+- Flag code that contradicts the committed submission claim, scope, qualifier, or a
+  documented public contract. Cite the conflicting behavior and its shortest useful location.
   Also flag changed behavior that cannot be traced from its entry point through one
   decision owner to an observable result. Safe path: align the contract, ownership,
   implementation, and behavior test, or obtain a human-approved scope change.

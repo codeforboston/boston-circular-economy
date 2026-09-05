@@ -388,6 +388,72 @@ class ProseCheckerTests(unittest.TestCase):
         self.assertEqual([], yaml_findings)
         self.assertEqual([], toml_findings)
 
+    def test_ignores_github_command_code_but_checks_names_and_comments(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / ".github/workflows/example.yml"
+            path.parent.mkdir(parents=True)
+            path.write_text(
+                "name: Unlock the potential.\n"
+                "jobs:\n"
+                "  check:\n"
+                "    steps:\n"
+                "      - run: unlock\n"
+                "      - run: &command |\n"
+                "          robust --scalable\n"
+                "          # Unlock the potential for maintainers.\n"
+                "      -\n"
+                "        run: scalable\n"
+                "      - name: Unlock the potential.\n"
+                "        env:\n"
+                "          run: Unlock the potential.\n"
+                "        run: powerful\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [
+                (1, "promotional cliche"),
+                (8, "promotional cliche"),
+                (11, "promotional cliche"),
+                (13, "promotional cliche"),
+            ],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
+    def test_checks_run_values_outside_github_actions_yaml(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.yml"
+            path.write_text("run: Unlock the potential.\n", encoding="utf-8")
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(1, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
+    def test_ignores_indentless_github_step_commands(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / ".github/workflows/example.yml"
+            path.parent.mkdir(parents=True)
+            path.write_text(
+                "jobs:\n"
+                "  check:\n"
+                "    steps:\n"
+                "    - run: Unlock the potential.\n"
+                "    - name: Unlock the potential.\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(5, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_rejects_contractions_and_long_markdown_sentences(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.md"

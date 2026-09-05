@@ -292,7 +292,7 @@ class LocalReviewRunnerTests(unittest.TestCase):
         self.assertIn("### Tested deployment identity", workflow_guidance)
         self.assertIn("### Required check continuity", workflow_guidance)
 
-    def test_pr_body_edits_use_an_independent_required_check(self) -> None:
+    def test_submission_status_uses_a_commit_bound_record(self) -> None:
         ci_workflow = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
         submission_workflow = (ROOT / ".github/workflows/submission.yml").read_text(
             encoding="utf-8"
@@ -307,13 +307,16 @@ class LocalReviewRunnerTests(unittest.TestCase):
         self.assertIn("github.event.pull_request.number || github.sha }}", ci_workflow)
         self.assertIn("cancel-in-progress: true", ci_workflow)
         self.assertIn(
-            "types: [opened, reopened, synchronize, edited]",
+            "types: [opened, reopened, synchronize]",
             submission_workflow,
         )
         self.assertIn("name: Submission policy", submission_workflow)
         self.assertIn("CONTEXT: Submission record", submission_workflow)
         self.assertNotIn("merge_group:", submission_workflow)
-        self.assertIn("group: submission-", submission_workflow)
+        self.assertIn(
+            "group: submission-${{ github.event.pull_request.head.sha",
+            submission_workflow,
+        )
         self.assertIn("pull_request_target:", submission_workflow)
         self.assertNotIn("\n  pull_request:\n", submission_workflow)
         self.assertIn(
@@ -327,15 +330,30 @@ class LocalReviewRunnerTests(unittest.TestCase):
             "HEAD_SHA: ${{ github.event.pull_request.head.sha }}",
             submission_workflow,
         )
+        self.assertIn(
+            "BASE_SHA: ${{ github.event.pull_request.base.sha }}",
+            submission_workflow,
+        )
         self.assertIn("continue-on-error: true", submission_workflow)
         self.assertIn("steps.check.outcome", submission_workflow)
         self.assertIn("steps.publish.outcome", submission_workflow)
-        self.assertIn("--slurpfile expected", submission_workflow)
-        self.assertIn("pull_request.body", submission_workflow)
+        self.assertNotIn("--slurpfile expected", submission_workflow)
+        self.assertNotIn("pull_request.body", submission_workflow)
+        self.assertIn("$RUNNER_TEMP/base-submission.json", submission_workflow)
+        self.assertIn("$RUNNER_TEMP/head-submission.json", submission_workflow)
+        self.assertIn("$RUNNER_TEMP/submission.md", submission_workflow)
+        self.assertIn("contents/.github/submission.md?ref=$BASE_SHA", submission_workflow)
+        self.assertIn("contents/.github/submission.md?ref=$HEAD_SHA", submission_workflow)
+        self.assertIn(".type == \"file\" and .encoding == \"base64\"", submission_workflow)
+        self.assertIn('$(jq -r .sha "$RUNNER_TEMP/base-submission.json")', submission_workflow)
+        self.assertIn('$(jq -r .sha "$RUNNER_TEMP/head-submission.json")', submission_workflow)
+        self.assertIn("base64 --decode", submission_workflow)
+        self.assertIn("--body-file", submission_workflow)
         self.assertIn("$RUNNER_TEMP/latest-pr.json", submission_workflow)
         self.assertIn("!cancelled()", submission_workflow)
         self.assertIn("cancel-in-progress: false", submission_workflow)
         self.assertIn("-f state=pending", submission_workflow)
+        self.assertNotIn("--paginate --slurp", submission_workflow)
         first_live_read = submission_workflow.index(
             'gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER"'
         )

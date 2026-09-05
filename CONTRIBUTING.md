@@ -48,7 +48,10 @@ cd ..
 python3 -B .agents/skills/make-evidence-based-technical-case/scripts/check_prose.py .
 ```
 
-Open a focused pull request that closes its issue. Use the pull request template to report evidence, missing checks, risk, and review questions. All CI checks and the required human review must pass before merge.
+Open a focused pull request that closes its issue. Complete and commit
+`.github/submission.md` to report evidence, missing checks, risk, and review questions.
+The pull request description can mirror that record for reviewer convenience. All CI
+checks and the required human review must pass before merge.
 
 Follow [`docs/CODE_CHANGE_STANDARD.md`](docs/CODE_CHANGE_STANDARD.md). Explain why the
 design supports the claim and why the closest credible alternative was not selected.

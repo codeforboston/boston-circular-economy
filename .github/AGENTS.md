@@ -39,6 +39,11 @@ This file adds review rules for workflows and repository automation. Apply the r
   fixed status context on the pull request head. Limit the token to status writes and
   repository reads.
 - Flag a status writer when an older run can overwrite a newer pull request result.
-  Safe path: compare the live head and body with the triggering event before
-  publication. Serialize status writers, do not cancel an active writer, and suppress
+  Safe path: compare the live head with the triggering event before publication.
+  Serialize status writers by head commit, do not cancel an active writer, and suppress
   publication from a manually canceled run.
+- Flag a commit status whose result depends on mutable pull request metadata. Two pull
+  requests at one head commit share statuses but can have different titles, bodies, or
+  labels. Safe path: validate a versioned record fetched from the exact head as inert
+  data. Require that record to differ from its base-commit version so inherited evidence
+  cannot satisfy a new change.

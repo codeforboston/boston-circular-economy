@@ -8,6 +8,15 @@ repos:
           .agents/skills/make-evidence-based-technical-case/scripts/check_prose.py
         language: python
         files: '\.(cjs|js|jsx|md|mjs|py|toml|ts|tsx|yaml|yml)$'
+      - id: submission-record
+        name: Check committed submission record
+        entry: >-
+          python -B
+          .agents/skills/make-evidence-based-technical-case/scripts/check_submission.py
+          --body-file .github/submission.md
+        language: python
+        always_run: true
+        pass_filenames: false
       - id: routing-policy
         name: Test delivery routing policy
         entry: >-
@@ -26,7 +35,7 @@ repos:
           -p test_*.py -v
         language: python
         files: >-
-          ^(\.agents/skills/make-evidence-based-technical-case/|\.github/ISSUE_TEMPLATE/work-unit\.yml$|\.github/pull_request_template\.md$|\.github/workflows/ci\.yml$|docs/CODE_CHANGE_STANDARD\.md$)
+          ^(\.agents/skills/make-evidence-based-technical-case/|\.github/ISSUE_TEMPLATE/work-unit\.yml$|\.github/pull_request_template\.md$|\.github/submission\.md$|\.github/workflows/ci\.yml$|docs/CODE_CHANGE_STANDARD\.md$)
         pass_filenames: false
       - id: code-review-policy
         name: Test code review policy and model routing

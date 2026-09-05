@@ -50,13 +50,14 @@ deterministic build gate. A maintainer evaluates each advisory and proposed upda
 ## Pull request checks
 
 The `CI` workflow starts for each code revision to a pull request against `main`. The
-`Submission` workflow also starts when the pull request description changes. Neither
-workflow uses path filters because a filtered required workflow can remain pending.
+`Submission` workflow starts when a pull request opens, reopens, or receives a new head
+revision. Neither workflow uses path filters because a filtered required workflow can
+remain pending.
 
 | Job | Selection | Result |
 |---|---|---|
 | `Route changes` | Always | Tests the policy and classifies the diff. |
-| `Submission record` | Always | Checks the current pull request record without changing application contexts. |
+| `Submission record` | Always | Checks the committed `.github/submission.md` without changing application contexts. |
 | `Prose` | Always | Checks repository prose and review policy. |
 | `Frontend` | Routed | Installs locked npm dependencies, then lints and builds the client. |
 | `Server` | Routed | Installs locked npm dependencies, then lints and builds the server. |
@@ -70,27 +71,34 @@ The CI concurrency key includes the event kind and the pull request number or ex
 commit. Pull-request revisions can cancel their predecessor. Each main-branch commit
 uses a distinct group, so an older rerun cannot evict CI for the current commit.
 
-The submission workflow has a separate pull-request concurrency group. A description
-edit joins that serialized group. It cannot cancel code CI or publish replacement
-application contexts.
+The submission workflow has a separate concurrency group keyed by head commit. It
+cannot cancel code CI or publish replacement application contexts. Pull requests that
+share a head commit join the same serialized group.
 
 The read-only `pull_request_target` workflow runs from the default branch and checks
-out only the base revision. It treats pull request metadata as data and never executes
-pull request code. Its token can publish commit statuses but cannot write repository
-contents. The workflow publishes a fixed `Submission record` context on the pull
-request head commit.
+out only the base revision. The trusted checker comes from that base. The workflow
+fetches `.github/submission.md` from the base commit and the exact pull request head
+through the Contents API. It checks the response type and encoding, requires different
+blob identifiers, and decodes the head file as inert data. It never executes pull
+request code. Its token can publish commit statuses but cannot write repository
+contents.
 
-Before the workflow checks or publishes a result, it fetches the live pull request. It
-compares the live head and body with the event that started the run. The concurrency
-group serializes status writers and does not cancel an active writer. A newer event waits
-for that writer, then publishes the current result. A manually canceled run does not
-publish.
+The changed-blob rule rejects a byte-identical record inherited from the base. It cannot
+detect a cosmetic edit or decide whether the evidence is true. A human reviewer must
+compare the record with the diff. Before the workflow publishes `pending` or a final
+result, it fetches the live pull request and confirms the event still names its head.
+The concurrency group serializes writers for that head and does not cancel an active
+writer. A manually canceled or stale run does not publish a final result.
 
-This status gate is not merge-queue compatible. GitHub attaches a merge-queue check to
-the temporary merge-group commit, but that event does not provide each current pull
-request body. Keep merge queues disabled while `Submission record` is required. A
-future GitHub App or required workflow must revalidate every constituent record and
-store monotonic state before the team enables a merge queue.
+GitHub commit statuses belong to a commit, not to one pull request. The input record now
+has that same identity: two pull requests at one head commit use the same versioned
+evidence and correctly share one result. Mutable pull request titles, bodies, and labels
+do not affect the status.
+
+This status gate is not yet merge-queue compatible. The current workflow does not
+handle `merge_group` or publish `Submission record` on the temporary merge-group
+commit. Keep merge queues disabled while this context is required. Add and test that
+event path before the team enables a merge queue.
 
 The router fails closed:
 
@@ -208,9 +216,9 @@ Every pull request follows `docs/CODE_CHANGE_STANDARD.md`. The record includes t
 evidence, reasoning, selected design, rejected alternative, and limits. It also includes
 the comprehension path, refactor boundary, and review question.
 
-The `Submission record` job enforces the required structure after a code revision or
-description edit. The `Prose` job enforces selected language rules in repository files.
-Human review decides whether the stated why and why-not match the code and evidence.
+The `Submission record` job enforces the required structure in the exact head revision.
+The `Prose` job enforces selected language rules in repository files. Human review
+decides whether the stated why and why-not match the code and evidence.
 
 Comments explain non-obvious reasons and invariants. Names, types, interfaces, and tests
 explain ordinary behavior. This rule avoids comments that repeat implementation syntax.
@@ -258,14 +266,15 @@ Follow [the activation checklist](DELIVERY_ACTIVATION.md). After merge, confirm 
 successful `CI` run and deployment on `main`. Validate `Submission record` on a
 subsequent PR, because the submission workflow does not run on main pushes.
 Configure `Submission record`, `Prose`, `Frontend`, `Server`, and `ETL` as required
-checks in the protected-main ruleset after observing their results.
+checks in the protected-main ruleset after observing their results. Require branches to
+be up to date before merge so a base change forces a new head and submission result.
 
 Connect the repository in Codex settings. Confirm that it is team-enabled before you
 enable automatic review. Otherwise, use `@codex review` on each representative change.
 
 Keep the approval, last-push approval, resolved-thread, squash-merge, deletion, and
 non-fast-forward protections. Do not enable a merge queue while `Submission record` is
-required. The application checks support merge groups, but the metadata gate does not.
+required. The application checks support merge groups, but the submission gate does not.
 
 Review routing paths, model defaults, false positives, CI minutes, and model usage after
 the first three merged work units.

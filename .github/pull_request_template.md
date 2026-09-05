@@ -1,3 +1,9 @@
+<!--
+The required submission record is .github/submission.md. Replace that file with this
+template's completed content and commit it with every change. You may mirror the same
+record here for reviewer convenience. CI does not validate this pull request body.
+-->
+
 ## Claim
 
 After this change, <!-- actor or system --> can <!-- observable result --> under <!-- important conditions -->.
