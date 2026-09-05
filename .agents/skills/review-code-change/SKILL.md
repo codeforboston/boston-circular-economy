@@ -43,14 +43,19 @@ Use the local runner when a contributor requests a model-routed review before th
 request is ready:
 
 ```bash
-python3 -B .agents/skills/review-code-change/scripts/run_local_review.py \
-  --risk yellow --base origin/main
+git show origin/main:.agents/skills/review-code-change/scripts/run_local_review.py | \
+  python3 -B - --repository "$PWD" --trusted-ref origin/main \
+    --risk yellow --base origin/main
 ```
 
 Add `--task-type integration` only for a cross-subsystem change. Add `--dry-run` to
 inspect the route without spending model tokens. The runner refuses Red review because
 that lane requires a specialist and a human checkpoint. The runner forces the Codex
 review process into a read-only sandbox.
+
+Run the script from the trusted base as shown. The runner resolves that base to one
+commit and reads both routing policies from it. It treats the proposed tree only as
+review data. Do not execute a runner or routing script from the proposed tree.
 
 The default `branch` scope reviews the current tracked state against the base. Add
 `--scope uncommitted` to review staged, unstaged, and untracked work without branch

@@ -298,8 +298,9 @@ Cap advisory AI review at three to five high-confidence findings. Each finding s
 For a local review before the pull request becomes ready, run:
 
 ```bash
-python3 -B .agents/skills/review-code-change/scripts/run_local_review.py \
-  --risk yellow --base origin/main
+git show origin/main:.agents/skills/review-code-change/scripts/run_local_review.py | \
+  python3 -B - --repository "$PWD" --trusted-ref origin/main \
+    --risk yellow --base origin/main
 ```
 
 Use `--dry-run` to inspect the selected model without spending tokens. Use
@@ -313,7 +314,9 @@ the lane for consequential work.
 
 The default scope reviews the current tracked state against the base. Add
 `--scope uncommitted` to review staged, unstaged, and untracked work without branch
-history. The runner forces a read-only Codex sandbox.
+history. The runner forces a read-only Codex sandbox. The command runs the trusted-base
+script and reads both policies from its resolved commit. It never executes review code
+from the proposed tree.
 
 The `Submission record v1` job enforces the committed evidence structure. Its read-only
 `pull_request_target` workflow runs from the default branch. It checks out the exact

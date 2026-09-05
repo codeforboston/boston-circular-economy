@@ -28,7 +28,7 @@ issue existed.
 
 - Comprehension path: The committed record defines the observable claim. The implementation skill traces its owner and result before independent review. Server startup imports the database module, which initializes SQLite.
 - Refactor boundary: The freshness checker owns first-parent comparison. The trusted workflow owns status publication. The server database module owns SQLite initialization.
-- Boundary and ownership: The routing skill owns path and model policy. CI owns merge evidence. The server workspace owns runtime dependencies. Humans own intent and approval.
+- Boundary and ownership: The trusted local runner owns review-route selection. The routing skill owns delivery policy. CI owns merge evidence. The server workspace owns runtime dependencies. Humans own intent and approval.
 - Failure and recovery: Unknown paths run all checks. An invalid or inherited record fails submission. An inaccessible SQLite path stops startup. Correct the path and restart.
 - Complexity added or removed: One record removes mutable pull request identity from the status decision. One native dependency completes an existing database import.
 
@@ -53,6 +53,8 @@ issue existed.
 - Add code-change standards for ownership, failure, recovery, and refactor boundaries.
 - Add capability defaults for deterministic tools, Luna, Terra, Sol, specialists, and humans.
 - Add self-explanatory implementation and independent review skills.
+- Execute local review logic and routing policy from one resolved trusted-base commit.
+- Treat the proposed review tree as data before the read-only Codex sandbox starts.
 - Keep review command-construction tests independent of the caller's working-tree risk.
 - Align the managed-review decision record with the review severities observed during this validation.
 - Route destructive utilities throughout each subsystem to Red review while excluding fixture data.
@@ -123,6 +125,7 @@ issue existed.
 - Join ordinary JavaScript literal additions before checking rendered wording.
 - Join implicit and added Python reader strings before checking rendered wording.
 - Apply the semicolon rule to reader-facing HTML, CSS, and JSX source text.
+- Scan reader-facing text and accessible attributes in standalone SVG files.
 
 ## Challenge cases
 
@@ -152,6 +155,7 @@ issue existed.
 - Destructive utilities named with `wipe` or `truncate` require Red review.
 - Uncommitted review routing unions staged, unstaged, and untracked paths before applying the risk floor.
 - Command construction retains uncommitted scope even while workflow edits raise the live tree to Red.
+- A modified target routing script remains inert while trusted-base policy selects the review route.
 - Unrelated CI completions cannot cancel an active qualifying Pages deployment.
 - Hosted frontend CI rejects generated client files that differ after the build.
 - List-marker fences stay masked, including tilde fences and nested quotes.
@@ -210,6 +214,7 @@ issue existed.
 - Visible blockquote text and heading semicolons remain subject to the prose policy.
 - Static JSX string addition cannot split a prohibited contraction across literals.
 - Static JavaScript and Python string expressions cannot split prohibited wording.
+- SVG titles, descriptions, text, and accessible attributes remain visible while metadata and scripts remain inert.
 - Red review stops for specialist and human escalation, including ETL credential and secret paths.
 
 ## Evidence
@@ -219,9 +224,9 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass. Startup creates and closes a temporary SQLite database, and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 145 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 146 communication and submission tests |
 | Routing policy | Pass | 42 routing, hook-context, manifest-integrity, and model-route tests |
-| Review policy and model routing | Pass | 25 local-runner tests and independent delivery challenges |
+| Review policy and model routing | Pass | 26 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation, schema validation, and commit-stage and push-stage runs |
 | Workflow syntax | Pass | Actionlint 1.7.11 and YAML parsing |
 | Hosted pull-request CI | Not run | Hosted CI starts after this record enters the commit |
@@ -250,6 +255,7 @@ human-readable ARIA value text, visible blockquotes, heading semicolons, and wor
 dependency integrity. Examine static JSX string addition and source semicolon handling.
 Examine ordinary JavaScript additions and adjacent Python reader strings. Examine
 element-specific HTML and JSX attributes, React children, and JavaScript property keys.
+Examine trusted-base local review execution and standalone SVG reader-text boundaries.
 Examine Python resource identifiers, heading termination, hook suffix coverage, and the
 Red workflow risk floor. Confirm the deployment reconcile step verifies the selected
 run has an unexpired client artifact before it marks the deployment ready. Confirm

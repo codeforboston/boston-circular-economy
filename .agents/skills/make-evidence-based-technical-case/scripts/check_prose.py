@@ -34,13 +34,14 @@ SCANNED_SUFFIXES = {
     ".md",
     ".mjs",
     ".py",
+    ".svg",
     ".toml",
     ".ts",
     ".tsx",
     ".yaml",
     ".yml",
 }
-SEMICOLON_SCANNED_SUFFIXES = {".css", ".html", ".jsx", ".tsx"}
+SEMICOLON_SCANNED_SUFFIXES = {".css", ".html", ".jsx", ".svg", ".tsx"}
 IGNORED_PARTS = {
     ".git",
     ".pytest_cache",
@@ -102,6 +103,7 @@ HTML_READER_VALUE_INPUT_TYPES = {
     "url",
 }
 HTML_SUPPRESSED_ELEMENTS = {"code", "pre", "script", "style", "template"}
+SVG_READER_TEXT_ELEMENTS = {"desc", "text", "title"}
 HTML_ATTRIBUTE = re.compile(
     r"""(?P<name>[A-Za-z_:][-A-Za-z0-9_:.]*)[ \t\r\n]*=[ \t\r\n]*"""
     r"""(?:"(?P<double>[^"]*)"|'(?P<single>[^']*)'|"""
@@ -602,11 +604,18 @@ def mask_span(output: list[str], source: str, start: int, end: int) -> None:
 class ReaderFacingHtmlParser(HTMLParser):
     """Copy visible HTML text and reader-facing attributes into a text mask."""
 
-    def __init__(self, source: str, output: list[str]) -> None:
+    def __init__(
+        self,
+        source: str,
+        output: list[str],
+        reader_text_elements: set[str] | None = None,
+    ) -> None:
         super().__init__(convert_charrefs=False)
         self.source = source
         self.output = output
         self.offsets = line_offsets(source)
+        self.reader_text_elements = reader_text_elements
+        self.reader_text_ancestors: list[str] = []
         self.suppressed_elements: list[str] = []
 
     def current_offset(self) -> int:
@@ -642,6 +651,11 @@ class ReaderFacingHtmlParser(HTMLParser):
             self.suppressed_elements.append(normalized_tag)
             return
         if not self.suppressed_elements:
+            if (
+                self.reader_text_elements is not None
+                and normalized_tag in self.reader_text_elements
+            ):
+                self.reader_text_ancestors.append(normalized_tag)
             reader_attributes = set(HTML_READER_ATTRIBUTES)
             attributes = {
                 name.casefold(): value for name, value in attrs if value is not None
@@ -669,28 +683,49 @@ class ReaderFacingHtmlParser(HTMLParser):
                 - self.suppressed_elements[::-1].index(normalized_tag)
             )
             del self.suppressed_elements[matching_index:]
+            return
+        if normalized_tag in self.reader_text_ancestors:
+            matching_index = (
+                len(self.reader_text_ancestors)
+                - 1
+                - self.reader_text_ancestors[::-1].index(normalized_tag)
+            )
+            del self.reader_text_ancestors[matching_index:]
+
+    def exposes_text(self) -> bool:
+        return not self.suppressed_elements and (
+            self.reader_text_elements is None or bool(self.reader_text_ancestors)
+        )
 
     def handle_data(self, data: str) -> None:
-        if not self.suppressed_elements:
+        if self.exposes_text():
             self.expose_current(data)
 
     def handle_entityref(self, name: str) -> None:
-        if not self.suppressed_elements:
+        if self.exposes_text():
             self.expose_current(f"&{name};")
 
     def handle_charref(self, name: str) -> None:
-        if not self.suppressed_elements:
+        if self.exposes_text():
             self.expose_current(f"&#{name};")
 
 
-def mask_html_code(text: str) -> str:
+def mask_html_code(
+    text: str, reader_text_elements: set[str] | None = None
+) -> str:
     """Return visible HTML prose with source line positions preserved."""
 
     output = list(blank_like(text))
-    parser = ReaderFacingHtmlParser(text, output)
+    parser = ReaderFacingHtmlParser(text, output, reader_text_elements)
     parser.feed(text)
     parser.close()
     return decode_markdown_entities("".join(output))
+
+
+def mask_svg_code(text: str) -> str:
+    """Return reader-facing SVG prose with source line positions preserved."""
+
+    return mask_html_code(text, SVG_READER_TEXT_ELEMENTS)
 
 
 def copy_decoded_text(
@@ -3127,6 +3162,8 @@ def mask_source_code(path: Path, text: str) -> str:
         return "".join(output)
     if suffix == ".html":
         return mask_html_code(text)
+    if suffix == ".svg":
+        return mask_svg_code(text)
     if suffix == ".css":
         return mask_css_code(text)
     if suffix in {".yaml", ".yml"}:

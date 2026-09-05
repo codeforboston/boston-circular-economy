@@ -447,6 +447,34 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_checks_standalone_svg_reader_text_only(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "map.svg"
+            path.write_text(
+                '<svg aria-label="Unlock the potential.">\n'
+                "<metadata>Unlock the potential.</metadata>\n"
+                "<title>Don't deploy.</title>\n"
+                "<desc>Unlock the potential.</desc>\n"
+                "<text><tspan>Review; submit.</tspan></text>\n"
+                "<script>Unlock the potential.</script>\n"
+                "</svg>\n",
+                encoding="utf-8",
+            )
+
+            files = prose_files([Path(directory)])
+            findings = editorial_findings(path)
+
+        self.assertIn(path, files)
+        self.assertEqual(
+            {
+                (1, "promotional cliche"),
+                (3, "contraction"),
+                (4, "promotional cliche"),
+                (5, "semicolon"),
+            },
+            {(finding.line, finding.rule) for finding in findings},
+        )
+
     def test_checks_labels_only_for_html_elements_that_render_them(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "index.html"

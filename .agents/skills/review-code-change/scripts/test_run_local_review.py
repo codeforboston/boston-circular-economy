@@ -13,7 +13,9 @@ from run_local_review import (
     effective_risk,
     infer_minimum_risk,
     load_risk_policy,
+    load_routing_policy,
     path_matches,
+    resolve_commit,
     select_route,
 )
 
@@ -29,6 +31,8 @@ class LocalReviewRunnerTests(unittest.TestCase):
                 "-B",
                 str(SCRIPT),
                 "--base",
+                "HEAD",
+                "--trusted-ref",
                 "HEAD",
                 "--dry-run",
                 *arguments,
@@ -316,7 +320,7 @@ class LocalReviewRunnerTests(unittest.TestCase):
         self.assertEqual(route["reasoning_effort"], "high")
 
     def test_uncommitted_scope_does_not_use_the_base(self) -> None:
-        route = select_route("bounded", "green")
+        route = select_route(load_routing_policy(), "bounded", "green")
         command = build_codex_command(route, "HEAD", "uncommitted")
 
         self.assertIn("--uncommitted", command)
@@ -368,6 +372,8 @@ class LocalReviewRunnerTests(unittest.TestCase):
                 "--dry-run",
                 "--risk",
                 "red",
+                "--trusted-ref",
+                "HEAD",
             ],
             cwd=ROOT,
             check=False,
@@ -376,6 +382,86 @@ class LocalReviewRunnerTests(unittest.TestCase):
         )
         self.assertEqual(completed.returncode, 2)
         self.assertIn("specialist and human checkpoint", completed.stderr)
+
+    def test_modified_target_router_is_not_executed(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            repository = Path(directory)
+            subprocess.run(["git", "init", "-q"], cwd=repository, check=True)
+            subprocess.run(
+                ["git", "config", "user.email", "review@example.invalid"],
+                cwd=repository,
+                check=True,
+            )
+            subprocess.run(
+                ["git", "config", "user.name", "Review test"],
+                cwd=repository,
+                check=True,
+            )
+            risk_path = repository / (
+                ".agents/skills/review-code-change/references/review-risk.json"
+            )
+            routing_path = repository / (
+                ".agents/skills/route-agent-work/references/delivery-routing.json"
+            )
+            risk_path.parent.mkdir(parents=True)
+            routing_path.parent.mkdir(parents=True)
+            risk_path.write_text(
+                (ROOT / risk_path.relative_to(repository)).read_text(encoding="utf-8"),
+                encoding="utf-8",
+            )
+            routing_path.write_text(
+                (ROOT / routing_path.relative_to(repository)).read_text(
+                    encoding="utf-8"
+                ),
+                encoding="utf-8",
+            )
+            subprocess.run(["git", "add", "."], cwd=repository, check=True)
+            subprocess.run(
+                ["git", "commit", "-qm", "Add trusted policies"],
+                cwd=repository,
+                check=True,
+            )
+            trusted_commit = resolve_commit(repository, "HEAD")
+            marker = repository / "target-router-ran"
+            router = repository / (
+                ".agents/skills/route-agent-work/scripts/route_work.py"
+            )
+            router.parent.mkdir(parents=True)
+            router.write_text(
+                f"from pathlib import Path\nPath({str(marker)!r}).touch()\n",
+                encoding="utf-8",
+            )
+            subprocess.run(["git", "add", "."], cwd=repository, check=True)
+            subprocess.run(
+                ["git", "commit", "-qm", "Modify target router"],
+                cwd=repository,
+                check=True,
+            )
+
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    "-B",
+                    str(SCRIPT),
+                    "--repository",
+                    str(repository),
+                    "--base",
+                    trusted_commit,
+                    "--trusted-ref",
+                    trusted_commit,
+                    "--dry-run",
+                    "--risk",
+                    "green",
+                ],
+                cwd=ROOT,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            result = json.loads(completed.stdout)
+            self.assertFalse(marker.exists())
+
+        self.assertEqual("bounded_yellow", result["route"]["route"])
 
     def test_repository_guidance_keeps_review_rules_near_the_change(self) -> None:
         root_guidance = (ROOT / "AGENTS.md").read_text(encoding="utf-8")

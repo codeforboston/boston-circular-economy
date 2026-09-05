@@ -124,8 +124,10 @@ The pre-commit framework installs two hook stages from `.pre-commit-config.yaml`
 
 Python hooks use a pre-commit Python environment and its `python` executable. This
 avoids requiring a system `python3` alias. Schema validation uses a pinned `uvx` tool.
-The local runner resolves external commands through `PATH`, including Windows command
-launchers, and propagates nonzero exits.
+The local review runner executes from a trusted base commit. It reads routing policy
+from that resolved commit and treats the proposed tree as data. The quality-check runner
+resolves external commands through `PATH`, including Windows command launchers, and
+propagates nonzero exits.
 
 The commit stage checks prose-bearing changed files and validates changed work-unit
 manifests. It also runs routing tests when a routing, hook, or CI file changes.
@@ -206,7 +208,7 @@ The managed service selects its own model. The repository model routes apply to 
 and delegated review. The local runner uses Luna for bounded Green changes, Terra for
 bounded Yellow changes, and Sol for cross-subsystem review.
 
-The local runner requires a declared risk lane. Versioned path rules can raise that
+The local runner requires a declared risk lane. Trusted-base path rules can raise that
 lane but cannot lower it. This check catches clear under-routing. Examples include
 authentication code, every GitHub Actions workflow, and migration code declared Green.
 Every workflow uses Red review because permissions and authorization can change inside

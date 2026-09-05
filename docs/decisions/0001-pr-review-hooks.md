@@ -83,8 +83,9 @@ and a human checkpoint.
 - Root review rules apply the Code Change Standard to every changed area.
 - The `.github/AGENTS.md` rules add security and deployment checks near workflow code.
 - The review skill defines evidence thresholds, priority, wording, and stop conditions.
-- The local runner uses Luna for bounded Green review and Terra for bounded Yellow
-  review. It uses Sol only for cross-subsystem review.
+- The local runner executes from the trusted base and treats proposed code as data.
+- The runner uses Luna for bounded Green review and Terra for bounded Yellow review.
+  It uses Sol only for cross-subsystem review.
 - AI review does not become a required status check or a substitute for approval.
 - A failed or unavailable AI review does not block deterministic CI or human review.
 
