@@ -80,7 +80,7 @@ REQUIRED_EVIDENCE_CHECKS = (
 )
 EVIDENCE_HEADER = ("Check", "Result", "Evidence or reason not run")
 ALLOWED_EVIDENCE_RESULTS = {"pass", "fail", "not run", "not affected"}
-SECTION_HEADING = re.compile(r"(?m)^##[ \t]+(.+?)[ \t]*$")
+SECTION_HEADING = re.compile(r"(?m)^[ ]{0,3}##[ \t]+(.+?)[ \t]*$")
 TRAILING_HEADING_MARKS = re.compile(r"[ \t]+#+[ \t]*$")
 FENCE_START = re.compile(r"(?P<marker>`{3,}|~{3,})(?P<info>[^\r\n]*)$")
 ATX_BLOCK_START = re.compile(r"#{1,6}(?:[ \t]+|$)")
@@ -208,6 +208,61 @@ def expose_inline_code_text(content: str) -> str:
     return "".join(output)
 
 
+def markdown_inline_link_end(content: str, start: int) -> int | None:
+    """Return the end of an inline Markdown link destination and optional title."""
+
+    index = start
+    nested_parentheses = 0
+    quote: str | None = None
+    while index < len(content):
+        character = content[index]
+        if character == "\\":
+            index += 2
+            continue
+        if character in "\r\n":
+            return None
+        if quote is not None:
+            if character == quote:
+                quote = None
+        elif character in "'\"":
+            quote = character
+        elif character == "(":
+            nested_parentheses += 1
+        elif character == ")":
+            if nested_parentheses == 0:
+                return index + 1
+            nested_parentheses -= 1
+        index += 1
+    return None
+
+
+def expose_markdown_link_labels(content: str) -> str:
+    """Keep inline-link labels while hiding destinations and Markdown controls."""
+
+    output = list(content)
+    cursor = 0
+    while cursor < len(content):
+        marker = content.find("](", cursor)
+        if marker < 0:
+            break
+        line_start = content.rfind("\n", 0, marker) + 1
+        label_start = content.rfind("[", line_start, marker)
+        link_end = markdown_inline_link_end(content, marker + 2)
+        if (
+            label_start < 0
+            or escaped_backtick(content, label_start)
+            or escaped_backtick(content, marker)
+            or link_end is None
+        ):
+            cursor = marker + 2
+            continue
+        label = content[label_start + 1 : marker]
+        output[label_start:link_end] = " " * (link_end - label_start)
+        output[label_start + 1 : label_start + 1 + len(label)] = label
+        cursor = link_end
+    return "".join(output)
+
+
 def has_unclosed_html_comment(content: str) -> bool:
     """Return whether visible Markdown opens an HTML comment without closing it."""
 
@@ -231,7 +286,8 @@ def has_meaningful_section_content(content: str) -> bool:
         without_guidance = pattern.sub("", without_guidance)
     without_checkboxes = MARKDOWN_CHECKBOX.sub("", without_guidance)
     visible_inline_code = expose_inline_code_text(without_checkboxes)
-    without_html = RAW_HTML_TAG.sub("", visible_inline_code)
+    visible_link_labels = expose_markdown_link_labels(visible_inline_code)
+    without_html = RAW_HTML_TAG.sub("", visible_link_labels)
     decoded_entities = html.unescape(without_html)
     without_empty_markdown = EMPTY_MARKDOWN_LINE.sub("", decoded_entities)
     return any(character.isalnum() for character in without_empty_markdown)

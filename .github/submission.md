@@ -87,6 +87,11 @@ issue existed.
 - Treat every matching backtick inside an open code span as a closing delimiter, even after a backslash.
 - Scan values on visible HTML input types while excluding hidden and choice-control values.
 - Exclude Python file and path arguments from reader prose while retaining ordinary messages.
+- Treat only inline-link labels as substantive submission content while preserving visible autolinks.
+- Accept zero to three spaces before submission headings while masking four-space code blocks.
+- Exclude quoted JavaScript property keys from prose while continuing to scan their values.
+- Scan only reader-facing JSX attributes and visible native-input values.
+- Classify raw HTML inside Markdown so visible text and alt text remain subject to prose checks.
 
 ## Challenge cases
 
@@ -139,6 +144,11 @@ issue existed.
 - A backslash before a closing code-span backtick cannot hide the prose that follows it.
 - Submit and text-input values fail editorial checks, while hidden-input values remain machine data.
 - Python path constructors, file calls, path joins, and path composition remain outside prose checks.
+- An empty Markdown link cannot satisfy a rationale field, while a visible autolink can.
+- A submission heading with three leading spaces passes, while a four-space heading remains code.
+- A quoted JavaScript object key remains inert, while a reader-facing value still fails.
+- JSX test IDs and class names remain inert, while accessible labels and visible input values fail.
+- A raw Markdown image source remains inert, while its alt text remains visible to the checker.
 - Red review stops for specialist and human escalation, including ETL credential and secret paths.
 
 ## Evidence
@@ -148,7 +158,7 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass. Startup creates and closes a temporary SQLite database, and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 122 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 127 communication and submission tests |
 | Routing policy | Pass | 37 routing, hook-context, and manifest-discovery tests plus model-route samples |
 | Review policy and model routing | Pass | 25 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation, schema validation, and commit-stage and push-stage runs |
@@ -171,9 +181,10 @@ I read and understand the submitted diff. I verified the evidence above and rema
 
 Review the versioned first-parent record boundary and terminal-only status publication.
 Examine Markdown fence, paragraph, table, image-alt, and code-span boundaries. Examine
-HTML control-value classification, Python resource identifiers, and the Red workflow
-risk floor. Check SQLite shutdown order, native lockfile changes, path mapping, evidence
-threshold, model defaults, and protected-branch activation steps.
+link-label and heading boundaries, HTML and JSX attribute classification, and JavaScript
+property keys. Examine Python resource identifiers and the Red workflow risk floor.
+Check SQLite shutdown order, native lockfile changes, path mapping, evidence threshold,
+model defaults, and protected-branch activation steps.
 
 The repository has not observed the submission workflow from `main`. A repository
 administrator must configure the named required checks only after the hosted evidence

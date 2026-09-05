@@ -243,7 +243,8 @@ def prose_files(inputs: list[Path]) -> list[Path]:
 
 
 def plain_markdown(line: str) -> str:
-    text = IMAGE.sub(r"\1", line)
+    text = mask_html_code(line)
+    text = IMAGE.sub(r"\1", text)
     text = LINK.sub(r"\1", text)
     text = URL.sub(" URL ", text)
     text = re.sub(r"^\s*(?:[-+*]|\d+[.)])\s+", "", text)
@@ -496,7 +497,7 @@ def editorial_findings(path: Path) -> list[Finding]:
     source_text = path.read_text(encoding="utf-8")
     suffix = path.suffix.casefold()
     if suffix == ".md":
-        text = decode_markdown_entities(
+        text = mask_html_code(
             mask_markdown_link_destinations(mask_markdown_code(source_text))
         )
     else:
@@ -1271,6 +1272,28 @@ def javascript_identifier_literal(text: str, start: int, end: int) -> bool:
     )
 
 
+def javascript_property_key(text: str, start: int, end: int, tokens: list[str]) -> bool:
+    """Return whether a quoted string is an object property key."""
+
+    if not tokens or tokens[-1] not in {"{", ","}:
+        return False
+    index = end
+    while index < len(text):
+        if text[index].isspace():
+            index += 1
+            continue
+        if text.startswith("//", index):
+            newline = text.find("\n", index + 2)
+            index = len(text) if newline == -1 else newline + 1
+            continue
+        if text.startswith("/*", index):
+            closing = text.find("*/", index + 2)
+            index = len(text) if closing == -1 else closing + 2
+            continue
+        break
+    return index < len(text) and text[index] == ":"
+
+
 def javascript_template_identifier(text: str, start: int) -> bool:
     """Return whether a template's first literal segment identifies a resource."""
 
@@ -1366,21 +1389,76 @@ def jsx_tag_end(text: str, start: int) -> int | None:
     return None
 
 
-def copy_jsx_tag_literals(text: str, output: list[str], start: int, end: int) -> None:
-    """Keep quoted JSX attribute text while leaving tag names and props hidden."""
+JSX_TAG_NAME = re.compile(r"<\s*(?P<name>[A-Za-z][A-Za-z0-9_.:-]*)")
+JSX_ATTRIBUTE_ASSIGNMENT = re.compile(
+    r"(?P<name>[A-Za-z_:][-A-Za-z0-9_:.]*)[ \t\r\n]*=[ \t\r\n]*"
+)
+JSX_TYPE_ASSIGNMENT = re.compile(r"(?<![-A-Za-z0-9_:])type[ \t\r\n]*=")
+JSX_STATIC_INPUT_TYPE = re.compile(
+    r"""(?<![-A-Za-z0-9_:])type[ \t\r\n]*=[ \t\r\n]*(?:\{[ \t\r\n]*)?"""
+    r"""(?:"(?P<double>[^"]*)"|'(?P<single>[^']*)')"""
+)
 
-    index = start
-    while index < end:
-        if text[index] in "'\"":
-            next_index = javascript_string_end(text, index, text[index])
-            if not javascript_identifier_literal(text, index, next_index):
-                copy_javascript_string(text, output, index, next_index)
-            index = min(next_index, end)
-        elif text[index] == "`":
-            next_index = mask_js_template(text, output, index)
-            index = min(next_index, end)
+
+def jsx_reader_attributes(text: str, start: int, end: int) -> set[str]:
+    """Return static JSX attributes that present text to a reader."""
+
+    attributes = set(HTML_READER_ATTRIBUTES)
+    tag_text = text[start:end]
+    tag_match = JSX_TAG_NAME.match(tag_text)
+    if tag_match is None or tag_match.group("name") != "input":
+        return attributes
+
+    type_match = JSX_STATIC_INPUT_TYPE.search(tag_text)
+    if type_match is None:
+        input_type = None if JSX_TYPE_ASSIGNMENT.search(tag_text) else ""
+    else:
+        input_type = type_match.group("double") or type_match.group("single") or ""
+    if (
+        input_type is not None
+        and input_type.casefold() in HTML_READER_VALUE_INPUT_TYPES
+    ):
+        attributes.add("value")
+    return attributes
+
+
+def copy_jsx_tag_literals(text: str, output: list[str], start: int, end: int) -> None:
+    """Keep reader-facing JSX attributes while hiding implementation metadata."""
+
+    reader_attributes = jsx_reader_attributes(text, start, end)
+    cursor = start
+    while match := JSX_ATTRIBUTE_ASSIGNMENT.search(text, cursor, end):
+        attribute_name = match.group("name").casefold()
+        value_start = match.end()
+        if value_start >= end:
+            break
+        reader_facing = attribute_name in reader_attributes
+        delimiter = text[value_start]
+        if delimiter in "'\"":
+            cursor = javascript_string_end(text, value_start, delimiter)
+            if reader_facing:
+                copy_javascript_string(text, output, value_start, cursor)
+        elif delimiter == "`":
+            cursor = mask_js_template(
+                text,
+                output,
+                value_start,
+                copy_literal=reader_facing,
+            )
+            if not reader_facing:
+                mask_span(output, text, value_start, cursor)
+        elif delimiter == "{":
+            closing = mask_javascript_code(
+                text,
+                output,
+                value_start + 1,
+                stop_at_brace=True,
+            )
+            cursor = closing + 1 if closing < len(text) else closing
+            if not reader_facing:
+                mask_span(output, text, value_start, cursor)
         else:
-            index += 1
+            cursor = value_start + 1
 
 
 def mask_jsx_children(text: str, output: list[str], start: int) -> int:
@@ -1445,6 +1523,7 @@ def mask_javascript_code(
                 javascript_module_specifier(tokens)
                 or javascript_route_argument(tokens)
                 or javascript_identifier_literal(text, index, end)
+                or javascript_property_key(text, index, end, tokens)
             ):
                 copy_javascript_string(text, output, index, end)
             index = end
@@ -1472,6 +1551,9 @@ def mask_javascript_code(
                     index = mask_jsx_children(text, output, end + 1)
                     remember_javascript_token(tokens, "<jsx>")
                     continue
+                index = end + 1
+                remember_javascript_token(tokens, "<jsx>")
+                continue
         if character.isalpha() or character in "_$":
             end = index + 1
             while end < len(text) and (text[end].isalnum() or text[end] in "_$"):

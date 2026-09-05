@@ -391,6 +391,23 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_classifies_raw_html_attributes_inside_markdown(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.md"
+            path.write_text(
+                '<img src="/unlock.png" alt="Map">\n'
+                "<span>Unlock the potential.</span>\n"
+                '<img src="/map.png" alt="Unlock the potential.">\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(2, "promotional cliche"), (3, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_ignores_javascript_identifiers_but_checks_reader_text(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.ts"
@@ -537,6 +554,45 @@ class ProseCheckerTests(unittest.TestCase):
             findings = editorial_findings(path)
 
         self.assertEqual([], findings)
+
+    def test_ignores_quoted_javascript_property_keys(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.ts"
+            path.write_text(
+                'const payload = {"unlock": true, "label": "Unlock the potential."};\n'
+                'const message = ready ? "Unlock the potential." : "Wait.";\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(1, "promotional cliche"), (2, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
+    def test_scans_only_reader_facing_jsx_attributes(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.tsx"
+            path.write_text(
+                'const field = <input data-testid="unlock" className="powerful" '
+                'aria-label="Unlock the potential." />;\n'
+                'const hidden = <input type="hidden" value="Unlock the potential." />;\n'
+                'const submit = <input type="submit" value="Unlock the potential." />;\n'
+                'const titled = <div title={"Unlock the potential."} />;\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [
+                (1, "promotional cliche"),
+                (3, "promotional cliche"),
+                (4, "promotional cliche"),
+            ],
+            [(finding.line, finding.rule) for finding in findings],
+        )
 
     def test_ignores_python_identifiers_and_checks_reader_text(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

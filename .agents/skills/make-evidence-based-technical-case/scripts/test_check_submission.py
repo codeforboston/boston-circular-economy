@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 import sys
 import tempfile
 import unittest
@@ -485,6 +486,28 @@ class CheckSubmissionTests(unittest.TestCase):
         body = f"{VALID_BODY}\n```markdown\n## Risk and scope\n```\n"
 
         self.assertEqual(check_submission.check_submission(body), [])
+
+    def test_empty_link_destination_is_not_substantive_content(self) -> None:
+        empty_link = VALID_BODY.replace(
+            "- Grounds: The tests pass.",
+            "- Grounds: [](https://example.com)",
+        )
+        visible_autolink = VALID_BODY.replace(
+            "- Grounds: The tests pass.",
+            "- Grounds: <https://example.com>",
+        )
+
+        rules = [
+            finding.rule for finding in check_submission.check_submission(empty_link)
+        ]
+
+        self.assertIn("empty-label", rules)
+        self.assertEqual([], check_submission.check_submission(visible_autolink))
+
+    def test_allows_up_to_three_spaces_before_submission_headings(self) -> None:
+        indented = re.sub(r"(?m)^## ", "   ## ", VALID_BODY)
+
+        self.assertEqual([], check_submission.check_submission(indented))
 
     def test_backtick_in_fence_info_does_not_mask_following_text(self) -> None:
         body = "```bad`\nVisible reader text.\n```\n"
