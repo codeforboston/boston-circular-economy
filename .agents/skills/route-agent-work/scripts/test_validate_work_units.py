@@ -60,6 +60,20 @@ class WorkUnitValidationTests(unittest.TestCase):
         self.assertEqual(1, len(errors))
         self.assertIn("duplicates", errors[0])
 
+    def test_manifest_dependencies_must_resolve(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ui-005.json"
+            path.write_text(
+                '{"id": "UI-005", "depends_on": ["UI-999"]}\n',
+                encoding="utf-8",
+            )
+
+            errors = manifest_identity_errors([path])
+
+        self.assertEqual(1, len(errors))
+        self.assertIn("dependency 'UI-999'", errors[0])
+        self.assertIn("does not match a discovered work unit", errors[0])
+
 
 if __name__ == "__main__":
     unittest.main()

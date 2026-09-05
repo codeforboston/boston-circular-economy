@@ -82,6 +82,7 @@ issue existed.
 - Require accepted work units to name a reviewed revision and test the invalid terminal state in CI.
 - Require accepted work units to name artifacts, a reviewer, and a review date.
 - Bind each numbered manifest ID to its filename and reject duplicate IDs.
+- Reject dependencies that do not identify a discovered work unit.
 - Run the schema validator from a repository lock that fixes its full dependency graph.
 - Start the built server with temporary SQLite and verify `/ping` in local push checks and CI.
 - Route every GitHub Actions workflow change to Red review because any workflow can change permissions or authorization.
@@ -115,6 +116,7 @@ issue existed.
 - Scan reader-facing static values in JSX object-literal spreads while excluding dynamic spreads and machine-only properties.
 - Scan decoded CSS `content` strings while excluding selectors, URLs, custom properties, and other machine values.
 - Parse static `dangerouslySetInnerHTML` values as HTML prose while leaving dynamic expressions inert.
+- Scan human-readable `aria-valuetext` in HTML and JSX.
 
 ## Challenge cases
 
@@ -160,6 +162,7 @@ issue existed.
 - An otherwise valid accepted work unit fails when its completion record omits the reviewed revision.
 - An accepted work unit fails when its artifact list, reviewer, or review date is empty.
 - A numbered manifest fails when its ID differs from its filename or duplicates another manifest ID.
+- A manifest fails when its dependency does not identify a discovered work unit.
 - Server smoke testing imports the native SQLite binding, uses a temporary database, binds an available port, and requires a successful `pong` response.
 - An unclosed list fence stops masking when visible prose leaves the list container.
 - An unclosed quote fence stops masking when the quote depth decreases.
@@ -195,6 +198,7 @@ issue existed.
 - Literal JSX spreads expose reader-facing `children` and accessibility labels without exposing dynamic spreads or machine-only keys.
 - CSS generated text decodes string escapes, while custom properties and resource URLs remain inert.
 - Static JSX HTML injection exposes visible text and attributes but excludes scripts and dynamic HTML.
+- Human-readable ARIA value text remains subject to the prose policy.
 - Red review stops for specialist and human escalation, including ETL credential and secret paths.
 
 ## Evidence
@@ -205,7 +209,7 @@ issue existed.
 | Server lint and build | Pass | Lint and build pass. Startup creates and closes a temporary SQLite database, and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
 | Technical prose and editorial style | Pass | Full repository scan and 141 communication and submission tests |
-| Routing policy | Pass | 39 routing, hook-context, manifest-identity, and model-route tests |
+| Routing policy | Pass | 40 routing, hook-context, manifest-integrity, and model-route tests |
 | Review policy and model routing | Pass | 25 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation, schema validation, and commit-stage and push-stage runs |
 | Workflow syntax | Pass | Actionlint 1.7.11 and YAML parsing |
@@ -231,6 +235,7 @@ link-label, reference-link, and heading boundaries. Examine YAML escape handling
 TOML basic-string escape handling, assignment step labels, TypeScript generic
 classification, escaped-line source mapping, JSX character references, and static
 object-literal spreads. Examine CSS generated content and static HTML injection. Examine
+human-readable ARIA value text and work-unit dependency integrity. Examine
 element-specific HTML and JSX attributes, React children, and JavaScript property keys.
 Examine Python resource identifiers, heading termination, hook suffix coverage, and the
 Red workflow risk floor. Confirm the deployment reconcile step verifies the selected

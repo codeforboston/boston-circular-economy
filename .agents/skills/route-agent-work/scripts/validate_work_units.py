@@ -21,10 +21,11 @@ def manifest_paths(directory: Path = WORK_UNIT_DIRECTORY) -> list[Path]:
 
 
 def manifest_identity_errors(manifests: list[Path]) -> list[str]:
-    """Check that versioned filenames and manifest IDs identify one work unit."""
+    """Check that versioned filenames, IDs, and dependencies identify known units."""
 
     errors: list[str] = []
     paths_by_id: dict[str, Path] = {}
+    payloads_by_id: dict[str, dict[str, object]] = {}
     for path in manifests:
         name_match = MANIFEST_NAME.fullmatch(path.name)
         if name_match is None:
@@ -48,6 +49,17 @@ def manifest_identity_errors(manifests: list[Path]) -> list[str]:
             )
         else:
             paths_by_id[manifest_id] = path
+            payloads_by_id[manifest_id] = payload
+    for manifest_id, payload in payloads_by_id.items():
+        dependencies = payload.get("depends_on")
+        if not isinstance(dependencies, list):
+            continue
+        for dependency in dependencies:
+            if isinstance(dependency, str) and dependency not in paths_by_id:
+                errors.append(
+                    f"{paths_by_id[manifest_id]}: dependency {dependency!r} "
+                    "does not match a discovered work unit"
+                )
     return errors
 
 

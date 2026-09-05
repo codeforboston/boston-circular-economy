@@ -415,7 +415,8 @@ class ProseCheckerTests(unittest.TestCase):
                 "<script>Unlock the potential.</script>\n"
                 "<p>Unlock the potential.</p>\n"
                 '<img src="/unlock-the-potential.png" '
-                'alt="Unlock the potential.">\n',
+                'alt="Unlock the potential.">\n'
+                '<div role="slider" aria-valuetext="Unlock the potential."></div>\n',
                 encoding="utf-8",
             )
 
@@ -424,7 +425,11 @@ class ProseCheckerTests(unittest.TestCase):
 
         self.assertIn(path, files)
         self.assertEqual(
-            [(2, "promotional cliche"), (3, "promotional cliche")],
+            [
+                (2, "promotional cliche"),
+                (3, "promotional cliche"),
+                (4, "promotional cliche"),
+            ],
             [(finding.line, finding.rule) for finding in findings],
         )
 
@@ -665,7 +670,8 @@ class ProseCheckerTests(unittest.TestCase):
                 'const hidden = <input type="hidden" value="Unlock the potential." />;\n'
                 'const submit = <input type="submit" value="Unlock the potential." />;\n'
                 'const titled = <div title={"Unlock the potential."} />;\n'
-                'const group = <optgroup label="Unlock the potential." />;\n',
+                'const group = <optgroup label="Unlock the potential." />;\n'
+                'const slider = <div role="slider" aria-valuetext="Unlock the potential." />;\n',
                 encoding="utf-8",
             )
 
@@ -677,6 +683,7 @@ class ProseCheckerTests(unittest.TestCase):
                 (3, "promotional cliche"),
                 (4, "promotional cliche"),
                 (5, "promotional cliche"),
+                (6, "promotional cliche"),
             ],
             [(finding.line, finding.rule) for finding in findings],
         )
