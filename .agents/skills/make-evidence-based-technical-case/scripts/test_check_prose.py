@@ -1364,6 +1364,27 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_ignores_python_regular_expression_patterns(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "patterns.py"
+            path.write_text(
+                "import re\n"
+                "import re as regex\n"
+                "from re import compile as compile_pattern\n"
+                'first = re.compile(r"[;,]")\n'
+                'second = regex.search(pattern=r"don\'t;", string=value)\n'
+                'third = compile_pattern(r"Unlock the potential;")\n'
+                'reader_message = "Do not deploy; wait."\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(7, "semicolon")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_checks_components_after_a_path_variable_is_reassigned(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.py"

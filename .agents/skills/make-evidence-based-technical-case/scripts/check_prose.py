@@ -1194,6 +1194,85 @@ def python_environment_key_spans(
     return sorted(spans)
 
 
+def python_regular_expression_pattern_spans(
+    text: str, offsets: list[int]
+) -> list[tuple[int, int]]:
+    """Locate static patterns passed to Python's regular-expression module."""
+
+    try:
+        syntax_tree = ast.parse(text)
+    except SyntaxError:
+        return []
+
+    lines = text.splitlines(keepends=True)
+
+    def source_offset(line: int, byte_column: int) -> int:
+        line_prefix = lines[line - 1].encode("utf-8")[:byte_column]
+        character_column = len(line_prefix.decode("utf-8"))
+        return offsets[line - 1] + character_column
+
+    def string_span(node: ast.AST) -> tuple[int, int] | None:
+        if not isinstance(node, (ast.Constant, ast.JoinedStr)):
+            return None
+        if isinstance(node, ast.Constant) and not isinstance(node.value, (str, bytes)):
+            return None
+        if node.end_lineno is None or node.end_col_offset is None:
+            return None
+        return (
+            source_offset(node.lineno, node.col_offset),
+            source_offset(node.end_lineno, node.end_col_offset),
+        )
+
+    pattern_functions = {
+        "compile",
+        "findall",
+        "finditer",
+        "fullmatch",
+        "match",
+        "search",
+        "split",
+        "sub",
+        "subn",
+    }
+    module_aliases = {"re"}
+    function_aliases: set[str] = set()
+    for node in ast.walk(syntax_tree):
+        if isinstance(node, ast.Import):
+            module_aliases.update(
+                item.asname or item.name for item in node.names if item.name == "re"
+            )
+        elif isinstance(node, ast.ImportFrom) and node.module == "re":
+            function_aliases.update(
+                item.asname or item.name
+                for item in node.names
+                if item.name in pattern_functions
+            )
+
+    def regular_expression_call(node: ast.Call) -> bool:
+        if isinstance(node.func, ast.Name):
+            return node.func.id in function_aliases
+        return bool(
+            isinstance(node.func, ast.Attribute)
+            and isinstance(node.func.value, ast.Name)
+            and node.func.value.id in module_aliases
+            and node.func.attr in pattern_functions
+        )
+
+    spans: list[tuple[int, int]] = []
+    for node in ast.walk(syntax_tree):
+        if not isinstance(node, ast.Call) or not regular_expression_call(node):
+            continue
+        candidates = list(node.args[:1])
+        if not candidates:
+            candidates.extend(
+                keyword.value for keyword in node.keywords if keyword.arg == "pattern"
+            )
+        spans.extend(
+            span for candidate in candidates if (span := string_span(candidate))
+        )
+    return sorted(set(spans))
+
+
 def python_resource_identifier_spans(
     text: str, offsets: list[int]
 ) -> list[tuple[int, int]]:
@@ -1546,6 +1625,7 @@ def mask_python_code(text: str) -> str:
         set(
             python_mapping_key_spans(text, offsets)
             + python_environment_key_spans(text, offsets)
+            + python_regular_expression_pattern_spans(text, offsets)
             + python_resource_identifier_spans(text, offsets)
             + python_command_argument_spans(text, offsets)
             + token_mapping_key_spans(tokens, offsets)

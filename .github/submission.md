@@ -100,6 +100,7 @@ issue existed.
 - Route every GitHub Actions workflow change to Red review because any workflow can change permissions or authorization.
 - Route every repo-local GitHub Action change to Red review because it executes with its caller's privileges.
 - Route access-control modules in every application subsystem to Red review.
+- Route verb-named authentication and authorization handlers to Red review.
 - Route trusted submission-status helpers to Red review because they run with a status-writing token.
 - Route `migrate` utility names to Red review in the ETL and server subsystems.
 - Add authorization to the Red risk option in the work-unit issue form.
@@ -112,6 +113,7 @@ issue existed.
 - Treat every matching backtick inside an open code span as a closing delimiter, even after a backslash.
 - Scan values on visible HTML input types while excluding hidden and choice-control values.
 - Exclude Python file and path arguments from reader prose while retaining ordinary messages.
+- Exclude patterns passed to recognized Python regular-expression APIs from reader prose.
 - Treat only inline-link labels as substantive submission content while preserving visible autolinks.
 - Accept zero to three spaces before submission headings while masking four-space code blocks.
 - Exclude quoted JavaScript property keys from prose while continuing to scan their values.
@@ -226,6 +228,7 @@ issue existed.
 - A backslash before a closing code-span backtick cannot hide the prose that follows it.
 - Submit and text-input values fail editorial checks, while hidden-input values remain machine data.
 - Python path constructors, file calls, path joins, and path composition remain outside prose checks.
+- Python regular-expression patterns remain machine input while ordinary messages remain visible.
 - An empty Markdown link cannot satisfy a rationale field, while a visible autolink can.
 - A submission heading with three leading spaces passes, while a four-space heading remains code.
 - A quoted JavaScript object key remains inert, while a reader-facing value still fails.
@@ -264,6 +267,7 @@ issue existed.
 - A static template interpolation cannot split a prohibited contraction.
 - Password and authentication-token handlers require Red review, while design-token
   files retain the normal application route.
+- Verb-named authentication and authorization handlers require Red review in each application subsystem.
 - A mutable base ref can move after resolution without changing the classified diff or
   the base passed to the review command.
 - CSSOM payload assignments and calls remain machine syntax, while adjacent reader text
@@ -299,9 +303,9 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass. Startup creates and closes a temporary SQLite database, and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 166 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 167 communication and submission tests |
 | Routing policy | Pass | 44 routing, hook-context, manifest-integrity, and model-route tests |
-| Review policy and model routing | Pass | 33 local-runner tests and independent delivery challenges |
+| Review policy and model routing | Pass | 34 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation, schema validation, and commit-stage and push-stage runs |
 | Workflow syntax | Pass | Actionlint 1.7.11 and YAML parsing |
 | Hosted pull-request CI | Not run | Hosted CI starts after this record enters the commit |
@@ -351,7 +355,8 @@ ACL and RBAC risk routing.
 Examine Python path-variable and path-method propagation.
 Examine destructive `destroy` and `remove` routing.
 Examine Python resource identifiers, heading termination, hook suffix coverage, and the
-Red workflow risk floor. Confirm the deployment reconcile step verifies the selected
+Red workflow risk floor. Examine Python regular-expression pattern classification and
+verb-named authentication and authorization routing. Confirm the deployment reconcile step verifies the selected
 run has an unexpired client artifact before it marks the deployment ready. Confirm
 the Pages concurrency group serializes qualifying runs without cancellation. Confirm
 artifact selection carries tested client output through non-client commits. Confirm
