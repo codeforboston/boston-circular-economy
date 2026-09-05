@@ -255,6 +255,26 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_ignores_javascript_route_literals_but_checks_reader_text(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.tsx"
+            path.write_text(
+                'app.get("/unlock", handler);\n'
+                'router.post("powerful", handler);\n'
+                'const route = createFileRoute(`/robust/${routeId}`);\n'
+                'const url = "https://example.com/scalable";\n'
+                'const title = "Unlock the potential.";\n'
+                'export const link = <a href="/unlock">Unlock the potential.</a>;\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(5, "promotional cliche"), (6, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_checks_reader_text_inside_module_template_expressions(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.ts"

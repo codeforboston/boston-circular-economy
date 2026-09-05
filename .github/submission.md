@@ -32,7 +32,7 @@ issue existed.
 ## Risk and scope
 
 - Risk lane: Yellow
-- In scope: hooks, routed CI, advisory review, tested-artifact deployment, submission standards, prose checks, skills, and model routing.
+- In scope: hooks, routed CI, advisory review, tested-artifact deployment, submission standards, prose checks, skills, model routing, and ETL lint configuration.
 - Out of scope: autonomous approval, autonomous merge, a secret-bearing custom review Action, backend deployment, and production monitoring.
 - Important invariants: Pull requests cannot deploy. Models cannot determine check results. Humans retain accountable decisions.
 
@@ -45,6 +45,7 @@ issue existed.
 - Add code-change standards for ownership, failure, recovery, and refactor boundaries.
 - Add capability defaults for deterministic tools, Luna, Terra, Sol, specialists, and humans.
 - Add self-explanatory implementation and independent review skills.
+- Add the pinned ETL lint toolchain and format existing ETL code without changing its data contracts.
 - Deploy the exact client artifact produced by successful main-branch CI.
 - Import and extend the Library of Context communication layer with Toulmin and ASD-STE100-aligned guidance.
 
@@ -59,6 +60,8 @@ issue existed.
 - A missing or unchanged `.github/submission.md` fails before success is published.
 - Module paths and workflow commands remain outside prose checks while reader-facing strings and comments remain inside.
 - Action references remain outside prose checks while action names, nested values, and comments remain inside.
+- JavaScript route paths remain outside prose checks while reader-facing strings remain inside.
+- Authentication and security workflow paths require Red review.
 - Uncommitted review routing unions staged, unstaged, and untracked paths before applying the risk floor.
 - Unrelated CI completions cannot cancel an active qualifying Pages deployment.
 - List-contained code examples cannot satisfy or invalidate submission fields.
@@ -71,9 +74,9 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | `npm run lint -w server` and `npm run build -w server` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 82 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 83 communication and submission tests |
 | Routing policy | Pass | 32 routing and hook-context tests, policy validation, and model-route samples |
-| Review policy and model routing | Pass | 21 local-runner tests and independent delivery challenges |
+| Review policy and model routing | Pass | 22 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation plus commit-stage and push-stage runs |
 | Workflow syntax | Pass | Actionlint 1.7.11 and YAML parsing |
 | Hosted pull-request CI | Not run | Hosted CI starts after this record enters the commit |

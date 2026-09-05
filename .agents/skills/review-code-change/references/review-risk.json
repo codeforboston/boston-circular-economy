@@ -22,6 +22,16 @@
     "server/**"
   ],
   "red_paths": [
+    ".github/workflows/*auth*",
+    ".github/workflows/*credential*",
+    ".github/workflows/*login*",
+    ".github/workflows/*oauth*",
+    ".github/workflows/*oidc*",
+    ".github/workflows/*permission*",
+    ".github/workflows/*privacy*",
+    ".github/workflows/*secret*",
+    ".github/workflows/*security*",
+    ".github/workflows/*session*",
     "client/src/**/auth.*",
     "client/src/**/auth/**",
     "client/src/**/*authentication*",

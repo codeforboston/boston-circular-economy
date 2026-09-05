@@ -517,14 +517,6 @@ def javascript_string_end(text: str, start: int, quote: str) -> int:
     return min(index, len(text))
 
 
-def copy_js_string(text: str, output: list[str], start: int, quote: str) -> int:
-    """Copy one quoted JavaScript string and return the next source position."""
-
-    end = javascript_string_end(text, start, quote)
-    copy_span(output, text, start, end)
-    return end
-
-
 def javascript_module_specifier(tokens: list[str]) -> bool:
     """Return whether recent code tokens introduce a module specifier."""
 
@@ -535,6 +527,72 @@ def javascript_module_specifier(tokens: list[str]) -> bool:
             and tokens[-2] in {"import", "require"}
             and tokens[-1] == "("
         )
+    )
+
+
+JAVASCRIPT_ROUTE_METHODS = {
+    "all",
+    "delete",
+    "get",
+    "head",
+    "options",
+    "patch",
+    "post",
+    "put",
+    "route",
+    "use",
+}
+JAVASCRIPT_ROUTE_RECEIVERS = {"app", "fastify", "router", "routes", "server"}
+JAVASCRIPT_ROUTE_FUNCTIONS = {
+    "createFileRoute",
+    "createRoute",
+    "navigate",
+    "redirect",
+}
+
+
+def javascript_route_argument(tokens: list[str]) -> bool:
+    """Return whether the next literal is a route API's first argument."""
+
+    if not tokens or tokens[-1] != "(":
+        return False
+    if len(tokens) >= 2 and tokens[-2] in JAVASCRIPT_ROUTE_FUNCTIONS:
+        return True
+    return bool(
+        len(tokens) >= 4
+        and tokens[-2] in JAVASCRIPT_ROUTE_METHODS
+        and tokens[-3] == "."
+        and tokens[-4] in JAVASCRIPT_ROUTE_RECEIVERS
+    )
+
+
+def javascript_identifier_literal(text: str, start: int, end: int) -> bool:
+    """Return whether a literal has the shape of a path, URL, or fragment."""
+
+    value_end = end - 1 if end > start + 1 and text[end - 1] == text[start] else end
+    value = text[start + 1 : value_end]
+    if not value or any(character.isspace() for character in value):
+        return False
+    return bool(
+        value.startswith(("/", "./", "../", "#"))
+        or re.match(r"^[A-Za-z][A-Za-z0-9+.-]*://", value)
+    )
+
+
+def javascript_template_identifier(text: str, start: int) -> bool:
+    """Return whether a template's first literal segment identifies a resource."""
+
+    segment_end = len(text)
+    for delimiter in ("${", "`"):
+        position = text.find(delimiter, start + 1)
+        if position != -1:
+            segment_end = min(segment_end, position)
+    value = text[start + 1 : segment_end]
+    if not value or any(character.isspace() for character in value):
+        return False
+    return bool(
+        value.startswith(("/", "./", "../", "#"))
+        or re.match(r"^[A-Za-z][A-Za-z0-9+.-]*://", value)
     )
 
 
@@ -625,7 +683,9 @@ def copy_jsx_tag_literals(text: str, output: list[str], start: int, end: int) ->
     index = start
     while index < end:
         if text[index] in "'\"":
-            next_index = copy_js_string(text, output, index, text[index])
+            next_index = javascript_string_end(text, index, text[index])
+            if not javascript_identifier_literal(text, index, next_index):
+                copy_span(output, text, index, next_index)
             index = min(next_index, end)
         elif text[index] == "`":
             next_index = mask_js_template(text, output, index)
@@ -691,10 +751,14 @@ def mask_javascript_code(
             continue
         character = text[index]
         if character in "'\"":
-            if javascript_module_specifier(tokens):
-                index = javascript_string_end(text, index, character)
-            else:
-                index = copy_js_string(text, output, index, character)
+            end = javascript_string_end(text, index, character)
+            if not (
+                javascript_module_specifier(tokens)
+                or javascript_route_argument(tokens)
+                or javascript_identifier_literal(text, index, end)
+            ):
+                copy_span(output, text, index, end)
+            index = end
             remember_javascript_token(tokens, "<string>")
             continue
         if character == "`":
@@ -702,7 +766,11 @@ def mask_javascript_code(
                 text,
                 output,
                 index,
-                copy_literal=not javascript_module_specifier(tokens),
+                copy_literal=not (
+                    javascript_module_specifier(tokens)
+                    or javascript_route_argument(tokens)
+                    or javascript_template_identifier(text, index)
+                ),
             )
             remember_javascript_token(tokens, "<template>")
             continue

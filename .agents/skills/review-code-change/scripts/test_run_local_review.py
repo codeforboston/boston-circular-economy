@@ -85,6 +85,31 @@ class LocalReviewRunnerTests(unittest.TestCase):
                     effective_risk("green", str(assessment["risk"])),
                 )
 
+    def test_authentication_workflow_requires_red_review(self) -> None:
+        paths = (
+            ".github/workflows/auth.yml",
+            ".github/workflows/authorization-check.yaml",
+            ".github/workflows/credentials.yml",
+            ".github/workflows/login.yml",
+            ".github/workflows/oauth.yml",
+            ".github/workflows/oidc.yml",
+            ".github/workflows/permissions.yml",
+            ".github/workflows/privacy.yml",
+            ".github/workflows/secrets.yml",
+            ".github/workflows/security-review.yml",
+            ".github/workflows/session.yml",
+        )
+        policy = load_risk_policy()
+
+        for path in paths:
+            with self.subTest(path=path):
+                assessment = infer_minimum_risk([path], policy)
+                self.assertEqual("red", assessment["risk"])
+                self.assertEqual(
+                    "red",
+                    effective_risk("green", str(assessment["risk"])),
+                )
+
     def test_migration_path_requires_red_review(self) -> None:
         paths = (
             "etl/migration.py",
