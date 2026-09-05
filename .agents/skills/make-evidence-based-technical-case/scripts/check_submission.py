@@ -90,11 +90,14 @@ EMPTY_MARKDOWN_LINE = re.compile(
     r"(?:[*_-][ \t]*){3,}|>+|#{1,6})[ \t]*$"
 )
 MARKDOWN_CHECKBOX = re.compile(r"\[[ xX]\]")
-RAW_HTML_TAG = re.compile(r"</?[A-Za-z][^>]*>")
+RAW_HTML_TAG = re.compile(
+    r"</?[A-Za-z][A-Za-z0-9-]*(?:[ \t\r\n][^>]*|/?)>"
+)
 HTML_ENTITY = re.compile(r"&(?:#[0-9]+|#x[0-9A-Fa-f]+|[A-Za-z][A-Za-z0-9]+);")
 INLINE_CODE_SPAN = re.compile(
     r"(?<!`)(?P<ticks>`+)(?!`)(?P<code>[^\r\n]*?)(?<!`)(?P=ticks)(?!`)"
 )
+BLOCKQUOTE_MARKER = re.compile(r"[ ]{0,3}>[ \t]?")
 TEMPLATE_GUIDANCE = (
     "Describe how you tried to prove the change wrong. Include normal, boundary, "
     "failure, and regression cases that apply.",
@@ -164,11 +167,14 @@ def mask_markdown_code_blocks(body: str) -> str:
     fence_length = 0
     for line in body.splitlines(keepends=True):
         content = line.rstrip("\r\n")
+        container_content = content
+        while marker := BLOCKQUOTE_MARKER.match(container_content):
+            container_content = container_content[marker.end() :]
         if fence_character is None:
-            if INDENTED_CODE.match(content):
+            if INDENTED_CODE.match(container_content):
                 output.append("".join("\n" if value == "\n" else " " for value in line))
                 continue
-            match = FENCE_START.match(content)
+            match = FENCE_START.match(container_content)
             if match is None:
                 output.append(line)
                 continue
@@ -177,7 +183,7 @@ def mask_markdown_code_blocks(body: str) -> str:
             fence_length = len(marker)
         elif re.fullmatch(
             rf"[ ]{{0,3}}{re.escape(fence_character)}{{{fence_length},}}[ \t]*",
-            content,
+            container_content,
         ):
             fence_character = None
             fence_length = 0

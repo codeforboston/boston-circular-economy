@@ -384,6 +384,41 @@ class CheckSubmissionTests(unittest.TestCase):
         self.assertIn("missing-label", rules)
         self.assertIn("accountability", rules)
 
+    def test_code_inside_a_blockquote_cannot_fill_a_section(self) -> None:
+        replacements = (
+            "> ```text\n> generated non-evidence\n> ```",
+            ">     generated non-evidence",
+            "> >     generated non-evidence",
+        )
+        for replacement in replacements:
+            with self.subTest(replacement=replacement):
+                body = VALID_BODY.replace(
+                    "- Route lookup through the service.",
+                    replacement,
+                )
+
+                findings = check_submission.check_submission(body)
+
+                self.assertIn(
+                    "What changed",
+                    [
+                        finding.detail
+                        for finding in findings
+                        if finding.rule == "empty-section"
+                    ],
+                )
+
+    def test_markdown_autolinks_are_visible_content(self) -> None:
+        body = VALID_BODY.replace(
+            "- Grounds: The tests pass.",
+            "- Grounds: See <https://example.com/contracts>.",
+        ).replace(
+            "| ETL tests | Pass | `uv run pytest` |",
+            "| ETL tests | Pass | See <https://example.com/test-run>. |",
+        )
+
+        self.assertEqual(check_submission.check_submission(body), [])
+
     def test_issue_exception_is_accepted(self) -> None:
         body = VALID_BODY.replace(
             "Closes #123", "Issue exception: This maintenance work predates the form."
