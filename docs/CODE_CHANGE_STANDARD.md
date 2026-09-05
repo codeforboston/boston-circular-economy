@@ -44,11 +44,11 @@ therefore update the record. Two pull requests at one head use the same record a
 receive the same result, even when their bases differ. Human approval remains a
 separate judgment because a cosmetic edit can satisfy the blob check.
 
-The v1 context freezes its validation and publication predicate. Change the context
-version before changing that result boundary. Migrate the protected-branch rule, then
-retire the earlier context after active pull requests use the new policy. A trigger-only
-coverage correction can retain the context when the predicate and target commit remain
-unchanged.
+The v1 context freezes its terminal validation predicate and target commit. Change the
+context version before changing that result boundary. Migrate the protected-branch
+rule, then retire the earlier context after active pull requests use the new policy.
+Trigger coverage and intermediate-state safety corrections can retain the context when
+the terminal predicate and target commit remain unchanged.
 
 CI cannot decide whether the stated rationale is true or complete. The contributor and
 human reviewer must compare the explanation with the implementation and evidence.

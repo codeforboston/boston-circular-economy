@@ -392,7 +392,7 @@ class LocalReviewRunnerTests(unittest.TestCase):
             submission_workflow,
         )
         self.assertIn("name: Submission policy v1", submission_workflow)
-        self.assertEqual(2, submission_workflow.count("CONTEXT: Submission record v1"))
+        self.assertEqual(1, submission_workflow.count("CONTEXT: Submission record v1"))
         self.assertNotIn("merge_group:", submission_workflow)
         self.assertIn(
             "group: submission-${{ github.event.pull_request.head.sha",
@@ -435,18 +435,22 @@ class LocalReviewRunnerTests(unittest.TestCase):
         self.assertIn("$RUNNER_TEMP/latest-pr.json", submission_workflow)
         self.assertIn("!cancelled()", submission_workflow)
         self.assertIn("cancel-in-progress: false", submission_workflow)
-        self.assertIn("-f state=pending", submission_workflow)
+        self.assertNotIn("-f state=pending", submission_workflow)
+        self.assertEqual(
+            1,
+            submission_workflow.count(
+                '"repos/$GITHUB_REPOSITORY/statuses/$HEAD_SHA"'
+            ),
+        )
         self.assertNotIn("--paginate --slurp", submission_workflow)
         first_live_read = submission_workflow.index(
             'gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER"'
         )
-        pending_status = submission_workflow.index("-f state=pending")
         final_live_read = submission_workflow.index(
             'gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER"',
             first_live_read + 1,
         )
         final_status = submission_workflow.index('-f state="$result"')
-        self.assertLess(first_live_read, pending_status)
         self.assertLess(final_live_read, final_status)
 
     def test_required_status_workflows_handle_pull_request_retargets(self) -> None:

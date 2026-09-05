@@ -19,7 +19,7 @@ issue existed.
 
 ## Decision explanation
 
-- Why this design: One versioned path policy selects checks for local hooks and CI. A committed record and immutable status version make submission results commit-bound. The server workspace declares the dependency owned by its database module.
+- Why this design: One versioned path policy selects checks for local hooks and CI. A committed record and immutable terminal-result boundary make submission results commit-bound. The workflow publishes that result only after its final live-head check. The server workspace declares the dependency owned by its database module.
 - Why not the closest alternative: A mutable pull request body can differ between pull requests that share one status. Reusing a status context across checker revisions can also conflict. Omitting SQLite leaves the server's clean-install contract incomplete.
 - Trade-off accepted: The final head commit must update one versioned record. A validation-result change requires a new status context and branch-rule migration. Native SQLite adds a platform dependency.
 - Revisit when: Use a PR-scoped check when the repository plan supports one. Revisit SQLite when the server selects its production persistence design.
@@ -40,7 +40,7 @@ issue existed.
 - Recovery and rollback: Before merge, close the pull request. After merge, revert the change, remove its required status before retiring the workflow, and redeploy the last successful Pages artifact.
 - In scope: hooks, routed CI, advisory review, tested-artifact deployment, submission standards, prose checks, skills, model routing, ETL lint configuration, and local SQLite server startup.
 - Out of scope: autonomous approval, autonomous merge, a secret-bearing custom review Action, backend deployment, production monitoring, database schema design, and migrations.
-- Important invariants: Pull requests cannot deploy. Models cannot determine check results. One head commit has one submission result. Database initialization fails visibly when its file is unavailable.
+- Important invariants: Pull requests cannot deploy. Models cannot determine check results. One head commit has one terminal submission result. A stale pull request run cannot leave that shared status pending. Database initialization fails visibly when its file is unavailable.
 
 ## What changed
 
@@ -65,6 +65,8 @@ issue existed.
 - Apply the same multiline inline-code boundary to committed submission validation.
 - Keep Python environment keys outside prose checks and decode JavaScript reader strings before checking them.
 - Use one Markdown inline-code parser that keeps escaped backticks visible to both prose and submission checks.
+- Reject an unclosed visible HTML comment in a submission record while allowing comment syntax in code examples.
+- Publish one terminal submission status after the final live-head check instead of publishing an intermediate pending status.
 
 ## Challenge cases
 
@@ -94,6 +96,8 @@ issue existed.
 - List-marker fences stay masked, including tilde fences and nested quotes.
 - Inline-code spans stay masked when matching backticks occur after a line break.
 - Escaped Markdown backticks remain visible punctuation and cannot hide prose or raw HTML.
+- A visible unclosed HTML comment fails submission validation, while the same syntax in a code span or fenced example remains inert.
+- A stale run for one of two pull requests at the same head cannot leave the shared commit status pending.
 - An unclosed list fence stops masking when visible prose leaves the list container.
 - An unclosed quote fence stops masking when the quote depth decreases.
 - A clean server install initializes temporary SQLite and returns `pong` from `/ping`.
@@ -107,7 +111,7 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass; startup creates temporary SQLite and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 104 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 106 communication and submission tests |
 | Routing policy | Pass | 34 routing and hook-context tests, policy validation, and model-route samples |
 | Review policy and model routing | Pass | 25 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation plus commit-stage and push-stage runs |
@@ -128,8 +132,9 @@ I read and understand the submitted diff. I verified the evidence above and rema
 
 ## Review focus and uncertainty
 
-Review the versioned first-parent record boundary, native SQLite lockfile changes, path
-mapping, evidence threshold, model defaults, and protected-branch activation steps.
+Review the versioned first-parent record boundary, terminal-only status publication,
+native SQLite lockfile changes, path mapping, evidence threshold, model defaults, and
+protected-branch activation steps.
 
 The repository has not observed the submission workflow from `main`. A repository
 administrator must configure the named required checks only after the hosted evidence

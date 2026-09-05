@@ -97,11 +97,11 @@ GitHub commit statuses belong to a commit, not to one pull request. The input re
 has that same identity. Two pull requests at one head commit share one result, even
 when their base commits differ. Mutable pull request text does not affect the status.
 
-The `Submission record v1` context freezes its validation and publication predicate. A
-change to that result boundary requires a new versioned context and a protected-branch
-migration. An old workflow revision can then write only its retired context. A
-trigger-only coverage correction can retain the context when the predicate and target
-commit remain unchanged.
+The `Submission record v1` context freezes its terminal validation predicate and target
+commit. A change to that result boundary requires a new versioned context and a
+protected-branch migration. An old workflow revision can then write only its retired
+context. Trigger coverage and intermediate-state safety corrections can retain the
+context when the terminal predicate and target commit remain unchanged.
 
 This status gate is not yet merge-queue compatible. The current workflow does not
 handle `merge_group` or publish `Submission record v1` on the temporary merge-group

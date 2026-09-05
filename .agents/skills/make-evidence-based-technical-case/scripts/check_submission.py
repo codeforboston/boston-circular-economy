@@ -68,6 +68,7 @@ DOCUMENTATION_OPTIONS = (
     "I recorded a follow-up issue for remaining work",
 )
 PLACEHOLDER = re.compile(r"<!--.*?-->", re.DOTALL)
+HTML_COMMENT_OPEN = "<!--"
 REQUIRED_EVIDENCE_CHECKS = (
     "Client lint and build",
     "Server lint and build",
@@ -203,6 +204,20 @@ def expose_inline_code_text(content: str) -> str:
         cursor = closing_end
     output.append(content[cursor:])
     return "".join(output)
+
+
+def has_unclosed_html_comment(content: str) -> bool:
+    """Return whether visible Markdown opens an HTML comment without closing it."""
+
+    cursor = 0
+    while True:
+        opening = content.find(HTML_COMMENT_OPEN, cursor)
+        if opening < 0:
+            return False
+        closing = content.find("-->", opening + len(HTML_COMMENT_OPEN))
+        if closing < 0:
+            return True
+        cursor = closing + len("-->")
 
 
 def has_meaningful_section_content(content: str) -> bool:
@@ -519,11 +534,17 @@ def check_submission(body: str) -> list[SubmissionFinding]:
                     SubmissionFinding("empty-label", f"{section_name}: {label}")
                 )
 
-    if PLACEHOLDER.search(record):
+    record_without_inline_code = mask_inline_code_spans(record)
+    if has_unclosed_html_comment(record_without_inline_code):
+        findings.append(
+            SubmissionFinding(
+                "unclosed-html-comment", "close or remove every HTML comment"
+            )
+        )
+    if PLACEHOLDER.search(record_without_inline_code):
         findings.append(
             SubmissionFinding("template-placeholder", "remove all HTML placeholders")
         )
-    record_without_inline_code = mask_inline_code_spans(record)
     if RAW_HTML_TAG.search(record_without_inline_code):
         findings.append(
             SubmissionFinding("raw-html", "use visible Markdown instead of HTML tags")

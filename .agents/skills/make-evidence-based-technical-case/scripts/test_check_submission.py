@@ -308,6 +308,28 @@ class CheckSubmissionTests(unittest.TestCase):
         rules = [finding.rule for finding in check_submission.check_submission(body)]
         self.assertIn("template-placeholder", rules)
 
+    def test_unclosed_html_comment_fails(self) -> None:
+        body = VALID_BODY.replace("Residents can", "<!-- actor\nResidents can")
+
+        rules = [finding.rule for finding in check_submission.check_submission(body)]
+
+        self.assertIn("unclosed-html-comment", rules)
+
+    def test_html_comment_syntax_in_code_is_not_a_comment(self) -> None:
+        bodies = (
+            VALID_BODY.replace(
+                "Review the stale-data boundary.",
+                "Review the `<!-- actor` example.",
+            ),
+            VALID_BODY.replace(
+                "Review the stale-data boundary.",
+                "Review this example:\n\n```html\n<!-- actor\n```",
+            ),
+        )
+        for body in bodies:
+            with self.subTest(body=body):
+                self.assertEqual(check_submission.check_submission(body), [])
+
     def test_invalid_risk_lane_fails(self) -> None:
         body = VALID_BODY.replace("Risk lane: Yellow", "Risk lane: Medium")
         rules = [finding.rule for finding in check_submission.check_submission(body)]

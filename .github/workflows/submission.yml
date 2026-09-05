@@ -40,12 +40,10 @@ jobs:
         id: check
         continue-on-error: true
         env:
-          CONTEXT: Submission record v1
           EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-          TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" \
             > "$RUNNER_TEMP/current-pr.json"
@@ -53,12 +51,6 @@ jobs:
             --arg expected_head "$EXPECTED_HEAD_SHA" \
             '.head.sha == $expected_head' \
             "$RUNNER_TEMP/current-pr.json"
-          gh api --method POST \
-            "repos/$GITHUB_REPOSITORY/statuses/$HEAD_SHA" \
-            -f state=pending \
-            -f context="$CONTEXT" \
-            -f description="Checking the committed submission record." \
-            -f target_url="$TARGET_URL"
           gh api "repos/$GITHUB_REPOSITORY/commits/$HEAD_SHA" \
             > "$RUNNER_TEMP/head-commit.json"
           HEAD_PARENT_SHA="$(

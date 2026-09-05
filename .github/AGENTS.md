@@ -41,15 +41,17 @@ This file adds review rules for workflows and repository automation. Apply the r
 - Flag a status writer when an older run can overwrite a newer pull request result.
   Safe path: compare the live head with the triggering event before publication.
   Serialize status writers by head commit, do not cancel an active writer, and suppress
-  publication from a manually canceled run.
+  publication from a manually canceled run. Publish only a terminal result after the
+  final live-head check. A shared commit status must not be stranded at `pending` by a
+  stale pull request run.
 - Flag a commit status whose result depends on mutable pull request metadata. Two pull
   requests at one head commit share statuses but can have different titles, bodies, or
   labels. Safe path: validate a versioned record fetched from the exact head as inert
   data. Require the head commit to change that record from its first parent. This rule
   keeps the result intrinsic to the head and rejects inherited evidence.
-- Flag a change to versioned submission validation or publication logic that retains
-  its status context. A shared head can receive conflicting results from two checker
-  revisions. Safe path: create a new context version, migrate the protected-branch
-  rule, and retire the old context after open pull requests move to the new policy. A
-  trigger-only change can keep the context when it does not change the predicate or
-  target commit.
+- Flag a change to a versioned submission context's terminal validation predicate or
+  target commit. A shared head can receive conflicting terminal results from two
+  checker revisions. Safe path: create a new context version, migrate the
+  protected-branch rule, and retire the old context after open pull requests move to
+  the new policy. Trigger coverage and intermediate-state safety corrections can keep
+  the context when they do not change the terminal predicate or target commit.
