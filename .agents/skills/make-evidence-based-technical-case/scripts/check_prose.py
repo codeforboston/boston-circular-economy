@@ -1296,6 +1296,109 @@ def python_resource_identifier_spans(
     return sorted(set(spans))
 
 
+def python_command_argument_spans(
+    text: str, offsets: list[int]
+) -> list[tuple[int, int]]:
+    """Locate static process-command arguments, which are machine input."""
+
+    try:
+        syntax_tree = ast.parse(text)
+    except SyntaxError:
+        return []
+
+    lines = text.splitlines(keepends=True)
+
+    def source_offset(line: int, byte_column: int) -> int:
+        line_prefix = lines[line - 1].encode("utf-8")[:byte_column]
+        character_column = len(line_prefix.decode("utf-8"))
+        return offsets[line - 1] + character_column
+
+    def string_span(node: ast.AST) -> tuple[int, int] | None:
+        if not isinstance(node, (ast.Constant, ast.JoinedStr)):
+            return None
+        if isinstance(node, ast.Constant) and not isinstance(node.value, (str, bytes)):
+            return None
+        if node.end_lineno is None or node.end_col_offset is None:
+            return None
+        return (
+            source_offset(node.lineno, node.col_offset),
+            source_offset(node.end_lineno, node.end_col_offset),
+        )
+
+    module_calls = {
+        "subprocess": {
+            "Popen",
+            "call",
+            "check_call",
+            "check_output",
+            "getoutput",
+            "getstatusoutput",
+            "run",
+        },
+        "os": {"popen", "system"},
+        "asyncio": {"create_subprocess_exec", "create_subprocess_shell"},
+    }
+    module_aliases = {module: {module} for module in module_calls}
+    function_aliases: dict[str, tuple[str, str]] = {}
+    for node in ast.walk(syntax_tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                if alias.name in module_aliases:
+                    module_aliases[alias.name].add(alias.asname or alias.name)
+        elif isinstance(node, ast.ImportFrom) and node.module in module_calls:
+            for alias in node.names:
+                if alias.name in module_calls[node.module]:
+                    function_aliases[alias.asname or alias.name] = (
+                        node.module,
+                        alias.name,
+                    )
+
+    def command_call(node: ast.Call) -> tuple[str, str] | None:
+        if isinstance(node.func, ast.Name):
+            return function_aliases.get(node.func.id)
+        if not isinstance(node.func, ast.Attribute) or not isinstance(
+            node.func.value, ast.Name
+        ):
+            return None
+        receiver = node.func.value.id
+        for module, aliases in module_aliases.items():
+            if receiver in aliases:
+                return (module, node.func.attr)
+        return None
+
+    def command_values(node: ast.AST) -> list[ast.AST]:
+        if isinstance(node, (ast.List, ast.Tuple, ast.Set)):
+            return [value for element in node.elts for value in command_values(element)]
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
+            return command_values(node.left) + command_values(node.right)
+        return [node]
+
+    spans: list[tuple[int, int]] = []
+    for node in ast.walk(syntax_tree):
+        if not isinstance(node, ast.Call):
+            continue
+        identity = command_call(node)
+        if identity is None:
+            continue
+        module, function = identity
+        if function not in module_calls[module]:
+            continue
+        candidates = list(node.args)
+        if module != "asyncio" or function != "create_subprocess_exec":
+            candidates = candidates[:1]
+        if not candidates:
+            candidates.extend(
+                keyword.value for keyword in node.keywords if keyword.arg == "args"
+            )
+        for candidate in candidates:
+            spans.extend(
+                span
+                for value in command_values(candidate)
+                if (span := string_span(value)) is not None
+            )
+    return sorted(set(spans))
+
+
 def token_mapping_key_spans(
     tokens: list[tokenize.TokenInfo], offsets: list[int]
 ) -> list[tuple[int, int]]:
@@ -1372,6 +1475,7 @@ def mask_python_code(text: str) -> str:
             python_mapping_key_spans(text, offsets)
             + python_environment_key_spans(text, offsets)
             + python_resource_identifier_spans(text, offsets)
+            + python_command_argument_spans(text, offsets)
             + token_mapping_key_spans(tokens, offsets)
         )
     )

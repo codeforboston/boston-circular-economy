@@ -1228,6 +1228,33 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_ignores_python_commands_but_checks_adjacent_reader_text(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "commands.py"
+            path.write_text(
+                "import subprocess\n"
+                "import subprocess as sp\n"
+                "from subprocess import run as launch\n"
+                "import os as operating_system\n"
+                "from asyncio import create_subprocess_shell as launch_async\n"
+                'subprocess.run("echo first; echo second", shell=True)\n'
+                'sp.Popen(["sh", "-c", "echo first; echo second"])\n'
+                'launch(args="echo first; echo second", shell=True)\n'
+                'operating_system.system("echo first; echo second")\n'
+                'launch_async("echo first; echo second")\n'
+                'subprocess.run(f"{\'echo first; echo second\'}", shell=True)\n'
+                'section.run("Unlock the potential.")\n'
+                'message = "Do not deploy; wait."\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(12, "promotional cliche"), (13, "semicolon")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_ignores_python_mapping_keys_but_checks_string_values(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.py"
