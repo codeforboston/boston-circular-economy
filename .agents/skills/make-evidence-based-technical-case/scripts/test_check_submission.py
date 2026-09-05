@@ -228,6 +228,18 @@ class CheckSubmissionTests(unittest.TestCase):
         ]
         self.assertIn("Decision explanation: Revisit when:", details)
 
+    def test_top_level_heading_ends_a_required_section(self) -> None:
+        body = VALID_BODY.replace(
+            "## Technical case\n\n",
+            "## Technical case\n\n# Unrelated\n\n",
+        )
+
+        findings = check_submission.check_submission(body)
+        details = [finding.detail for finding in findings]
+
+        self.assertIn("Technical case", details)
+        self.assertIn("Technical case: Grounds:", details)
+
     def test_label_inside_multiline_inline_code_does_not_count(self) -> None:
         body = VALID_BODY.replace(
             "- Rebuttal: Provider data can become stale.",

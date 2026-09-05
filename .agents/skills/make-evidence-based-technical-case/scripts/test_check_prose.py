@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import re
 import tempfile
 import unittest
 from pathlib import Path
 
 from check_prose import (
     DEFAULT_PROFILE,
+    SCANNED_SUFFIXES,
     editorial_findings,
     load_profile,
     markdown_findings,
@@ -14,6 +16,29 @@ from check_prose import (
 
 
 class ProseCheckerTests(unittest.TestCase):
+    def test_precommit_filter_includes_every_scanned_suffix(self) -> None:
+        repository_root = Path(__file__).resolve().parents[4]
+        configuration = (repository_root / ".pre-commit-config.yaml").read_text(
+            encoding="utf-8"
+        )
+        hook = re.search(
+            r"- id: technical-prose(?P<body>.*?)(?=\n      - id:|\Z)",
+            configuration,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(hook)
+        file_filter = re.search(r"files: '(?P<pattern>[^']+)'", hook.group("body"))
+        self.assertIsNotNone(file_filter)
+        pattern = re.compile(file_filter.group("pattern"))
+
+        unmatched = {
+            suffix
+            for suffix in SCANNED_SUFFIXES
+            if pattern.search(f"reader-facing{suffix}") is None
+        }
+
+        self.assertEqual(set(), unmatched)
+
     def test_rejects_formulaic_ai_opening(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.md"

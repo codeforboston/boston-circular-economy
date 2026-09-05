@@ -81,6 +81,7 @@ REQUIRED_EVIDENCE_CHECKS = (
 EVIDENCE_HEADER = ("Check", "Result", "Evidence or reason not run")
 ALLOWED_EVIDENCE_RESULTS = {"pass", "fail", "not run", "not affected"}
 SECTION_HEADING = re.compile(r"(?m)^[ ]{0,3}##[ \t]+(.+?)[ \t]*$")
+SECTION_BOUNDARY = re.compile(r"(?m)^[ ]{0,3}#{1,2}(?:[ \t]+|$)")
 TRAILING_HEADING_MARKS = re.compile(r"[ \t]+#+[ \t]*$")
 FENCE_START = re.compile(r"(?P<marker>`{3,}|~{3,})(?P<info>[^\r\n]*)$")
 ATX_BLOCK_START = re.compile(r"#{1,6}(?:[ \t]+|$)")
@@ -550,10 +551,14 @@ def section_map(body: str, value_source: str | None = None) -> dict[str, str]:
     if len(source) != len(body):
         raise ValueError("section source must preserve structural offsets")
     headings = list(SECTION_HEADING.finditer(body))
+    boundaries = list(SECTION_BOUNDARY.finditer(body))
     sections: dict[str, str] = {}
-    for index, heading in enumerate(headings):
+    for heading in headings:
         start = heading.end()
-        end = headings[index + 1].start() if index + 1 < len(headings) else len(body)
+        end = next(
+            (boundary.start() for boundary in boundaries if boundary.start() >= start),
+            len(body),
+        )
         sections[normalize_section_name(heading.group(1))] = source[start:end]
     return sections
 
