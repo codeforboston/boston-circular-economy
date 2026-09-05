@@ -143,6 +143,35 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_ignores_reference_identifiers_but_checks_visible_labels(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "example.md"
+            path.write_text(
+                "[Map][unlock]\n"
+                "[unlock]: https://example.com\n"
+                "[Unlock the potential.][proof]\n"
+                "[proof]: https://example.com\n"
+                "[Map][powerful]\n"
+                "[Guide][don't]\n"
+                "[don't]: https://example.com\n",
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+            sentence_findings = markdown_findings(
+                path,
+                load_profile(DEFAULT_PROFILE),
+            )
+
+        self.assertEqual(
+            [(3, "promotional cliche"), (5, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+        self.assertEqual(
+            [(5, "vague-term")],
+            [(finding.line, finding.rule) for finding in sentence_findings],
+        )
+
     def test_rejects_contractions_in_markdown_headings(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "example.md"
@@ -374,6 +403,22 @@ class ProseCheckerTests(unittest.TestCase):
             [(finding.line, finding.rule) for finding in findings],
         )
 
+    def test_checks_labels_only_for_html_elements_that_render_them(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "index.html"
+            path.write_text(
+                '<div label="Unlock the potential."></div>\n'
+                '<optgroup label="Unlock the potential."></optgroup>\n',
+                encoding="utf-8",
+            )
+
+            findings = editorial_findings(path)
+
+        self.assertEqual(
+            [(2, "promotional cliche")],
+            [(finding.line, finding.rule) for finding in findings],
+        )
+
     def test_checks_visible_html_input_values_only(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "index.html"
@@ -579,7 +624,8 @@ class ProseCheckerTests(unittest.TestCase):
                 'aria-label="Unlock the potential." />;\n'
                 'const hidden = <input type="hidden" value="Unlock the potential." />;\n'
                 'const submit = <input type="submit" value="Unlock the potential." />;\n'
-                'const titled = <div title={"Unlock the potential."} />;\n',
+                'const titled = <div title={"Unlock the potential."} />;\n'
+                'const group = <optgroup label="Unlock the potential." />;\n',
                 encoding="utf-8",
             )
 
@@ -590,6 +636,7 @@ class ProseCheckerTests(unittest.TestCase):
                 (1, "promotional cliche"),
                 (3, "promotional cliche"),
                 (4, "promotional cliche"),
+                (5, "promotional cliche"),
             ],
             [(finding.line, finding.rule) for finding in findings],
         )

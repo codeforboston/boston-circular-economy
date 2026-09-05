@@ -504,6 +504,31 @@ class CheckSubmissionTests(unittest.TestCase):
         self.assertIn("empty-label", rules)
         self.assertEqual([], check_submission.check_submission(visible_autolink))
 
+    def test_empty_reference_link_is_not_substantive_content(self) -> None:
+        empty_reference = VALID_BODY.replace(
+            "- Grounds: The tests pass.",
+            "- Grounds: [][proof]\n\n[proof]: https://example.com",
+        )
+
+        rules = [
+            finding.rule
+            for finding in check_submission.check_submission(empty_reference)
+        ]
+
+        self.assertIn("empty-label", rules)
+
+        unresolved_reference = VALID_BODY.replace(
+            "- Grounds: The tests pass.",
+            "- Grounds: [][proof]",
+        )
+        self.assertNotIn(
+            "empty-label",
+            [
+                finding.rule
+                for finding in check_submission.check_submission(unresolved_reference)
+            ],
+        )
+
     def test_allows_up_to_three_spaces_before_submission_headings(self) -> None:
         indented = re.sub(r"(?m)^## ", "   ## ", VALID_BODY)
 

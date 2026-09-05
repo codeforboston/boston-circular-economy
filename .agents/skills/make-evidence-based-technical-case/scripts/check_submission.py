@@ -88,6 +88,10 @@ THEMATIC_OR_SETEXT_LINE = re.compile(
     r"(?:=+[ \t]*|-+[ \t]*|(?:\*[ \t]*){3,}|(?:_[ \t]*){3,})$"
 )
 REFERENCE_DEFINITION = re.compile(r"\[[^]\r\n]+]:[ \t]*\S")
+REFERENCE_LINK = re.compile(r"\[(?P<label>[^]\r\n]*)]\[(?P<reference>[^]\r\n]*)]")
+REFERENCE_DEFINITION_LINE = re.compile(
+    r"(?m)^[ ]{0,3}\[(?P<label>[^]\r\n]+)]:[^\r\n]*(?:\r?\n|$)"
+)
 LIST_ITEM_START = re.compile(
     r"^(?P<indent>[ \t]*)(?:[-+*]|\d{1,9}[.)])(?P<spacing>[ \t]+)"
 )
@@ -130,8 +134,8 @@ def normalize_section_name(name: str) -> str:
     return " ".join(without_marks.split()).casefold()
 
 
-def escaped_backtick(content: str, index: int) -> bool:
-    """Return whether an odd backslash run escapes one backtick."""
+def markdown_character_is_escaped(content: str, index: int) -> bool:
+    """Return whether an odd backslash run escapes one Markdown character."""
 
     backslashes = 0
     index -= 1
@@ -150,7 +154,7 @@ def inline_code_spans(content: str) -> list[tuple[int, int, int, int]]:
         opening_start = content.find("`", cursor)
         if opening_start < 0:
             break
-        if escaped_backtick(content, opening_start):
+        if markdown_character_is_escaped(content, opening_start):
             cursor = opening_start + 1
             continue
         opening_end = opening_start
@@ -250,8 +254,8 @@ def expose_markdown_link_labels(content: str) -> str:
         link_end = markdown_inline_link_end(content, marker + 2)
         if (
             label_start < 0
-            or escaped_backtick(content, label_start)
-            or escaped_backtick(content, marker)
+            or markdown_character_is_escaped(content, label_start)
+            or markdown_character_is_escaped(content, marker)
             or link_end is None
         ):
             cursor = marker + 2
@@ -260,6 +264,61 @@ def expose_markdown_link_labels(content: str) -> str:
         output[label_start:link_end] = " " * (link_end - label_start)
         output[label_start + 1 : label_start + 1 + len(label)] = label
         cursor = link_end
+    return "".join(output)
+
+
+def normalize_markdown_reference_identifier(identifier: str) -> str:
+    """Apply Markdown's case-insensitive, collapsed-space label comparison."""
+
+    return " ".join(identifier.split()).casefold()
+
+
+def markdown_reference_identifiers(content: str) -> set[str]:
+    """Return identifiers supplied by reference-definition lines."""
+
+    return {
+        normalize_markdown_reference_identifier(match.group("label"))
+        for match in REFERENCE_DEFINITION_LINE.finditer(content)
+    }
+
+
+def mask_markdown_reference_controls(
+    content: str,
+    defined_references: set[str] | None = None,
+) -> str:
+    """Hide controls for resolved links while retaining visible labels and titles."""
+
+    output = list(content)
+    identifiers = (
+        markdown_reference_identifiers(content)
+        if defined_references is None
+        else defined_references
+    )
+    for match in REFERENCE_LINK.finditer(content):
+        if markdown_character_is_escaped(content, match.start()):
+            continue
+        label = match.group("label")
+        reference = match.group("reference") or label
+        if normalize_markdown_reference_identifier(reference) not in identifiers:
+            continue
+        output[match.start() : match.end()] = " " * (match.end() - match.start())
+        label_start = match.start() + 1
+        output[label_start : label_start + len(label)] = label
+    for match in REFERENCE_DEFINITION_LINE.finditer(content):
+        label_end = content.find("]", match.start(), match.end()) + 1
+        output[match.start() : label_end] = " " * (label_end - match.start())
+    return "".join(output)
+
+
+def mask_markdown_reference_definition_lines(content: str) -> str:
+    """Hide reference definitions that cannot supply visible evidence."""
+
+    output = list(content)
+    for match in REFERENCE_DEFINITION_LINE.finditer(content):
+        output[match.start() : match.end()] = "".join(
+            "\n" if character == "\n" else " "
+            for character in content[match.start() : match.end()]
+        )
     return "".join(output)
 
 
@@ -277,7 +336,10 @@ def has_unclosed_html_comment(content: str) -> bool:
         cursor = closing + len("-->")
 
 
-def has_meaningful_section_content(content: str) -> bool:
+def has_meaningful_section_content(
+    content: str,
+    defined_references: set[str] | None = None,
+) -> bool:
     """Require substantive text after removing template and Markdown controls."""
 
     without_placeholders = PLACEHOLDER.sub("", content)
@@ -287,7 +349,19 @@ def has_meaningful_section_content(content: str) -> bool:
     without_checkboxes = MARKDOWN_CHECKBOX.sub("", without_guidance)
     visible_inline_code = expose_inline_code_text(without_checkboxes)
     visible_link_labels = expose_markdown_link_labels(visible_inline_code)
-    without_html = RAW_HTML_TAG.sub("", visible_link_labels)
+    reference_identifiers = (
+        markdown_reference_identifiers(visible_link_labels)
+        if defined_references is None
+        else defined_references
+    )
+    without_reference_definitions = mask_markdown_reference_definition_lines(
+        visible_link_labels
+    )
+    visible_reference_labels = mask_markdown_reference_controls(
+        without_reference_definitions,
+        reference_identifiers,
+    )
+    without_html = RAW_HTML_TAG.sub("", visible_reference_labels)
     decoded_entities = html.unescape(without_html)
     without_empty_markdown = EMPTY_MARKDOWN_LINE.sub("", decoded_entities)
     return any(character.isalnum() for character in without_empty_markdown)
@@ -540,7 +614,9 @@ def evidence_row_cells(line: str) -> list[str] | None:
 
 
 def evidence_findings(
-    content: str, structural_content: str | None = None
+    content: str,
+    structural_content: str | None = None,
+    defined_references: set[str] | None = None,
 ) -> list[SubmissionFinding]:
     findings: list[SubmissionFinding] = []
     lines = content.splitlines()
@@ -608,7 +684,8 @@ def evidence_findings(
         normalized_check = " ".join(check.split()).casefold()
         supplied_checks[normalized_check] = supplied_checks.get(normalized_check, 0) + 1
         if not all(
-            has_meaningful_section_content(value) for value in (check, result, evidence)
+            has_meaningful_section_content(value, defined_references)
+            for value in (check, result, evidence)
         ):
             findings.append(
                 SubmissionFinding(
@@ -642,6 +719,9 @@ def check_submission(body: str) -> list[SubmissionFinding]:
     findings: list[SubmissionFinding] = []
     record = mask_markdown_code_blocks(body)
     structural_record = mask_inline_code_spans(record)
+    reference_identifiers = markdown_reference_identifiers(
+        PLACEHOLDER.sub("", structural_record)
+    )
     sections = section_map(structural_record, record)
     structural_sections = section_map(structural_record)
     section_names = [
@@ -656,7 +736,10 @@ def check_submission(body: str) -> list[SubmissionFinding]:
             findings.append(SubmissionFinding("duplicate-section", name))
         if count == 0:
             findings.append(SubmissionFinding("missing-section", name))
-        elif not has_meaningful_section_content(sections[section_key]):
+        elif not has_meaningful_section_content(
+            sections[section_key],
+            reference_identifiers,
+        ):
             findings.append(SubmissionFinding("empty-section", name))
 
     for section_name, labels in REQUIRED_SECTION_LABELS.items():
@@ -673,7 +756,10 @@ def check_submission(body: str) -> list[SubmissionFinding]:
                 findings.append(
                     SubmissionFinding("duplicate-label", f"{section_name}: {label}")
                 )
-            elif not has_meaningful_section_content(values[0]):
+            elif not has_meaningful_section_content(
+                values[0],
+                reference_identifiers,
+            ):
                 findings.append(
                     SubmissionFinding("empty-label", f"{section_name}: {label}")
                 )
@@ -798,7 +884,11 @@ def check_submission(body: str) -> list[SubmissionFinding]:
     evidence_key = normalize_section_name("Evidence")
     if evidence_key in sections:
         findings.extend(
-            evidence_findings(sections[evidence_key], structural_sections[evidence_key])
+            evidence_findings(
+                sections[evidence_key],
+                structural_sections[evidence_key],
+                reference_identifiers,
+            )
         )
     if ACCOUNTABILITY_PARAGRAPH.search(structural_record) is None:
         findings.append(

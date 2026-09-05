@@ -92,6 +92,8 @@ issue existed.
 - Exclude quoted JavaScript property keys from prose while continuing to scan their values.
 - Scan only reader-facing JSX attributes and visible native-input values.
 - Classify raw HTML inside Markdown so visible text and alt text remain subject to prose checks.
+- Keep Markdown reference labels and titles visible while masking resolved identifiers and definition labels.
+- Scan `label` attributes only on HTML and JSX elements that render them.
 
 ## Challenge cases
 
@@ -149,6 +151,9 @@ issue existed.
 - A quoted JavaScript object key remains inert, while a reader-facing value still fails.
 - JSX test IDs and class names remain inert, while accessible labels and visible input values fail.
 - A raw Markdown image source remains inert, while its alt text remains visible to the checker.
+- An empty reference link cannot satisfy a rationale field, even when its definition supplies an identifier and destination.
+- Resolved Markdown reference identifiers remain inert. Unresolved syntax, visible link labels, and optional titles remain subject to prose checks.
+- Labels on `optgroup`, `option`, and `track` remain visible, while unrelated element labels remain machine data.
 - Red review stops for specialist and human escalation, including ETL credential and secret paths.
 
 ## Evidence
@@ -158,7 +163,7 @@ issue existed.
 | Client lint and build | Pass | `npm run lint -w client` and `npm run build -w client` |
 | Server lint and build | Pass | Lint and build pass. Startup creates and closes a temporary SQLite database, and `/ping` returns `pong` |
 | ETL tests | Pass | Ruff checks pass and pytest reports 7 passed |
-| Technical prose and editorial style | Pass | Full repository scan and 127 communication and submission tests |
+| Technical prose and editorial style | Pass | Full repository scan and 130 communication and submission tests |
 | Routing policy | Pass | 37 routing, hook-context, and manifest-discovery tests plus model-route samples |
 | Review policy and model routing | Pass | 25 local-runner tests and independent delivery challenges |
 | Local hook configuration | Pass | Pre-commit validation, schema validation, and commit-stage and push-stage runs |
@@ -181,8 +186,9 @@ I read and understand the submitted diff. I verified the evidence above and rema
 
 Review the versioned first-parent record boundary and terminal-only status publication.
 Examine Markdown fence, paragraph, table, image-alt, and code-span boundaries. Examine
-link-label and heading boundaries, HTML and JSX attribute classification, and JavaScript
-property keys. Examine Python resource identifiers and the Red workflow risk floor.
+link-label, reference-link, and heading boundaries. Examine element-specific HTML and
+JSX attribute classification and JavaScript property keys. Examine Python resource
+identifiers and the Red workflow risk floor.
 Check SQLite shutdown order, native lockfile changes, path mapping, evidence threshold,
 model defaults, and protected-branch activation steps.
 

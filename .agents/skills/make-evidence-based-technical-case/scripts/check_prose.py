@@ -12,7 +12,11 @@ from dataclasses import dataclass
 from html.parser import HTMLParser
 from pathlib import Path
 
-from check_submission import mask_inline_code_spans, mask_markdown_code_blocks
+from check_submission import (
+    mask_inline_code_spans,
+    mask_markdown_code_blocks,
+    mask_markdown_reference_controls,
+)
 
 DEFAULT_PROFILE = (
     Path(__file__).resolve().parents[1] / "references" / "asd-ste100-software.yaml"
@@ -75,6 +79,7 @@ HTML_READER_ATTRIBUTES = {
     "placeholder",
     "title",
 }
+HTML_READER_LABEL_ELEMENTS = {"optgroup", "option", "track"}
 HTML_READER_VALUE_INPUT_TYPES = {
     "",
     "button",
@@ -243,7 +248,7 @@ def prose_files(inputs: list[Path]) -> list[Path]:
 
 
 def plain_markdown(line: str) -> str:
-    text = mask_html_code(line)
+    text = mask_html_code(mask_markdown_reference_controls(line))
     text = IMAGE.sub(r"\1", text)
     text = LINK.sub(r"\1", text)
     text = URL.sub(" URL ", text)
@@ -410,7 +415,9 @@ def markdown_findings(path: Path, profile: dict[str, object]) -> list[Finding]:
         paragraph.clear()
 
     source_text = path.read_text(encoding="utf-8")
-    masked_lines = mask_markdown_code(source_text).splitlines()
+    masked_lines = mask_markdown_reference_controls(
+        mask_markdown_code(source_text)
+    ).splitlines()
     for number, (raw_line, checked_line) in enumerate(
         zip(source_text.splitlines(), masked_lines, strict=True), start=1
     ):
@@ -498,7 +505,9 @@ def editorial_findings(path: Path) -> list[Finding]:
     suffix = path.suffix.casefold()
     if suffix == ".md":
         text = mask_html_code(
-            mask_markdown_link_destinations(mask_markdown_code(source_text))
+            mask_markdown_reference_controls(
+                mask_markdown_link_destinations(mask_markdown_code(source_text))
+            )
         )
     else:
         text = mask_source_code(path, source_text)
@@ -590,6 +599,8 @@ class ReaderFacingHtmlParser(HTMLParser):
                 in HTML_READER_VALUE_INPUT_TYPES
             ):
                 reader_attributes.add("value")
+            if normalized_tag in HTML_READER_LABEL_ELEMENTS:
+                reader_attributes.add("label")
             self.expose_attributes(reader_attributes)
 
     def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
@@ -1406,7 +1417,12 @@ def jsx_reader_attributes(text: str, start: int, end: int) -> set[str]:
     attributes = set(HTML_READER_ATTRIBUTES)
     tag_text = text[start:end]
     tag_match = JSX_TAG_NAME.match(tag_text)
-    if tag_match is None or tag_match.group("name") != "input":
+    if tag_match is None:
+        return attributes
+    tag_name = tag_match.group("name")
+    if tag_name in HTML_READER_LABEL_ELEMENTS:
+        attributes.add("label")
+    if tag_name != "input":
         return attributes
 
     type_match = JSX_STATIC_INPUT_TYPE.search(tag_text)
