@@ -7,9 +7,12 @@ from etl.sources.google_places.normalizer import GooglePlacesNormalizer
 from etl.sources.google_places.querier import GooglePlacesQuerier
 from etl.sources.openstreetmap.normalizer import OpenStreetMapNormalizer
 from etl.sources.openstreetmap.querier import OpenStreetMapQuerier
+from etl.sources.openstreetmap.queries import CLOTHING_FILTERS
 
 google_places_query_args: list[dict[str, str]] = []
-openstreetmap_query_args: list[dict[str, str]] = []
+openstreetmap_query_args: list[dict[str, str]] = [
+    {"tag_filters": CLOTHING_FILTERS},
+]
 
 
 def main() -> None:
@@ -33,7 +36,7 @@ def main() -> None:
 
     for args in openstreetmap_query_args:
         # queries the OpenStreetMap API
-        querier = OpenStreetMapQuerier()
+        querier = OpenStreetMapQuerier(**args)
         raw_locations = querier.fetch()
 
         # maps OpenStreetMap payloads to the shared schema
