@@ -10,7 +10,6 @@ USER_AGENT = "boston-circular-economy-etl/0.1 (https://github.com/codeforboston/
 RETRYABLE = {429, 502, 503, 504}
 
 
-# based on coordinates set in repair-00.json in /data-explorations
 DEFAULT_BBOX = (42.2, -71.2, 42.5, -70.9)  # south, west, north, east
 
 
@@ -41,7 +40,8 @@ class OpenStreetMapQuerier(BaseQuerier):
                 headers={"User-Agent": USER_AGENT},
             )
             if response.status_code == 200:
-                return response.json()["elements"]
+                body = response.json()
+                return body["elements"]
             if response.status_code in RETRYABLE and attempt < attempts - 1:
                 time.sleep(2 ** attempt * 5)   # 5s, 10s
                 continue
