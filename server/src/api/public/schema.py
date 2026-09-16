@@ -19,10 +19,16 @@ class LocationResponse(BaseModel):
     address: str  # TODO: restrict to etl.dtos.Address
 
 
+class SearchResult(BaseModel):
+    location: LocationResponse
+    item: str  # TODO: restrict to etl.dtos.ItemCategory
+    activity: str
+
+
 class SearchResponse(BaseModel):
-    locations: list[LocationResponse] = Field(
+    results: list[SearchResult] = Field(
         default_factory=list,
-        description="A list of locations matching the search criteria.",
+        description="A list of search results matching the search criteria.",
     )
 
 

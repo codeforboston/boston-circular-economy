@@ -1,8 +1,6 @@
-from typing import Annotated
+from fastapi import APIRouter, status
 
-from fastapi import APIRouter, Depends, status
-
-from .schema import FeedbackInput, SearchInput, SearchResponse
+from .schema import FeedbackInput, SearchResponse
 
 router = APIRouter()
 
@@ -13,8 +11,8 @@ async def ping():
 
 
 @router.get("/search", response_model=SearchResponse)
-async def search_location(search_input: Annotated[SearchInput, Depends()]):
-    # TODO: Implement the logic for searching items by category or query
+async def search():
+    # TODO: return tuples[location, item, activity]
     return SearchResponse()
 
 
