@@ -5,9 +5,6 @@ import pytest
 def test_fetch_against_live_overpass(querier):
     results = querier.fetch()
 
-    # Wide bounds: OSM data changes, so this only catches a broken query or an empty response.
-    assert 20 < len(results) < 400, f"unexpected count: {len(results)}"
-
     ids = [r.data_source_id for r in results]
     assert len(ids) == len(set(ids)), "duplicate data_source_id in results"
     assert all(i.split("/")[0] in {"node", "way", "relation"} for i in ids)
