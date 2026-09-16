@@ -15,9 +15,7 @@ class Activity(str, Enum):
     REPAIR_FREE = "repair_free"  # repair your items here for free (e.g. repair cafes)
     REPAIR_PAID = "repair_paid"  # repair your items here for a fee
     DONATION_DROP = "donation_drop"  # drop off items you no longer need
-    DONATION_PICK = (
-        "donation_pick"  # pick up free items (e.g. free stores, give-away shops)
-    )
+    DONATION_PICK = "donation_pick"  # pick up free items (e.g. free stores, give-away shops)
     RESALE_BUY = "resale_buy"  # buy secondhand items here
     RESALE_SELL = "resale_sell"  # sell or consign your items here
     REFILL = "refill"  # refill your own container here
