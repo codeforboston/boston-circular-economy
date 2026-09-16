@@ -1,0 +1,9 @@
+[project]
+name = "boston-circular-economy-contracts"
+version = "0.1.0"
+description = "Shared contracts for boston circular economy project"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic>=2.13.5",
+]
