@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "ETL pipeline for collecting and normalizing circular economy location data"
 requires-python = ">=3.14"
 dependencies = [
+    "boston-circular-economy-contracts",
     "pydantic>=2.13.3",
 ]
 
@@ -25,3 +26,6 @@ where = ["src"]
 
 [tool.uv]
 package = true
+
+[tool.uv.sources]
+boston-circular-economy-contracts = { path = "../packages/contracts", editable = true}
