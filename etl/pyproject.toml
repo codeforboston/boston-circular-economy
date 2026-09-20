@@ -5,6 +5,7 @@ description = "ETL pipeline for collecting and normalizing circular economy loca
 requires-python = ">=3.14"
 dependencies = [
     "httpx>=0.28.1",
+    "boston-circular-economy-contracts",
     "pydantic>=2.13.3",
 ]
 
@@ -27,3 +28,6 @@ where = ["src"]
 
 [tool.uv]
 package = true
+
+[tool.uv.sources]
+boston-circular-economy-contracts = { path = "../packages/contracts", editable = true}
