@@ -7,6 +7,10 @@ dependencies = [
     "httpx>=0.28.1",
     "boston-circular-economy-contracts",
     "pydantic>=2.13.3",
+    "phonenumbers>=9.0.37",
+    "rapidfuzz>=3.14.5",
+    "cleanco>=2.3",
+    "usaddress-scourgify>=0.7.1",
 ]
 
 [project.scripts]
