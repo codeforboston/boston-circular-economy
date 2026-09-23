@@ -1,6 +1,5 @@
 import pytest
-
-from etl.dtos import Address, Contact, DataSource
+from contracts.domain import Address, Contact, DataSource
 from etl.merge_processor import MergeProcessor
 
 

@@ -1,0 +1,19 @@
+[project]
+name = "boston-circular-economy-data-store"
+version = "0.1.0"
+description = "Local data store for boston circular economy project"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+	"boston-circular-economy-contracts",
+]
+
+[tool.uv.sources]
+boston-circular-economy-contracts = { path = "../contracts", editable = true }
+
+[build-system]
+requires = ["uv_build>=0.10,<0.11"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "data_store"

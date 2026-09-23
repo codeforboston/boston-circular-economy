@@ -6,6 +6,7 @@ requires-python = ">=3.14"
 dependencies = [
     "httpx>=0.28.1",
     "boston-circular-economy-contracts",
+    "boston-circular-economy-data-store",
     "pydantic>=2.13.3",
     "phonenumbers>=9.0.37",
     "rapidfuzz>=3.14.5",
@@ -34,4 +35,5 @@ where = ["src"]
 package = true
 
 [tool.uv.sources]
-boston-circular-economy-contracts = { path = "../packages/contracts", editable = true}
+boston-circular-economy-contracts = { path = "../packages/contracts", editable = true }
+boston-circular-economy-data-store = { path = "../packages/data-store", editable = true }
