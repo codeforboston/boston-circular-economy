@@ -1,4 +1,5 @@
-from etl.dtos import DataSource, RawLocation
+from contracts.domain import DataSource
+from etl.dtos import RawLocation
 from etl.sources.openstreetmap.querier import DEFAULT_BBOX, OpenStreetMapQuerier
 
 NODE_WITH_NAME = {

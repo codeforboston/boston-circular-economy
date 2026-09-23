@@ -1,8 +1,9 @@
 import os
 from pathlib import Path
 
-from etl.dtos import DataSource
-from etl.local_data_store import LocalDataStore
+from contracts.domain import DataSource
+from data_store import LocalDataStore
+
 from etl.sources.google_places.normalizer import GooglePlacesNormalizer
 from etl.sources.google_places.querier import GooglePlacesQuerier
 from etl.sources.openstreetmap.normalizer import OpenStreetMapNormalizer

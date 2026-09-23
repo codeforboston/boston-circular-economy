@@ -1,9 +1,8 @@
 import json
 
 import pytest
-
-from etl.dtos import DataSource
-from etl.local_data_store import LocalDataStore
+from contracts.domain import DataSource
+from data_store import LocalDataStore
 
 
 @pytest.fixture
