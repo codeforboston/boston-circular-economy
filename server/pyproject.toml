@@ -5,6 +5,10 @@ description = "API and server-side logic for Boston Circular Economy"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "boston-circular-economy-contracts",
     "fastapi>=0.141.1",
     "uvicorn>=0.52.4",
 ]
+
+[tool.uv.sources]
+boston-circular-economy-contracts = { path = "../packages/contracts" }

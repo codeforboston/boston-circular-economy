@@ -12,7 +12,6 @@ async def ping():
 
 @router.get("/search", response_model=SearchResponse)
 async def search():
-    # TODO: return tuples[location, item, activity]
     return SearchResponse()
 
 
