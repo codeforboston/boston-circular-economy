@@ -1,6 +1,6 @@
 # Data Store
 
-`boston-circular-economy-data-store` provides `BaseDataStore` and inherited data store (ef. `LocalDataStore`).
+`boston-circular-economy-data-store` provides `BaseDataStore` and data-store implementations (e.g. `LocalDataStore`).
 
 ## Install in a local project
 **(Already done for `etl/` and `server/`. Skip this section to *# Add more data store* section)**
