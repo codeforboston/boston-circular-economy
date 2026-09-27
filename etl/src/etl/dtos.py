@@ -48,7 +48,7 @@ class Availability(BaseModel):
 
 # NormalizedLocation is the boundary between the normalizer and the data store.
 class NormalizedLocation(BaseModel):
-    data_source_id: str
+    data_source_id: str  # unique identifier for this location within its data source
     data_source: DataSource
     name: str
     lat: float
