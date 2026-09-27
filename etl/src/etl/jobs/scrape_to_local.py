@@ -7,11 +7,11 @@ from etl.sources.google_places.normalizer import GooglePlacesNormalizer
 from etl.sources.google_places.querier import GooglePlacesQuerier
 from etl.sources.openstreetmap.normalizer import OpenStreetMapNormalizer
 from etl.sources.openstreetmap.querier import OpenStreetMapQuerier
-from etl.sources.openstreetmap.queries import CLOTHING_FILTERS
+from etl.sources.openstreetmap.queries import CLOTHING_FILTERS, ORGANIZATION_FILTERS
 
 google_places_query_args: list[dict[str, str]] = []
 openstreetmap_query_args: list[dict[str, str]] = [
-    {"tag_filters": CLOTHING_FILTERS},
+     {"tag_filters": CLOTHING_FILTERS + ORGANIZATION_FILTERS},
 ]
 
 
