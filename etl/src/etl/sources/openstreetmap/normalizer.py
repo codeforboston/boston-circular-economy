@@ -1,5 +1,7 @@
+from contracts.domain import NormalizedLocation
+
 from etl.base.normalizer import BaseNormalizer
-from etl.dtos import RawLocation, NormalizedLocation
+from etl.dtos import RawLocation
 
 
 class OpenStreetMapNormalizer(BaseNormalizer):

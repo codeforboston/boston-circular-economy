@@ -1,4 +1,6 @@
-from etl.dtos import DataSource, MatchGroup, NormalizedLocation
+from contracts.domain import DataSource, NormalizedLocation
+
+from etl.dtos import MatchGroup
 from etl.field_merge import merge_group
 from etl.matching import MAX_MATCH_DISTANCE_M, MatchTier, evaluate_pair, haversine_m
 

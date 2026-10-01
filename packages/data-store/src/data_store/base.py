@@ -1,12 +1,10 @@
 from abc import ABC, abstractmethod
 
-from etl.dtos import DataSource, NormalizedLocation
+from contracts.domain import DataSource, NormalizedLocation
 
 
 class BaseDataStore(ABC):
-    """
-    Subclass this to implement a new storage backend.
-    """
+    """Subclass this to implement a new storage backend."""
 
     @abstractmethod
     def write_source_snapshot(
@@ -30,5 +28,5 @@ class BaseDataStore(ABC):
         self,
         output_locations: list[NormalizedLocation],
     ) -> None:
-        """Persist the merged locations after they've been deduplicated across sources."""
+        """Persist merged locations after deduplication across sources."""
         pass

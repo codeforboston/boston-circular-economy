@@ -1,11 +1,13 @@
-from etl.base.data_store import BaseDataStore
-from etl.dtos import DataSource, NormalizedLocation
-from pathlib import Path
 import json
+from pathlib import Path
 
-loc_key = 'locations'
+from contracts.domain import DataSource, NormalizedLocation
 
-# Reads and writes normalized locations to a local file.
+from data_store.base import BaseDataStore
+
+loc_key = "locations"
+
+
 class LocalDataStore(BaseDataStore):
 
     def __init__(self, data_dir: Path) -> None:

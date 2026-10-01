@@ -5,10 +5,9 @@ from enum import Enum
 
 import phonenumbers
 from cleanco import basename
+from contracts.domain import NormalizedLocation
 from rapidfuzz import fuzz
 from scourgify.normalize import normalize_addr_str
-
-from etl.dtos import NormalizedLocation
 
 # Tuning constants
 MAX_MATCH_DISTANCE_M = 150  # meters

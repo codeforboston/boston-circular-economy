@@ -23,6 +23,18 @@ class Activity(str, Enum):
     RENTING = "renting"  # rent items here for a fee
     LENDING = "lending"  # lend your items out through this location
 
+class Contact(BaseModel):
+    phone: str | None = None
+    email: str | None = None
+    website: str | None = None
+    social: str | None = None
+
+
+# The supported data sources for local service providers.
+class DataSource(str, Enum):
+    GOOGLE_PLACES = "google_places"
+    OPENSTREETMAP = "openstreetmap"
+
 
 class ItemCategory(str, Enum):
     SHOES = "shoes"
@@ -31,3 +43,26 @@ class ItemCategory(str, Enum):
     BOOKS = "books"
     FURNITURE = "furniture"
     TOOLS = "tools"
+
+class Service(BaseModel):
+    activity: Activity
+    item_category: ItemCategory
+
+
+class Availability(BaseModel):
+    opening_hours: str | None = None
+    is_persistent: bool = True
+
+
+# NormalizedLocation is the boundary between the normalizer and the data store.
+class NormalizedLocation(BaseModel):
+    data_source_id: str  # unique identifier for this location within its data source
+    data_source: DataSource
+    name: str
+    lat: float
+    lon: float
+    address: Address
+    contact: Contact
+    services: list[Service]
+    availability: Availability
+    last_verified: str | None = None

@@ -1,7 +1,11 @@
+import time
 from datetime import datetime, timezone
-import httpx, time
+
+import httpx
+from contracts.domain import DataSource
+
 from etl.base.querier import BaseQuerier
-from etl.dtos import DataSource, RawLocation
+from etl.dtos import RawLocation
 
 OVERPASS_URL = "https://overpass-api.de/api/interpreter"
 # Overpass asks clients to identify themselves.
