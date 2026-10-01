@@ -1,0 +1,252 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1300" viewBox="0 0 1600 1300">
+<rect x="0" y="0" width="1600" height="1300" rx="0" fill="#F2F5F7" stroke="none" stroke-width="0" opacity="1.0"/>
+<rect x="0" y="0" width="1600" height="168" rx="0" fill="#0B2237" stroke="none" stroke-width="0" opacity="1.0"/>
+<text x="48" y="58" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:17px;fill:#F5A623;font-weight:600;text-anchor:start;letter-spacing:3px;">CODE FOR BOSTON  ·  CIRCULAR ECONOMY</text>
+<text x="48" y="112" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:44px;fill:#FFFFFF;font-weight:700;text-anchor:start;">Client architecture</text>
+<text x="48" y="146" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:20px;fill:#A9BCCB;font-weight:400;text-anchor:start;">How the directory structure supports UI, maps, data, and security</text>
+<rect x="40" y="200" width="540" height="880" rx="16" fill="#FFFFFF" stroke="#DCE3E9" stroke-width="1.5" opacity="1.0"/>
+<text x="68" y="244" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:22px;fill:#1C2B3A;font-weight:700;text-anchor:start;">Directory map</text>
+<circle cx="68" cy="266" r="6" fill="#288BE4"/>
+<text x="82" y="271" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:14px;fill:#5D7185;font-weight:400;text-anchor:start;">UI</text>
+<circle cx="186" cy="266" r="6" fill="#12936B"/>
+<text x="200" y="271" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:14px;fill:#5D7185;font-weight:400;text-anchor:start;">domain</text>
+<circle cx="304" cy="266" r="6" fill="#7C3AED"/>
+<text x="318" y="271" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:14px;fill:#5D7185;font-weight:400;text-anchor:start;">services</text>
+<circle cx="422" cy="266" r="6" fill="#8A99A8"/>
+<text x="436" y="271" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:14px;fill:#5D7185;font-weight:400;text-anchor:start;">platform</text>
+<text x="82" y="304" style="font-family:'DejaVu Sans Mono', monospace;font-size:16.5px;fill:#0B2237;font-weight:600;text-anchor:start;">client/</text>
+<line x1="76" y1="310" x2="76" y2="328" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="76" y1="322" x2="86" y2="322" stroke="#D5DDE4" stroke-width="1.5"/>
+<circle cx="94" cy="322" r="6" fill="#8A99A8"/>
+<text x="108" y="330" style="font-family:'DejaVu Sans Mono', monospace;font-size:16.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">package.json</text>
+<text x="242.0" y="330" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:14.5px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">· third-party deps</text>
+<line x1="76" y1="336" x2="76" y2="354" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="76" y1="348" x2="86" y2="348" stroke="#D5DDE4" stroke-width="1.5"/>
+<circle cx="94" cy="348" r="6" fill="#8A99A8"/>
+<text x="108" y="356" style="font-family:'DejaVu Sans Mono', monospace;font-size:16.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">components.json</text>
+<text x="272.0" y="356" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:14.5px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">· shadcn config</text>
+<line x1="76" y1="362" x2="76" y2="380" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="76" y1="374" x2="86" y2="374" stroke="#D5DDE4" stroke-width="1.5"/>
+<circle cx="94" cy="374" r="6" fill="#8A99A8"/>
+<text x="108" y="382" style="font-family:'DejaVu Sans Mono', monospace;font-size:16.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">vite.config.ts</text>
+<text x="262.0" y="382" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:14.5px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">· build + alias</text>
+<line x1="76" y1="388" x2="76" y2="406" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="76" y1="400" x2="86" y2="400" stroke="#D5DDE4" stroke-width="1.5"/>
+<circle cx="94" cy="400" r="6" fill="#8A99A8"/>
+<text x="108" y="408" style="font-family:'DejaVu Sans Mono', monospace;font-size:16.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">tsconfig.app.json</text>
+<text x="292.0" y="408" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:14.5px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">· path alias</text>
+<line x1="76" y1="414" x2="76" y2="432" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="76" y1="426" x2="86" y2="426" stroke="#D5DDE4" stroke-width="1.5"/>
+<text x="108" y="434" style="font-family:'DejaVu Sans Mono', monospace;font-size:16.5px;fill:#0B2237;font-weight:600;text-anchor:start;">src/</text>
+<line x1="76" y1="440" x2="76" y2="458" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="102" y1="440" x2="102" y2="458" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="102" y1="452" x2="112" y2="452" stroke="#D5DDE4" stroke-width="1.5"/>
+<circle cx="120" cy="452" r="6" fill="#8A99A8"/>
+<text x="134" y="460" style="font-family:'DejaVu Sans Mono', monospace;font-size:16.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">main.tsx</text>
+<text x="228.0" y="460" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:14.5px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">· entry</text>
+<line x1="76" y1="466" x2="76" y2="484" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="102" y1="466" x2="102" y2="484" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="102" y1="478" x2="112" y2="478" stroke="#D5DDE4" stroke-width="1.5"/>
+<circle cx="120" cy="478" r="6" fill="#288BE4"/>
+<text x="134" y="486" style="font-family:'DejaVu Sans Mono', monospace;font-size:16.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">index.css</text>
+<text x="238.0" y="486" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:14.5px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">· theme tokens</text>
+<line x1="76" y1="492" x2="76" y2="510" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="102" y1="492" x2="102" y2="510" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="102" y1="504" x2="112" y2="504" stroke="#D5DDE4" stroke-width="1.5"/>
+<circle cx="120" cy="504" r="6" fill="#8A99A8"/>
+<text x="134" y="512" style="font-family:'DejaVu Sans Mono', monospace;font-size:16.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">routeTree.gen.ts</text>
+<text x="308.0" y="512" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:14.5px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">· generated</text>
+<line x1="76" y1="518" x2="76" y2="536" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="102" y1="518" x2="102" y2="536" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="102" y1="530" x2="112" y2="530" stroke="#D5DDE4" stroke-width="1.5"/>
+<circle cx="120" cy="530" r="6" fill="#7C3AED"/>
+<text x="134" y="538" style="font-family:'DejaVu Sans Mono', monospace;font-size:16.5px;fill:#0B2237;font-weight:600;text-anchor:start;">lib/</text>
+<line x1="76" y1="544" x2="76" y2="562" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="102" y1="544" x2="102" y2="562" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="128" y1="544" x2="128" y2="562" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="128" y1="556" x2="138" y2="556" stroke="#D5DDE4" stroke-width="1.5"/>
+<circle cx="146" cy="556" r="6" fill="#7C3AED"/>
+<text x="160" y="564" style="font-family:'DejaVu Sans Mono', monospace;font-size:16.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">utils.ts</text>
+<text x="254.0" y="564" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:14.5px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">· cn() helper</text>
+<line x1="76" y1="570" x2="76" y2="588" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="102" y1="570" x2="102" y2="588" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="128" y1="570" x2="128" y2="588" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="128" y1="582" x2="138" y2="582" stroke="#D5DDE4" stroke-width="1.5"/>
+<circle cx="146" cy="582" r="6" fill="#7C3AED"/>
+<text x="160" y="590" style="font-family:'DejaVu Sans Mono', monospace;font-size:16.5px;fill:#0B2237;font-weight:600;text-anchor:start;">api/</text>
+<text x="214.0" y="590" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:14.5px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">· typed server calls</text>
+<line x1="76" y1="596" x2="76" y2="614" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="102" y1="596" x2="102" y2="614" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="128" y1="596" x2="128" y2="614" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="128" y1="608" x2="138" y2="608" stroke="#D5DDE4" stroke-width="1.5"/>
+<circle cx="146" cy="608" r="6" fill="#7C3AED"/>
+<text x="160" y="616" style="font-family:'DejaVu Sans Mono', monospace;font-size:16.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">config.ts</text>
+<text x="264.0" y="616" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:14.5px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">· runtime config</text>
+<line x1="76" y1="622" x2="76" y2="640" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="102" y1="622" x2="102" y2="640" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="102" y1="634" x2="112" y2="634" stroke="#D5DDE4" stroke-width="1.5"/>
+<text x="134" y="642" style="font-family:'DejaVu Sans Mono', monospace;font-size:16.5px;fill:#0B2237;font-weight:600;text-anchor:start;">components/</text>
+<line x1="76" y1="648" x2="76" y2="666" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="102" y1="648" x2="102" y2="666" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="128" y1="648" x2="128" y2="666" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="128" y1="660" x2="138" y2="660" stroke="#D5DDE4" stroke-width="1.5"/>
+<circle cx="146" cy="660" r="6" fill="#288BE4"/>
+<text x="160" y="668" style="font-family:'DejaVu Sans Mono', monospace;font-size:16.5px;fill:#0B2237;font-weight:600;text-anchor:start;">ui/</text>
+<text x="204.0" y="668" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:14.5px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">· design system</text>
+<line x1="76" y1="674" x2="76" y2="692" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="102" y1="674" x2="102" y2="692" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="128" y1="674" x2="128" y2="692" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="154" y1="674" x2="154" y2="692" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="154" y1="686" x2="164" y2="686" stroke="#D5DDE4" stroke-width="1.5"/>
+<circle cx="172" cy="686" r="6" fill="#288BE4"/>
+<text x="186" y="694" style="font-family:'DejaVu Sans Mono', monospace;font-size:16.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">button.tsx</text>
+<line x1="76" y1="700" x2="76" y2="718" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="102" y1="700" x2="102" y2="718" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="128" y1="700" x2="128" y2="718" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="154" y1="700" x2="154" y2="718" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="154" y1="712" x2="164" y2="712" stroke="#D5DDE4" stroke-width="1.5"/>
+<circle cx="172" cy="712" r="6" fill="#288BE4"/>
+<text x="186" y="720" style="font-family:'DejaVu Sans Mono', monospace;font-size:16.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">input.tsx</text>
+<line x1="76" y1="726" x2="76" y2="744" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="102" y1="726" x2="102" y2="744" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="128" y1="726" x2="128" y2="744" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="154" y1="726" x2="154" y2="744" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="154" y1="738" x2="164" y2="738" stroke="#D5DDE4" stroke-width="1.5"/>
+<circle cx="172" cy="738" r="6" fill="#288BE4"/>
+<text x="186" y="746" style="font-family:'DejaVu Sans Mono', monospace;font-size:16.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">card.tsx</text>
+<line x1="76" y1="752" x2="76" y2="770" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="102" y1="752" x2="102" y2="770" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="128" y1="752" x2="128" y2="770" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="128" y1="764" x2="138" y2="764" stroke="#D5DDE4" stroke-width="1.5"/>
+<circle cx="146" cy="764" r="6" fill="#12936B"/>
+<text x="160" y="772" style="font-family:'DejaVu Sans Mono', monospace;font-size:16.5px;fill:#0B2237;font-weight:600;text-anchor:start;">map/</text>
+<text x="214.0" y="772" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:14.5px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">· domain</text>
+<line x1="76" y1="778" x2="76" y2="796" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="102" y1="778" x2="102" y2="796" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="128" y1="778" x2="128" y2="796" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="154" y1="778" x2="154" y2="796" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="154" y1="790" x2="164" y2="790" stroke="#D5DDE4" stroke-width="1.5"/>
+<circle cx="172" cy="790" r="6" fill="#12936B"/>
+<text x="186" y="798" style="font-family:'DejaVu Sans Mono', monospace;font-size:16.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">MapView.tsx</text>
+<line x1="76" y1="804" x2="76" y2="822" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="102" y1="804" x2="102" y2="822" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="128" y1="804" x2="128" y2="822" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="154" y1="804" x2="154" y2="822" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="154" y1="816" x2="164" y2="816" stroke="#D5DDE4" stroke-width="1.5"/>
+<circle cx="172" cy="816" r="6" fill="#12936B"/>
+<text x="186" y="824" style="font-family:'DejaVu Sans Mono', monospace;font-size:16.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">markers.tsx</text>
+<line x1="76" y1="830" x2="76" y2="848" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="102" y1="830" x2="102" y2="848" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="102" y1="842" x2="112" y2="842" stroke="#D5DDE4" stroke-width="1.5"/>
+<circle cx="120" cy="842" r="6" fill="#288BE4"/>
+<text x="134" y="850" style="font-family:'DejaVu Sans Mono', monospace;font-size:16.5px;fill:#0B2237;font-weight:600;text-anchor:start;">pages/</text>
+<text x="208.0" y="850" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:14.5px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">· screens</text>
+<line x1="76" y1="856" x2="76" y2="874" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="102" y1="856" x2="102" y2="874" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="128" y1="856" x2="128" y2="874" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="128" y1="868" x2="138" y2="868" stroke="#D5DDE4" stroke-width="1.5"/>
+<circle cx="146" cy="868" r="6" fill="#288BE4"/>
+<text x="160" y="876" style="font-family:'DejaVu Sans Mono', monospace;font-size:16.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">__root.tsx</text>
+<text x="274.0" y="876" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:14.5px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">· layout</text>
+<line x1="76" y1="882" x2="76" y2="900" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="102" y1="882" x2="102" y2="900" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="128" y1="882" x2="128" y2="900" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="128" y1="894" x2="138" y2="894" stroke="#D5DDE4" stroke-width="1.5"/>
+<circle cx="146" cy="894" r="6" fill="#288BE4"/>
+<text x="160" y="902" style="font-family:'DejaVu Sans Mono', monospace;font-size:16.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">index.tsx</text>
+<text x="264.0" y="902" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:14.5px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">· home</text>
+<line x1="76" y1="908" x2="76" y2="926" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="102" y1="908" x2="102" y2="926" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="128" y1="908" x2="128" y2="926" stroke="#D5DDE4" stroke-width="1.5"/>
+<line x1="128" y1="920" x2="138" y2="920" stroke="#D5DDE4" stroke-width="1.5"/>
+<circle cx="146" cy="920" r="6" fill="#288BE4"/>
+<text x="160" y="928" style="font-family:'DejaVu Sans Mono', monospace;font-size:16.5px;fill:#0B2237;font-weight:600;text-anchor:start;">dev/</text>
+<text x="214.0" y="928" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:14.5px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">· prototypes</text>
+<rect x="616" y="200" width="944" height="880" rx="16" fill="#FFFFFF" stroke="#DCE3E9" stroke-width="1.5" opacity="1.0"/>
+<text x="644" y="244" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:22px;fill:#1C2B3A;font-weight:700;text-anchor:start;">Layer map</text>
+<text x="644" y="270" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:15px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">Each layer imports only from the layer below it.</text>
+<rect x="640" y="292" width="896" height="118" rx="12" fill="#E7F1FD" stroke="#288BE4" stroke-width="1.5" opacity="1.0"/>
+<circle cx="664" cy="326" r="7" fill="#288BE4"/>
+<text x="680" y="332" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:19px;fill:#1C2B3A;font-weight:700;text-anchor:start;">Screens</text>
+<text x="782" y="332" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:15px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">src/pages/</text>
+<rect x="664" y="348" width="249.6" height="34" rx="17" fill="#FFFFFF" stroke="#C9D4DD" stroke-width="1.2" opacity="1.0"/>
+<text x="788.8" y="371" style="font-family:'DejaVu Sans Mono', monospace;font-size:14.5px;fill:#1C2B3A;font-weight:500;text-anchor:middle;">__root.tsx — shared layout</text>
+<rect x="923.6" y="348" width="163.6" height="34" rx="17" fill="#FFFFFF" stroke="#C9D4DD" stroke-width="1.2" opacity="1.0"/>
+<text x="1005.4" y="371" style="font-family:'DejaVu Sans Mono', monospace;font-size:14.5px;fill:#1C2B3A;font-weight:500;text-anchor:middle;">index.tsx — home</text>
+<rect x="1097.2" y="348" width="292.59999999999997" height="34" rx="17" fill="#FFFFFF" stroke="#C9D4DD" stroke-width="1.2" opacity="1.0"/>
+<text x="1243.5" y="371" style="font-family:'DejaVu Sans Mono', monospace;font-size:14.5px;fill:#1C2B3A;font-weight:500;text-anchor:middle;">dev/ — prototypes (not shipped)</text>
+<path d="M1079.0,414 l9,10 l9,-10" fill="none" stroke="#5D7185" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="1088.0" y="444" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:14px;fill:#5D7185;font-weight:400;text-anchor:middle;">imports from</text>
+<text x="664" y="482" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:19px;fill:#1C2B3A;font-weight:700;text-anchor:start;">Components</text>
+<text x="788" y="482" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:15px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">src/components/</text>
+<rect x="640.0" y="496" width="440.0" height="144" rx="12" fill="#E7F1FD" stroke="#288BE4" stroke-width="1.5" opacity="1.0"/>
+<circle cx="664.0" cy="522" r="7" fill="#288BE4"/>
+<text x="680.0" y="528" style="font-family:'DejaVu Sans Mono', monospace;font-size:17px;fill:#1C2B3A;font-weight:700;text-anchor:start;">ui/ — design system</text>
+<text x="680.0" y="554" style="font-family:'DejaVu Sans Mono', monospace;font-size:14.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">•  button.tsx</text>
+<text x="680.0" y="577" style="font-family:'DejaVu Sans Mono', monospace;font-size:14.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">•  input.tsx</text>
+<text x="680.0" y="600" style="font-family:'DejaVu Sans Mono', monospace;font-size:14.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">•  card.tsx</text>
+<text x="680.0" y="626" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:13.5px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">shadcn + Fleet · one file per component</text>
+<rect x="1096.0" y="496" width="440.0" height="144" rx="12" fill="#E4F5EE" stroke="#12936B" stroke-width="1.5" opacity="1.0"/>
+<circle cx="1120.0" cy="522" r="7" fill="#12936B"/>
+<text x="1136.0" y="528" style="font-family:'DejaVu Sans Mono', monospace;font-size:17px;fill:#1C2B3A;font-weight:700;text-anchor:start;">map/ — domain</text>
+<text x="1136.0" y="554" style="font-family:'DejaVu Sans Mono', monospace;font-size:14.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">•  MapView.tsx</text>
+<text x="1136.0" y="577" style="font-family:'DejaVu Sans Mono', monospace;font-size:14.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">•  markers.tsx</text>
+<text x="1136.0" y="626" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:13.5px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">built from ui/ primitives</text>
+<path d="M1079.0,656 l9,10 l9,-10" fill="none" stroke="#5D7185" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="1088.0" y="686" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:14px;fill:#5D7185;font-weight:400;text-anchor:middle;">imports from</text>
+<text x="664" y="724" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:19px;fill:#1C2B3A;font-weight:700;text-anchor:start;">Services</text>
+<text x="766" y="724" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:15px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">src/lib/  +  packages/</text>
+<rect x="640.0" y="738" width="440.0" height="144" rx="12" fill="#EFE9FB" stroke="#7C3AED" stroke-width="1.5" opacity="1.0"/>
+<circle cx="664.0" cy="764" r="7" fill="#7C3AED"/>
+<text x="680.0" y="770" style="font-family:'DejaVu Sans Mono', monospace;font-size:17px;fill:#1C2B3A;font-weight:700;text-anchor:start;">src/lib/</text>
+<text x="680.0" y="796" style="font-family:'DejaVu Sans Mono', monospace;font-size:14.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">•  utils.ts — cn()</text>
+<text x="680.0" y="819" style="font-family:'DejaVu Sans Mono', monospace;font-size:14.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">•  api/ — typed fetch</text>
+<text x="680.0" y="842" style="font-family:'DejaVu Sans Mono', monospace;font-size:14.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">•  config.ts</text>
+<text x="680.0" y="868" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:13.5px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">cross-cutting client code</text>
+<rect x="1096.0" y="738" width="440.0" height="144" rx="12" fill="#EFE9FB" stroke="#7C3AED" stroke-width="1.5" opacity="1.0"/>
+<circle cx="1120.0" cy="764" r="7" fill="#7C3AED"/>
+<text x="1136.0" y="770" style="font-family:'DejaVu Sans Mono', monospace;font-size:17px;fill:#1C2B3A;font-weight:700;text-anchor:start;">packages/</text>
+<text x="1136.0" y="796" style="font-family:'DejaVu Sans Mono', monospace;font-size:14.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">•  shared types</text>
+<text x="1136.0" y="868" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:13.5px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">one contract, client + server</text>
+<path d="M1079.0,898 l9,10 l9,-10" fill="none" stroke="#5D7185" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="1088.0" y="928" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:14px;fill:#5D7185;font-weight:400;text-anchor:middle;">imports from</text>
+<rect x="640" y="940" width="896" height="118" rx="12" fill="#E9EDF1" stroke="#8A99A8" stroke-width="1.5" opacity="1.0"/>
+<circle cx="664" cy="974" r="7" fill="#8A99A8"/>
+<text x="680" y="980" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:19px;fill:#1C2B3A;font-weight:700;text-anchor:start;">Platform</text>
+<text x="782" y="980" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:15px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">config &amp; entry</text>
+<rect x="664" y="996" width="129.2" height="34" rx="17" fill="#FFFFFF" stroke="#C9D4DD" stroke-width="1.2" opacity="1.0"/>
+<text x="728.6" y="1019" style="font-family:'DejaVu Sans Mono', monospace;font-size:14.5px;fill:#1C2B3A;font-weight:500;text-anchor:middle;">package.json</text>
+<rect x="803.2" y="996" width="146.39999999999998" height="34" rx="17" fill="#FFFFFF" stroke="#C9D4DD" stroke-width="1.2" opacity="1.0"/>
+<text x="876.4000000000001" y="1019" style="font-family:'DejaVu Sans Mono', monospace;font-size:14.5px;fill:#1C2B3A;font-weight:500;text-anchor:middle;">vite.config.ts</text>
+<rect x="959.6" y="996" width="172.2" height="34" rx="17" fill="#FFFFFF" stroke="#C9D4DD" stroke-width="1.2" opacity="1.0"/>
+<text x="1045.7" y="1019" style="font-family:'DejaVu Sans Mono', monospace;font-size:14.5px;fill:#1C2B3A;font-weight:500;text-anchor:middle;">tsconfig.app.json</text>
+<rect x="1141.8" y="996" width="172.2" height="34" rx="17" fill="#FFFFFF" stroke="#C9D4DD" stroke-width="1.2" opacity="1.0"/>
+<text x="1227.8999999999999" y="1019" style="font-family:'DejaVu Sans Mono', monospace;font-size:14.5px;fill:#1C2B3A;font-weight:500;text-anchor:middle;">index.css — theme</text>
+<rect x="1324.0" y="996" width="94.8" height="34" rx="17" fill="#FFFFFF" stroke="#C9D4DD" stroke-width="1.2" opacity="1.0"/>
+<text x="1371.4" y="1019" style="font-family:'DejaVu Sans Mono', monospace;font-size:14.5px;fill:#1C2B3A;font-weight:500;text-anchor:middle;">main.tsx</text>
+<rect x="40" y="1108" width="1520" height="150" rx="16" fill="#0B2237" stroke="none" stroke-width="0" opacity="1.0"/>
+<text x="68" y="1144" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:20px;fill:#FFFFFF;font-weight:700;text-anchor:start;">Request flow — keys never reach the browser</text>
+<rect x="80" y="1160" width="430" height="86" rx="12" fill="#FFFFFF" stroke="none" stroke-width="0" opacity="1.0"/>
+<text x="100" y="1192" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:18px;fill:#0B2237;font-weight:700;text-anchor:start;">Browser app</text>
+<text x="100" y="1214" style="font-family:'DejaVu Sans Mono', monospace;font-size:13.5px;fill:#5D7185;font-weight:400;text-anchor:start;">client/ bundle</text>
+<text x="280" y="1192" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:13.5px;fill:#5D7185;font-weight:400;text-anchor:start;">No secrets ship here.</text>
+<text x="280" y="1214" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:13.5px;fill:#5D7185;font-weight:400;text-anchor:start;">Only public VITE_ values.</text>
+<line x1="518" y1="1203" x2="558" y2="1203" stroke="#F5A623" stroke-width="3"/>
+<path d="M548,1195 l12,8 l-12,8" fill="none" stroke="#F5A623" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="568" y="1160" width="430" height="86" rx="12" fill="#F5A623" stroke="none" stroke-width="0" opacity="0.16"/>
+<rect x="568" y="1160" width="430" height="86" rx="12" fill="none" stroke="#F5A623" stroke-width="2.5"/>
+<text x="588" y="1192" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:18px;fill:#0B2237;font-weight:700;text-anchor:start;">FastAPI server</text>
+<text x="588" y="1214" style="font-family:'DejaVu Sans Mono', monospace;font-size:13.5px;fill:#5D7185;font-weight:400;text-anchor:start;">server/</text>
+<text x="768" y="1192" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:13.5px;fill:#5D7185;font-weight:400;text-anchor:start;">Holds API keys.</text>
+<text x="768" y="1214" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:13.5px;fill:#5D7185;font-weight:400;text-anchor:start;">Proxies Google calls.</text>
+<rect x="892" y="1172" width="92" height="26" rx="13" fill="#F5A623" stroke="none" stroke-width="0" opacity="1.0"/>
+<text x="938.0" y="1190" style="font-family:'DejaVu Sans Mono', monospace;font-size:13.5px;fill:#0B2237;font-weight:700;text-anchor:middle;">ADR-001</text>
+<line x1="1006" y1="1203" x2="1046" y2="1203" stroke="#F5A623" stroke-width="3"/>
+<path d="M1036,1195 l12,8 l-12,8" fill="none" stroke="#F5A623" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="1056" y="1160" width="430" height="86" rx="12" fill="#FFFFFF" stroke="none" stroke-width="0" opacity="1.0"/>
+<text x="1076" y="1192" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:18px;fill:#0B2237;font-weight:700;text-anchor:start;">Google APIs</text>
+<text x="1076" y="1214" style="font-family:'DejaVu Sans Mono', monospace;font-size:13.5px;fill:#5D7185;font-weight:400;text-anchor:start;">Maps · Places</text>
+<text x="1256" y="1192" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:13.5px;fill:#5D7185;font-weight:400;text-anchor:start;">Key stays server-side.</text>
+<text x="1256" y="1214" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:13.5px;fill:#5D7185;font-weight:400;text-anchor:start;">Client never sees it.</text>
+<text x="48" y="1278" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:15px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">New code lands in exactly one layer.  Third-party deps are declared in client/package.json and installed everywhere — localhost, CI, deployment.</text>
+</svg>
