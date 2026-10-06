@@ -1,6 +1,5 @@
-import pytest
 
-from etl.dtos import (
+from contracts.domain import (
     Activity,
     Address,
     Availability,

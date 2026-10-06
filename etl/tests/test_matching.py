@@ -1,6 +1,5 @@
 import pytest
-
-from etl.dtos import Address, Contact, DataSource
+from contracts.domain import Address, Contact, DataSource
 from etl.matching import (
     MAX_MATCH_DISTANCE_M,
     NAME_SIMILARITY_THRESHOLD,

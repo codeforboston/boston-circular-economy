@@ -6,9 +6,11 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "boston-circular-economy-contracts",
+    "boston-circular-economy-data-store",
     "fastapi>=0.141.1",
     "uvicorn>=0.52.4",
 ]
 
 [tool.uv.sources]
-boston-circular-economy-contracts = { path = "../packages/contracts" }
+boston-circular-economy-contracts = { path = "../packages/contracts", editable = true }
+boston-circular-economy-data-store = { path = "../packages/data-store" }

@@ -25,15 +25,6 @@ wheels = [
 ]
 
 [[package]]
-name = "certifi"
-version = "2026.7.22"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/a3/c2/24167ea9858356b47a87a50d39908bfdb72ceeefe0041586e704e5376b3a/certifi-2026.7.22.tar.gz", hash = "sha256:741e2c3b351ddf169a738da9f2c048608ff7f2c5cc02f1ebc6b118bb090d5d55", size = 138112, upload-time = "2026-07-22T03:35:12.644Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/0b/a7/71ac2cff56fec219ed242bb11b8efb69fcc4bec75db06fb7bfe35de520e6/certifi-2026.7.22-py3-none-any.whl", hash = "sha256:62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775", size = 136983, upload-time = "2026-07-22T03:35:11.276Z" },
-]
-
-[[package]]
 name = "boston-circular-economy-contracts"
 version = "0.1.0"
 source = { editable = "../packages/contracts" }
@@ -43,6 +34,26 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [{ name = "pydantic", specifier = ">=2.13.5" }]
+
+[[package]]
+name = "boston-circular-economy-data-store"
+version = "0.1.0"
+source = { editable = "../packages/data-store" }
+dependencies = [
+    { name = "boston-circular-economy-contracts" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "boston-circular-economy-contracts", editable = "../packages/contracts" }]
+
+[[package]]
+name = "certifi"
+version = "2026.7.22"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/a3/c2/24167ea9858356b47a87a50d39908bfdb72ceeefe0041586e704e5376b3a/certifi-2026.7.22.tar.gz", hash = "sha256:741e2c3b351ddf169a738da9f2c048608ff7f2c5cc02f1ebc6b118bb090d5d55", size = 138112, upload-time = "2026-07-22T03:35:12.644Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0b/a7/71ac2cff56fec219ed242bb11b8efb69fcc4bec75db06fb7bfe35de520e6/certifi-2026.7.22-py3-none-any.whl", hash = "sha256:62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775", size = 136983, upload-time = "2026-07-22T03:35:11.276Z" },
+]
 
 [[package]]
 name = "cleanco"
@@ -67,9 +78,10 @@ name = "etl"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "httpx" },
     { name = "boston-circular-economy-contracts" },
+    { name = "boston-circular-economy-data-store" },
     { name = "cleanco" },
+    { name = "httpx" },
     { name = "phonenumbers" },
     { name = "pydantic" },
     { name = "rapidfuzz" },
@@ -83,9 +95,10 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "httpx", specifier = ">=0.28.1" },
     { name = "boston-circular-economy-contracts", editable = "../packages/contracts" },
+    { name = "boston-circular-economy-data-store", editable = "../packages/data-store" },
     { name = "cleanco", specifier = ">=2.3" },
+    { name = "httpx", specifier = ">=0.28.1" },
     { name = "phonenumbers", specifier = ">=9.0.37" },
     { name = "pydantic", specifier = ">=2.13.3" },
     { name = "rapidfuzz", specifier = ">=3.14.5" },

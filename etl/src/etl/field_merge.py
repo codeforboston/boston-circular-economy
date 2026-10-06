@@ -1,14 +1,15 @@
 """Field-level merging logic for combining locations from multiple sources."""
 
-from etl.dtos import (
+from contracts.domain import (
     Address,
     Availability,
     Contact,
     DataSource,
-    MatchGroup,
     NormalizedLocation,
     Service,
 )
+
+from etl.dtos import MatchGroup
 
 # Source priority for most fields: prefer Google, fall back to OSM
 SOURCE_PRIORITY = [DataSource.GOOGLE_PLACES, DataSource.OPENSTREETMAP]
