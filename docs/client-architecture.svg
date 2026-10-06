@@ -23,8 +23,8 @@
 <line x1="76" y1="336" x2="76" y2="354" stroke="#D5DDE4" stroke-width="1.5"/>
 <line x1="76" y1="348" x2="86" y2="348" stroke="#D5DDE4" stroke-width="1.5"/>
 <circle cx="94" cy="348" r="6" fill="#8A99A8"/>
-<text x="108" y="356" style="font-family:'DejaVu Sans Mono', monospace;font-size:16.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">components.json</text>
-<text x="272.0" y="356" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:14.5px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">· shadcn config</text>
+<text x="108" y="356" style="font-family:'DejaVu Sans Mono', monospace;font-size:16.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">README.md</text>
+<text x="212.0" y="356" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:14.5px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">· architecture guide</text>
 <line x1="76" y1="362" x2="76" y2="380" stroke="#D5DDE4" stroke-width="1.5"/>
 <line x1="76" y1="374" x2="86" y2="374" stroke="#D5DDE4" stroke-width="1.5"/>
 <circle cx="94" cy="374" r="6" fill="#8A99A8"/>
@@ -185,7 +185,7 @@
 <text x="680.0" y="554" style="font-family:'DejaVu Sans Mono', monospace;font-size:14.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">•  button.tsx</text>
 <text x="680.0" y="577" style="font-family:'DejaVu Sans Mono', monospace;font-size:14.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">•  input.tsx</text>
 <text x="680.0" y="600" style="font-family:'DejaVu Sans Mono', monospace;font-size:14.5px;fill:#1C2B3A;font-weight:400;text-anchor:start;">•  card.tsx</text>
-<text x="680.0" y="626" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:13.5px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">shadcn + Fleet · one file per component</text>
+<text x="680.0" y="626" style="font-family:Noto Sans, 'DejaVu Sans', sans-serif;font-size:13.5px;fill:#5D7185;font-weight:400;text-anchor:start;font-style:italic;">library choice pending · one file per component</text>
 <rect x="1096.0" y="496" width="440.0" height="144" rx="12" fill="#E4F5EE" stroke="#12936B" stroke-width="1.5" opacity="1.0"/>
 <circle cx="1120.0" cy="522" r="7" fill="#12936B"/>
 <text x="1136.0" y="528" style="font-family:'DejaVu Sans Mono', monospace;font-size:17px;fill:#1C2B3A;font-weight:700;text-anchor:start;">map/ — domain</text>
