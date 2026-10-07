@@ -6,6 +6,8 @@ from pydantic import BaseModel, Field
 
 class SearchResult(BaseModel):
     name: str
+    lat: float
+    lon: float
     address: Address
     services: list[Service]
     contact: Contact
