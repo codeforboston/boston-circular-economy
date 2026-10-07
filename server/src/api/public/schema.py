@@ -1,19 +1,14 @@
 from typing import Literal
 
-from contracts.domain import Activity, Address, ItemCategory
+from contracts.domain import Address, Contact, Service
 from pydantic import BaseModel, Field
 
 
-class LocationResponse(BaseModel):
-    name: str
-    lat: float
-    lon: float
-    address: Address
-
 class SearchResult(BaseModel):
-    location: LocationResponse
-    item: ItemCategory
-    activity: Activity
+    name: str
+    address: Address
+    services: list[Service]
+    contact: Contact
 
 class SearchResponse(BaseModel):
     results: list[SearchResult] = Field(
