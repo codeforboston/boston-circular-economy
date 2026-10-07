@@ -1,5 +1,4 @@
 from config import DATA_DIR
-from contracts.domain import DataSource, NormalizedLocation
 from data_store import LocalDataStore
 from fastapi import APIRouter, status
 
@@ -16,16 +15,8 @@ async def ping():
 @router.get("/search", response_model=SearchResponse)
 async def search():
     data_store = LocalDataStore(DATA_DIR)
-    # Iterate over DataSource, get all NormalizedLocation
-    output: list[SearchResult] = []
-    for data_source in DataSource:
-        # TODO: confirm if we need to dedup locations across data sources
-        locations: list[NormalizedLocation] = data_store.read_source_snapshot(
-            source=data_source
-        )
-        output.extend(
-            SearchResult(**location.model_dump()) for location in locations
-        )
+    locations = data_store.read_output_locations()
+    output = [SearchResult(**location.model_dump()) for location in locations]
 
     return SearchResponse(results=output)
 
