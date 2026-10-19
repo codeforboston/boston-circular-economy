@@ -21,9 +21,11 @@ def _matches(org: Organization, tags: dict) -> bool:
 
 
 @pytest.fixture(scope="module")
-def org_results():
+def org_results(fetch_or_skip):
     # One Overpass call shared by every smoke test, to stay within rate limits.
-    return OpenStreetMapQuerier(tag_filters=ORGANIZATION_FILTERS).fetch()
+    # If Overpass is down, every test in this module skips rather than fails.
+    return fetch_or_skip(OpenStreetMapQuerier(tag_filters=ORGANIZATION_FILTERS))
+
 
 
 @pytest.mark.network
