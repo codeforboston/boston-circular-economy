@@ -1,16 +1,29 @@
 from typing import Literal
 
-from contracts.domain import Address, Contact, Service
+from contracts.domain import Address, Contact, NormalizedLocation, Service
 from pydantic import BaseModel, Field
 
 
 class SearchResult(BaseModel):
+    id: str = Field(
+        ...,
+        description=(
+            "Location identifier in the form '<data_source>:<data_source_id>'. "
+        ),
+    )
     name: str
     lat: float
     lon: float
     address: Address
     services: list[Service]
     contact: Contact
+
+    @classmethod
+    def from_location(cls, location: NormalizedLocation) -> "SearchResult":
+        return cls(
+            id=f"{location.data_source.value}:{location.data_source_id}",
+            **location.model_dump(),
+        )
 
 class SearchResponse(BaseModel):
     results: list[SearchResult] = Field(

@@ -47,7 +47,7 @@ requires-dist = [{ name = "pydantic", specifier = ">=2.13.5" }]
 [[package]]
 name = "boston-circular-economy-data-store"
 version = "0.1.0"
-source = { directory = "../packages/data-store" }
+source = { editable = "../packages/data-store" }
 dependencies = [
     { name = "boston-circular-economy-contracts" },
 ]
@@ -202,7 +202,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "boston-circular-economy-contracts", editable = "../packages/contracts" },
-    { name = "boston-circular-economy-data-store", directory = "../packages/data-store" },
+    { name = "boston-circular-economy-data-store", editable = "../packages/data-store" },
     { name = "fastapi", specifier = ">=0.141.1" },
     { name = "uvicorn", specifier = ">=0.52.4" },
 ]
