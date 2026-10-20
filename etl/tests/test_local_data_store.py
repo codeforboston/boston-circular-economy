@@ -66,6 +66,12 @@ def test_write_output_locations_writes_to_output_file(store, make_location, tmp_
     with open(output_file) as file:
         payload = json.load(file)
     assert [item["data_source_id"] for item in payload["locations"]] == ["a", "b"]
+    assert store.read_output_locations() == locations
+
+
+def test_read_missing_output_locations_raises_file_not_found(store):
+    with pytest.raises(FileNotFoundError):
+        store.read_output_locations()
 
 
 def test_write_creates_missing_data_dir(tmp_path, make_location):

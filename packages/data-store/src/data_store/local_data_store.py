@@ -28,13 +28,23 @@ class LocalDataStore(BaseDataStore):
         source: DataSource,
     ) -> list[NormalizedLocation]:
         file_path = self._get_snapshot_path(source)
+        return self._read_locations(file_path)
+
+    def read_output_locations(self) -> list[NormalizedLocation]:
+        file_path = self.output_dir / "locations.json"
+        return self._read_locations(file_path)
+
+    def _read_locations(self, file_path: Path) -> list[NormalizedLocation]:
         if not file_path.exists():
             raise FileNotFoundError(file_path)
 
         with open(file_path, "r") as file:
-            snapshot_serialized = json.load(file)
+            locations_serialized = json.load(file)
 
-        return [NormalizedLocation.model_validate(location) for location in snapshot_serialized[loc_key]]
+        return [
+            NormalizedLocation.model_validate(location)
+            for location in locations_serialized[loc_key]
+        ]
 
     def write_output_locations(
         self,

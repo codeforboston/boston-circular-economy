@@ -30,3 +30,8 @@ class BaseDataStore(ABC):
     ) -> None:
         """Persist merged locations after deduplication across sources."""
         pass
+
+    @abstractmethod
+    def read_output_locations(self) -> list[NormalizedLocation]:
+        """Load the merged locations after deduplication across sources."""
+        pass
