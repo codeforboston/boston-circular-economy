@@ -13,4 +13,4 @@ dependencies = [
 
 [tool.uv.sources]
 boston-circular-economy-contracts = { path = "../packages/contracts", editable = true }
-boston-circular-economy-data-store = { path = "../packages/data-store" }
+boston-circular-economy-data-store = { path = "../packages/data-store", editable = true }
