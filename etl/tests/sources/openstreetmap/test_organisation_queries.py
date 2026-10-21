@@ -1,9 +1,9 @@
-"""Unit tests for the organization-specific OpenStreetMap filters.
+"""Unit tests for the organisation-specific OpenStreetMap filters.
 
-Run offline and check the Overpass selectors built for each organization.
-Live Overpass checks are in test_organization_queries_smoke.py.
+Run offline and check the Overpass selectors built for each organisation.
+Live Overpass checks are in test_organisation_queries_smoke.py.
 
-    uv run pytest tests/sources/openstreetmap/test_organization_queries.py -v
+    uv run pytest tests/sources/openstreetmap/test_organisation_queries.py -v
 """
 
 import re
