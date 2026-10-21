@@ -1,9 +1,9 @@
-"""Smoke tests for the organization-specific OpenStreetMap filters.
+"""Smoke tests for the organisation-specific OpenStreetMap filters.
 
 Marked `network`: they hit the live Overpass API with one shared request.
-Offline unit tests are in test_organization_queries.py.
+Offline unit tests are in test_organisation_queries.py.
 
-    uv run pytest tests/sources/openstreetmap/test_organization_queries_smoke.py -v -m network -s
+    uv run pytest tests/sources/openstreetmap/test_organisation_queries_smoke.py -v -m network -s
 """
 
 import re
