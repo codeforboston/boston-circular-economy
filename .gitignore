@@ -34,5 +34,7 @@ __pycache__/
 .venv/
 *.egg-info/
 
-# ETL local data store
+# Local data store
+etl/data/
 etl/src/etl/data/
+server/data/
