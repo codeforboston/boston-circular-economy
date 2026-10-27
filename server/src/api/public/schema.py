@@ -1,6 +1,6 @@
 from typing import Literal
 
-from contracts.domain import Address, Contact, NormalizedLocation, Service
+from contracts.domain import Address, Availability, Contact, NormalizedLocation, Service
 from pydantic import BaseModel, Field
 
 
@@ -17,6 +17,8 @@ class SearchResult(BaseModel):
     address: Address
     services: list[Service]
     contact: Contact
+    availability: Availability
+    last_verified: str | None = None
 
     @classmethod
     def from_location(cls, location: NormalizedLocation) -> "SearchResult":

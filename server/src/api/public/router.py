@@ -21,7 +21,7 @@ async def ping():
         }
     },
 )
-async def search():
+def search():
     data_store = LocalDataStore(DATA_DIR)
     try:
         locations = data_store.read_output_locations()
