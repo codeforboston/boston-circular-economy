@@ -1,36 +1,37 @@
 from typing import Literal
 
+from contracts.domain import Address, Availability, Contact, NormalizedLocation, Service
 from pydantic import BaseModel, Field
 
 
-class SearchInput(BaseModel):
-    item_category: str | None = Field(
-        default=None, description="The item category, e.g., 'shoes', to search for."
-    )  # TODO: to restrict item_category to etl.dtos.ItemCategory
-    query: str | None = Field(
-        default=None, description="A free-text search query string."
+class SearchResult(BaseModel):
+    id: str = Field(
+        ...,
+        description=(
+            "Location identifier in the form '<data_source>:<data_source_id>'. "
+        ),
     )
-
-
-class LocationResponse(BaseModel):
     name: str
     lat: float
     lon: float
-    address: str  # TODO: restrict to etl.dtos.Address
+    address: Address
+    services: list[Service]
+    contact: Contact
+    availability: Availability
+    last_verified: str | None = None
 
-
-class SearchResult(BaseModel):
-    location: LocationResponse
-    item: str  # TODO: restrict to etl.dtos.ItemCategory
-    activity: str
-
+    @classmethod
+    def from_location(cls, location: NormalizedLocation) -> "SearchResult":
+        return cls(
+            id=f"{location.data_source.value}:{location.data_source_id}",
+            **location.model_dump(),
+        )
 
 class SearchResponse(BaseModel):
     results: list[SearchResult] = Field(
         default_factory=list,
         description="A list of search results matching the search criteria.",
     )
-
 
 class FeedbackInput(BaseModel):
     reaction: Literal["like", "dislike"] = Field(
