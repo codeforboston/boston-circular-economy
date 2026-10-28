@@ -1,4 +1,18 @@
 # Entry Point for API
+First install `uv`
+On macOS / Linux:
+```
+# bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+On Windows
+```
+powershell
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+Then launch the app
 ```
 # Launch Python FastAPI
 cd server
