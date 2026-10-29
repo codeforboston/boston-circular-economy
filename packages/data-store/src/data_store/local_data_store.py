@@ -1,7 +1,8 @@
+from collections.abc import Sequence
 import json
 from pathlib import Path
 
-from contracts.domain import DataSource, NormalizedLocation
+from contracts.domain import DataSource, Location, NormalizedLocation
 
 from data_store.base import BaseDataStore
 
@@ -28,13 +29,15 @@ class LocalDataStore(BaseDataStore):
         source: DataSource,
     ) -> list[NormalizedLocation]:
         file_path = self._get_snapshot_path(source)
-        return self._read_locations(file_path)
+        return self._read_locations(file_path, NormalizedLocation)
 
-    def read_output_locations(self) -> list[NormalizedLocation]:
+    def read_output_locations(self) -> list[Location]:
         file_path = self.output_dir / "locations.json"
-        return self._read_locations(file_path)
+        return self._read_locations(file_path, Location)
 
-    def _read_locations(self, file_path: Path) -> list[NormalizedLocation]:
+    def _read_locations[T: Location | NormalizedLocation](
+        self, file_path: Path, model: type[T]
+    ) -> list[T]:
         if not file_path.exists():
             raise FileNotFoundError(file_path)
 
@@ -42,13 +45,13 @@ class LocalDataStore(BaseDataStore):
             locations_serialized = json.load(file)
 
         return [
-            NormalizedLocation.model_validate(location)
+            model.model_validate(location)
             for location in locations_serialized[loc_key]
         ]
 
     def write_output_locations(
         self,
-        output_locations: list[NormalizedLocation],
+        output_locations: list[Location],
     ) -> None:
         file_path = self.output_dir / "locations.json"
         self._write_locations(file_path, output_locations)
@@ -56,7 +59,7 @@ class LocalDataStore(BaseDataStore):
     def _write_locations(
         self,
         file_path: Path,
-        locations: list[NormalizedLocation],
+        locations: Sequence[Location | NormalizedLocation],
     ) -> None:
         locations_serialized = [location.model_dump(mode="json") for location in locations]
         payload = { loc_key: locations_serialized }

@@ -54,10 +54,9 @@ class Availability(BaseModel):
     is_persistent: bool = True
 
 
-# NormalizedLocation is the boundary between the normalizer and the data store.
-class NormalizedLocation(BaseModel):
-    data_source_id: str  # unique identifier for this location within its data source
-    data_source: DataSource
+class LocationDetails(BaseModel):
+    """Location fields shared for NormalizedLocation and final Locations."""
+
     name: str
     lat: float
     lon: float
@@ -66,3 +65,16 @@ class NormalizedLocation(BaseModel):
     services: list[Service]
     availability: Availability
     last_verified: str | None = None
+
+
+class NormalizedLocation(LocationDetails):
+    """A source-specific record produced by a normalizer in etl."""
+
+    data_source_id: str  # unique identifier for this location within its data source
+    data_source: DataSource
+
+
+class Location(LocationDetails):
+    """Final location to persist to data store and shared across the application (client, server etc.)."""
+
+    id: str
