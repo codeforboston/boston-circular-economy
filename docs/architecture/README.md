@@ -53,13 +53,21 @@ never reads files directly.
 - Public API, live now: GET /ping, GET /search, POST /feedback.
   GET /search returns all locations today. It takes no parameters
   yet; the parameter contract is issue #75. POST /feedback returns
-  501 yet. It is not implemented.
+  501 yet. It is not implemented. Route name decision (2026-10-29):
+  the route stays GET /search. Issue #75 calls it
+  'service-locations'; that wording refers to this route. A rename
+  would touch server, client, and docs for no functional gain, and
+  the page route is /search, so one name serves both. A rename later
+  is a small refactor if the team wants it.
 - Contracts are the shared types. SearchResult is the page view of
   a location. NormalizedLocation is the shared shape between ETL
   and the API. ItemCategory names what a location handles (shoes,
   electronics, clothing, books, furniture, tools). Activity names
   what a visitor can do there (free or paid repair, donation drop
   or pick, resale buy or sell, refill, borrowing, renting, lending).
+- Service-type mapping (issue #75): repair is repair_free and
+  repair_paid; reuse is resale_buy, resale_sell, borrowing, renting,
+  lending, and refill; donate is donation_drop and donation_pick.
 - Internal API, planned, stubs only (issue #47): snapshot writes
   and merged-location writes for pipeline and admin use.
 
