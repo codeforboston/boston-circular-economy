@@ -6,16 +6,24 @@ Data pipeline for collecting, normalizing, and storing circular economy location
 
 ```mermaid
 flowchart LR
-    Q["Querier\nfetch()"] -->|RawLocation| N["Normalizer\nnormalize()"]
-    N -->|NormalizedLocation| I["DataStore\nwrite_source_snapshot()"]
-    I --> DB[(Database)]
-    DB --> M["MergeProcessor"]
-    M -->|Location| O["DataStore\nwrite_output_locations()"]
+    subgraph scrape["Job 1: scrape-to-local"]
+        Q["Querier<br/>fetch()"] -->|RawLocation| N["Normalizer<br/>normalize()"]
+        N -->|NormalizedLocation| I["DataStore<br/>write_source_snapshot()"]
+    end
+
+    subgraph merge["Job 2: merge-process-to-local"]
+        R["DataStore<br/>read_source_snapshot()"] -->|NormalizedLocation| M["MergeProcessor"]
+        M -->|Location| O["DataStore<br/>write_output_locations()"]
+    end
+
+    I -->|Write snapshots| DB[(Shared data store)]
+    DB -->|Read snapshots| R
+    O -->|Write final locations| DB
 
     classDef source fill:#1D9E75,stroke:#0F6E56,color:#E1F5EE
     classDef sourceTable fill:#7F77DD,stroke:#534AB7,color:#EEEDFE
 
-    class Q,N,I source
+    class Q,N,I,R,M,O source
     class DB sourceTable
 ```
 
