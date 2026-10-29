@@ -9,6 +9,8 @@ flowchart LR
     Q["Querier\nfetch()"] -->|RawLocation| N["Normalizer\nnormalize()"]
     N -->|NormalizedLocation| I["DataStore\nwrite_source_snapshot()"]
     I --> DB[(Database)]
+    DB --> M["MergeProcessor"]
+    M -->|Location| O["DataStore\nwrite_output_locations()"]
 
     classDef source fill:#1D9E75,stroke:#0F6E56,color:#E1F5EE
     classDef sourceTable fill:#7F77DD,stroke:#534AB7,color:#EEEDFE
@@ -17,7 +19,7 @@ flowchart LR
     class DB sourceTable
 ```
 
-Each pipeline has a **Querier** that fetches raw data from a source and a **Normalizer** that maps it to the shared schema. The **DataStore** is shared across pipelines and handles persistence.
+Each pipeline has a **Querier** that fetches raw data from a source and a **Normalizer** that maps it to the shared schema. The **DataStore** is shared across pipelines and handles persistence. Source snapshots retain `NormalizedLocation` records; the **MergeProcessor** converts them into final `Location` records for the application.
 
 ## Adding a pipeline
 
@@ -46,13 +48,15 @@ Key behaviors:
 
 ## DataStore
 
-The [`DataStore`](src/etl/base/data_store.py) reads and writes data for persistant storage. It is shared across all pipelines — you do not implement it per source.
+The [`DataStore`](../packages/data-store/src/data_store/base.py) reads and writes data for persistant storage. It is shared across all pipelines — you do not implement it per source.
 
 Key behaviors:
 
 - **`write_source_snapshot()`** — writes a list of `NormalizedLocation` records to the database.
   - **Update or Create** — records are keyed on `(data_source, data_source_id)`. Existing records are updated in place; new records are inserted.
-  - **Source** — every record retains its `data_source` and `data_source_id`, which makes cross-source deduplication tractable later without requiring it now.
+  - **Source** — every record retains its `data_source` and `data_source_id`, which supports cross-source matching during merging.
+
+- **`write_output_locations()` / `read_output_locations()`** — persist and load final `Location` records, containing an application `id` instead of `data_source` and `data_source_id`. Source snapshots remain unchanged.
 
 ## MergeProcessor
 
@@ -81,7 +85,9 @@ The [`MergeProcessor`](src/etl/merge_processor.py) deduplicates and merges locat
 - `availability`: prefers source with `opening_hours`
 - `last_verified`: latest date
 
-**Output:** One `NormalizedLocation` per real-world business, with the most complete data from all sources.
+**Output:** One `Location` per real-world business, with the most complete data from its source records. IDs currently use `<preferred_source>:<source_id>` (Google preferred, OSM fallback); they may change if the preferred source changes.
+
+Rerun [`merge_process_to_local.py`](src/etl/jobs/merge_process_to_local.py) from existing source snapshots to regenerate old output with the required `Location.id`.
 
 ### Matching details
 

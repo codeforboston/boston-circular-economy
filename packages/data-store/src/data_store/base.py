@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from contracts.domain import DataSource, NormalizedLocation
+from contracts.domain import DataSource, Location, NormalizedLocation
 
 
 class BaseDataStore(ABC):
@@ -26,12 +26,12 @@ class BaseDataStore(ABC):
     @abstractmethod
     def write_output_locations(
         self,
-        output_locations: list[NormalizedLocation],
+        output_locations: list[Location],
     ) -> None:
         """Persist merged locations after deduplication across sources."""
         pass
 
     @abstractmethod
-    def read_output_locations(self) -> list[NormalizedLocation]:
+    def read_output_locations(self) -> list[Location]:
         """Load the merged locations after deduplication across sources."""
         pass

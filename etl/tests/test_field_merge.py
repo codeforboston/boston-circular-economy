@@ -6,6 +6,7 @@ from contracts.domain import (
     Contact,
     DataSource,
     ItemCategory,
+    Location,
     Service,
 )
 from etl.field_merge import merge_group
@@ -14,13 +15,17 @@ from etl.field_merge import merge_group
 class TestMergeGroup:
     """Test field-level merging logic."""
 
-    def test_single_source_group_returns_unchanged(self, make_location):
+    def test_single_source_group_becomes_location(self, make_location):
         loc = make_location(data_source_id="g1", data_source=DataSource.GOOGLE_PLACES)
         group = {DataSource.GOOGLE_PLACES: loc}
 
         result = merge_group(group)
 
-        assert result == loc
+        assert type(result) is Location
+        assert result.id == "google_places:g1"
+        assert result.model_dump(exclude={"id"}) == loc.model_dump(
+            exclude={"data_source", "data_source_id"}
+        )
 
     def test_name_takes_first_non_empty(self, make_location):
         group = {
@@ -180,7 +185,7 @@ class TestMergeGroup:
 
         assert result.last_verified == "2024-03-20"
 
-    def test_data_source_id_from_preferred_source(self, make_location):
+    def test_id_from_preferred_source(self, make_location):
         group = {
             DataSource.GOOGLE_PLACES: make_location(
                 data_source_id="google-123", data_source=DataSource.GOOGLE_PLACES
@@ -193,10 +198,11 @@ class TestMergeGroup:
         result = merge_group(group)
 
         # Should use Google's ID for stability
-        assert result.data_source_id == "google-123"
-        assert result.data_source == DataSource.GOOGLE_PLACES
+        assert result.id == "google_places:google-123"
+        assert "data_source" not in result.model_dump()
+        assert "data_source_id" not in result.model_dump()
 
-    def test_osm_only_group_uses_osm_id(self, make_location):
+    def test_osm_only_group_uses_namespaced_id(self, make_location):
         group = {
             DataSource.OPENSTREETMAP: make_location(
                 data_source_id="osm-456", data_source=DataSource.OPENSTREETMAP
@@ -205,5 +211,12 @@ class TestMergeGroup:
 
         result = merge_group(group)
 
-        assert result.data_source_id == "osm-456"
-        assert result.data_source == DataSource.OPENSTREETMAP
+        assert result.id == "openstreetmap:osm-456"
+        assert type(result) is Location
+
+    def test_id_is_independent_of_group_insertion_order(self, make_location):
+        google = make_location(data_source_id="g1")
+        osm = make_location(data_source=DataSource.OPENSTREETMAP, data_source_id="o1")
+        assert merge_group({DataSource.OPENSTREETMAP: osm, DataSource.GOOGLE_PLACES: google}) == merge_group(
+            {DataSource.GOOGLE_PLACES: google, DataSource.OPENSTREETMAP: osm}
+        )
