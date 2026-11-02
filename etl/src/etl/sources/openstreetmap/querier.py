@@ -16,6 +16,12 @@ RETRYABLE = {429, 502, 503, 504}
 
 DEFAULT_BBOX = (42.2, -71.2, 42.5, -70.9)  # south, west, north, east
 
+class OverpassError(RuntimeError):
+    """Overpass returned a non-200 response; `status_code` says which."""
+
+    def __init__(self, status_code: int, body: str):
+        super().__init__(f"Overpass returned {status_code}: {body[:500]}")
+        self.status_code = status_code
 
 class OpenStreetMapQuerier(BaseQuerier):
 
@@ -49,7 +55,7 @@ class OpenStreetMapQuerier(BaseQuerier):
             if response.status_code in RETRYABLE and attempt < attempts - 1:
                 time.sleep(2 ** attempt * 5)   # 5s, 10s
                 continue
-            raise RuntimeError(f"Overpass returned {response.status_code}: {response.text[:500]}")
+            raise OverpassError(response.status_code, response.text)
 
     def _to_raw_locations(self, elements: list[dict]) -> list[RawLocation]:
         now = datetime.now(timezone.utc)
