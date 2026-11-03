@@ -1,0 +1,26 @@
+name: Pre-Merge Checks
+run-name: ${{ github.actor }} has opened a pull request 🚀
+
+on:
+  # Trigger the workflow on pull requests to the main branch, by default types are opened, reopened, and synchronize
+  pull_request:
+    branches:
+      - main
+jobs:
+  run-unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Set up Python
+        run: uv python install 3.14
+
+      - name: Install dependencies
+        run: uv sync --project etl --locked
+
+      - name: Run tests
+        run: uv run --project etl pytest
