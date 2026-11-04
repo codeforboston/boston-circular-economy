@@ -27,7 +27,7 @@ Pages that load data need the API running alongside the frontend.
    npm run dev
    ```
 
-4. Open http://localhost:5173/boston-circular-economy/. The [`/dev/search`](http://localhost:5173/boston-circular-economy/#/dev/search/) prototype shows data loaded from the API.
+4. Open http://localhost:5173/boston-circular-economy/. The [`/search`](http://localhost:5173/boston-circular-economy/#/search/) page shows data loaded from the API.
 
 Vite forwards requests for `/api/...` to the API at `http://127.0.0.1:8000`, so no CORS setup is needed in development.
 
@@ -133,7 +133,7 @@ Code that talks to the backend lives in `src/api/`, with one file per backend en
 | `src/api/queryClient.ts` | Shared TanStack Query client and defaults |
 | `src/api/openapi.json`, `src/api/schema.d.ts` | Generated from the FastAPI code. Don't edit by hand. |
 
-Pages load data in their route `loader` and read it with `useSuspenseQuery`. See `src/pages/dev/search/index.tsx` for an example with loading, error, and empty states.
+Pages load data in their route `loader` and read it with `useSuspenseQuery`. See `src/pages/search/index.tsx` for an example with loading, error, and empty states.
 
 ### After changing the API
 

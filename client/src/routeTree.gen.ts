@@ -10,8 +10,8 @@
 
 import { Route as rootRouteImport } from './pages/__root'
 import { Route as IndexRouteImport } from './pages/index'
+import { Route as SearchIndexRouteImport } from './pages/search/index'
 import { Route as DevIndexRouteImport } from './pages/dev/index'
-import { Route as DevSearchIndexRouteImport } from './pages/dev/search/index'
 import { Route as DevPrototypeFolderExampleIndexRouteImport } from './pages/dev/prototype-folder-example/index'
 import { Route as DevFuzzySearchIndexRouteImport } from './pages/dev/fuzzy-search/index'
 
@@ -20,14 +20,14 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SearchIndexRoute = SearchIndexRouteImport.update({
+  id: '/search/',
+  path: '/search/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DevIndexRoute = DevIndexRouteImport.update({
   id: '/dev/',
   path: '/dev/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DevSearchIndexRoute = DevSearchIndexRouteImport.update({
-  id: '/dev/search/',
-  path: '/dev/search/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DevPrototypeFolderExampleIndexRoute =
@@ -45,55 +45,55 @@ const DevFuzzySearchIndexRoute = DevFuzzySearchIndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dev/': typeof DevIndexRoute
+  '/search/': typeof SearchIndexRoute
   '/dev/fuzzy-search/': typeof DevFuzzySearchIndexRoute
   '/dev/prototype-folder-example/': typeof DevPrototypeFolderExampleIndexRoute
-  '/dev/search/': typeof DevSearchIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dev': typeof DevIndexRoute
+  '/search': typeof SearchIndexRoute
   '/dev/fuzzy-search': typeof DevFuzzySearchIndexRoute
   '/dev/prototype-folder-example': typeof DevPrototypeFolderExampleIndexRoute
-  '/dev/search': typeof DevSearchIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dev/': typeof DevIndexRoute
+  '/search/': typeof SearchIndexRoute
   '/dev/fuzzy-search/': typeof DevFuzzySearchIndexRoute
   '/dev/prototype-folder-example/': typeof DevPrototypeFolderExampleIndexRoute
-  '/dev/search/': typeof DevSearchIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/dev/'
+    | '/search/'
     | '/dev/fuzzy-search/'
     | '/dev/prototype-folder-example/'
-    | '/dev/search/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/dev'
+    | '/search'
     | '/dev/fuzzy-search'
     | '/dev/prototype-folder-example'
-    | '/dev/search'
   id:
     | '__root__'
     | '/'
     | '/dev/'
+    | '/search/'
     | '/dev/fuzzy-search/'
     | '/dev/prototype-folder-example/'
-    | '/dev/search/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DevIndexRoute: typeof DevIndexRoute
+  SearchIndexRoute: typeof SearchIndexRoute
   DevFuzzySearchIndexRoute: typeof DevFuzzySearchIndexRoute
   DevPrototypeFolderExampleIndexRoute: typeof DevPrototypeFolderExampleIndexRoute
-  DevSearchIndexRoute: typeof DevSearchIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -105,18 +105,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/search/': {
+      id: '/search/'
+      path: '/search'
+      fullPath: '/search/'
+      preLoaderRoute: typeof SearchIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dev/': {
       id: '/dev/'
       path: '/dev'
       fullPath: '/dev/'
       preLoaderRoute: typeof DevIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dev/search/': {
-      id: '/dev/search/'
-      path: '/dev/search'
-      fullPath: '/dev/search/'
-      preLoaderRoute: typeof DevSearchIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dev/prototype-folder-example/': {
@@ -139,9 +139,9 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DevIndexRoute: DevIndexRoute,
+  SearchIndexRoute: SearchIndexRoute,
   DevFuzzySearchIndexRoute: DevFuzzySearchIndexRoute,
   DevPrototypeFolderExampleIndexRoute: DevPrototypeFolderExampleIndexRoute,
-  DevSearchIndexRoute: DevSearchIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

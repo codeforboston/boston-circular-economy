@@ -1,8 +1,8 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { searchQueryOptions } from '../../../api/search'
+import { searchQueryOptions } from '../../api/search'
 
-export const Route = createFileRoute('/dev/search/')({
+export const Route = createFileRoute('/search/')({
   // Starts the request before the page renders; reuses cached data when fresh.
   loader: ({ context }) => context.queryClient.ensureQueryData(searchQueryOptions),
   pendingComponent: () => <p>Loading results…</p>,
