@@ -75,6 +75,16 @@ export interface components {
             /** Postcode */
             postcode?: string | null;
         };
+        /** Availability */
+        Availability: {
+            /** Opening Hours */
+            opening_hours?: string | null;
+            /**
+             * Is Persistent
+             * @default true
+             */
+            is_persistent: boolean;
+        };
         /** Contact */
         Contact: {
             /** Phone */
@@ -135,6 +145,9 @@ export interface components {
             /** Services */
             services: components["schemas"]["Service"][];
             contact: components["schemas"]["Contact"];
+            availability: components["schemas"]["Availability"];
+            /** Last Verified */
+            last_verified?: string | null;
         };
         /** Service */
         Service: {

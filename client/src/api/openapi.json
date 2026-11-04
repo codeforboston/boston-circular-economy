@@ -160,6 +160,28 @@
         "type": "object",
         "title": "Address"
       },
+      "Availability": {
+        "properties": {
+          "opening_hours": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opening Hours"
+          },
+          "is_persistent": {
+            "type": "boolean",
+            "title": "Is Persistent",
+            "default": true
+          }
+        },
+        "type": "object",
+        "title": "Availability"
+      },
       "Contact": {
         "properties": {
           "phone": {
@@ -310,6 +332,20 @@
           },
           "contact": {
             "$ref": "#/components/schemas/Contact"
+          },
+          "availability": {
+            "$ref": "#/components/schemas/Availability"
+          },
+          "last_verified": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Verified"
           }
         },
         "type": "object",
@@ -320,7 +356,8 @@
           "lon",
           "address",
           "services",
-          "contact"
+          "contact",
+          "availability"
         ],
         "title": "SearchResult"
       },
