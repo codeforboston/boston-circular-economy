@@ -6,9 +6,10 @@ from pydantic import BaseModel
 """
 DTOs for the location pipeline.
 
-The two pipeline boundaries are:
+The three pipeline boundaries are:
   - RawLocation: querier → normalizer
-  - NormalizedLocation: normalizer → data store
+  - NormalizedLocation: normalizer → data store (snapshot)
+  - Location: merge_processor → data store (location)
 
 Everything else in this file is a supporting type for NormalizedLocation.
 

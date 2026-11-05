@@ -5,7 +5,7 @@ from contracts.domain import (
     Availability,
     Contact,
     DataSource,
-    NormalizedLocation,
+    Location,
     Service,
 )
 
@@ -15,9 +15,9 @@ from etl.dtos import MatchGroup
 SOURCE_PRIORITY = [DataSource.GOOGLE_PLACES, DataSource.OPENSTREETMAP]
 
 
-def merge_group(group: MatchGroup) -> NormalizedLocation:
+def merge_group(group: MatchGroup) -> Location:
     """
-    Merge a MatchGroup into a single NormalizedLocation.
+    Merge a MatchGroup into a single Location.
 
     Applies field-level merge policies:
     - Most fields: first non-empty value in SOURCE_PRIORITY order
@@ -26,17 +26,20 @@ def merge_group(group: MatchGroup) -> NormalizedLocation:
     - services: union across sources, deduplicated
     - availability: prefer source with opening_hours (OSM preferred)
     - last_verified: latest date
-    - data_source/data_source_id: from preferred source for stability
+    - id: namespaced identifier from the preferred source
 
     Args:
         group: MatchGroup containing 1-2 NormalizedLocations keyed by source.
 
     Returns:
-        Merged NormalizedLocation with the most complete data.
+        Location with the most complete data and an application-level ID.
     """
     if len(group) == 1:
-        # Single-source group, return as-is
-        return list(group.values())[0]
+        loc = next(iter(group.values()))
+        return Location(
+            id=f"{loc.data_source.value}:{loc.data_source_id}",
+            **loc.model_dump(exclude={"data_source", "data_source_id"}),
+        )
 
     # Get locations in priority order
     locs = [group[src] for src in SOURCE_PRIORITY if src in group]
@@ -64,17 +67,10 @@ def merge_group(group: MatchGroup) -> NormalizedLocation:
     # last_verified: latest date
     last_verified = _merge_last_verified([loc.last_verified for loc in locs])
 
-    # data_source/data_source_id: from preferred source for output stability
-    # TODO(stbrody): This is a bit of a lie since the data is actually a merger of both sources.
-    # Consider introducing a new MergedLocation type that omits the source information, instead of
-    # reusing NormalizedLocation.
+    # Preserve existing API IDs using the preferred source's namespaced identity.
     preferred = locs[0]
-    data_source = preferred.data_source
-    data_source_id = preferred.data_source_id
-
-    return NormalizedLocation(
-        data_source_id=data_source_id,
-        data_source=data_source,
+    return Location(
+        id=f"{preferred.data_source.value}:{preferred.data_source_id}",
         name=name,
         lat=lat,
         lon=lon,
