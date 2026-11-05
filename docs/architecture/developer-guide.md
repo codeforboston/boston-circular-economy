@@ -8,19 +8,19 @@ A parent is an abstract base class. It fixes the shape of a part. A child fills 
 
 Every pattern in use, named from its source — not named here. GoF is Gamma, Helm, Johnson, and Vlissides, "Design Patterns" (1994). Repository is Fowler, "Patterns of Enterprise Application Architecture" (2002). Dependency Injection is Fowler (2004). Rows marked "React idiom" have no GoF name and get none.
 
-| Pattern | Source | What it solves | Where it lives | Stub |
-| --- | --- | --- | --- | --- |
-| Adapter | GoF | Converts the interface of a class into another interface clients expect | A normaliser per source converts source fields to the contract shape | 1 |
-| Template Method | GoF | Defines the skeleton of an algorithm; subclasses provide the steps | Jobs run fetch, normalize, write; `MergeProcessor` runs read, match, merge, write. The parents declare the steps | 1 |
-| Strategy | GoF | Defines a family of algorithms, encapsulates each one, makes them interchangeable | `field_merge.py` — one merge function per field, `SOURCE_PRIORITY` picks the winner | 8 |
-| Factory Method | GoF | Lets a creator decide which concrete class to instantiate | `get_store()` picks the concrete store; callers never build one | 3 |
-| Repository | Fowler, PoEAA | Callers need records, not storage details | `BaseDataStore` hides files today, a database later | 2 |
-| Dependency Injection | Fowler | High-level code needs a part without building it | FastAPI `Depends` on the server; the provided client in the UI | 3, 4 |
-| Composite | GoF | Composes objects into tree structures; parts and wholes share one interface | The React component tree; a question group and its options (#76) | 6 |
-| Decorator | GoF | Adds responsibilities to an object dynamically | The `DataState` wrapper adds loading, error, and empty views around a page's success view | 4 |
-| State | GoF | An object alters its behavior when its internal state changes | The decide flow: the next step is a function of the answers so far (#76) | 6 |
-| Observer | GoF | Dependents are notified when state changes | React rendering: a controlled form's children update when the form state changes (#84) | 7 |
-| Provider, custom hook, container / presentational | React idioms | Share a client, logic, and data duties across screens | App entry, `src/lib/`, Screens | 4, 5 |
+| Pattern | What it solves | Where it lives | Stub |
+| --- | --- | --- | --- |
+| Adapter (GoF) | Converts the interface of a class into another interface clients expect | A normaliser per source converts source fields to the contract shape | 1 |
+| Template Method (GoF) | Defines the skeleton of an algorithm; subclasses provide the steps | Jobs run fetch, normalize, write; `MergeProcessor` runs read, match, merge, write | 1 |
+| Strategy (GoF) | Defines a family of algorithms, encapsulates each one, makes them interchangeable | `field_merge.py` — one merge function per field, `SOURCE_PRIORITY` picks the winner | 8 |
+| Factory Method (GoF) | Lets a creator decide which concrete class to instantiate | `get_store()` picks the concrete store; callers never build one | 3 |
+| Repository (Fowler) | Callers need records, not storage details | `BaseDataStore` hides files today, a database later | 2 |
+| Dependency Injection (Fowler) | High-level code needs a part without building it | FastAPI `Depends` on the server; the provided client in the UI | 3, 4 |
+| Composite (GoF) | Composes objects into tree structures; parts and wholes share one interface | The React component tree; a question group and its options (#76) | 6 |
+| Decorator (GoF) | Adds responsibilities to an object dynamically | The `DataState` wrapper adds loading, error, and empty views | 4 |
+| State (GoF) | An object alters its behavior when its internal state changes | The decide flow: the next step is a function of the answers so far (#76) | 6 |
+| Observer (GoF) | Dependents are notified when state changes | React rendering: a controlled form's children update when the form state changes (#84) | 7 |
+| Provider / hook / container (React idiom) | Share a client, logic, and data duties across screens | App entry, `src/lib/`, Screens | 4, 5 |
 
 The parent classes are a mechanism, not a pattern. In Python they declare the step interface for Template Method and the algorithm interface for Strategy, and they are the abstraction Dependency Injection passes around.
 
