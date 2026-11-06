@@ -242,14 +242,13 @@ The breadcrumb shows the path back to parent pages. The current page is plain te
 
 ## 1.7 The four states of every data page
 
-Every data page has four states: loading, error, empty, success. One shared component, `DataState`, renders the first three. Each page writes only its success view. This is the Decorator pattern (GoF): the wrapper adds the loading, error, and empty views around the success view.
+Every data page has four states: loading, error, empty, success. The route shows loading and error. The page shows empty and success. This is the Decorator pattern (GoF): the route adds the loading and error views around the page.
 
 ```tsx
-// The hook returns one shape for every screen: data, isLoading, error.
-// One shape means every screen reads the same three values.
-<DataState query={locationsQuery}>
-  {(locations) => <ResultsList locations={locations} />}
-</DataState>
+// The route shows loading while the query runs. It shows the error view when the query fails.
+// The page reads the saved answer and writes only its success view.
+const { data: locations } = useSuspenseQuery(searchQueryOptions)
+<ResultsList locations={locations} />
 ```
 
 Loading says so in words. On the Repair results page, "Loading results…". The loading view is a progress bar (`.prg`) plus a plain-word sentence. Fleet has no spinner. None is styled.
@@ -425,14 +424,14 @@ Fleet classes: `.sf`, `.sf-hl` for the bold match, `.txt-f`.
 // client/src/components/ui/SearchInput.tsx
 // The parent owns the query, so the input holds nothing and cannot drift from the page.
 const [query, setQuery] = useState("");
-// The hook waits for a pause, then calls the service.
-// The pause stops a call on every keystroke, so typing stays fast.
+// The hook waits for a pause, then matches the typed word against the list.
+// The pause stops work on every keystroke, so typing stays fast.
 const results = useDebouncedSearch(query, 200);
 <input className="sf" type="text" value={query} onChange={(e) => setQuery(e.target.value)} />
 {results.map((r) => <li key={r.id}><HighlightedItem item={r.name} match={query} /></li>)}
 ```
 
-Build first: `client/src/components/ui/SearchInput.tsx` plus the debounce hook in `src/lib/`. Test the hook alone: it must not call the service on every keystroke. An empty query shows nothing, not the whole list.
+Build first: `client/src/components/ui/SearchInput.tsx` plus the debounce hook in `src/lib/`. Test the hook alone: it must not match on every keystroke. An empty query shows nothing, not the whole list.
 
 ### Form validation (Stub 15, W-08)
 
@@ -638,11 +637,12 @@ Check: open `/repair/results` with the worked example URL. The page shows 22 res
 
 Pattern: Provider, hook, and container (React idioms) and Decorator (GoF). The API client, provided at the entry, is the one typed client. Pages and services use that client. Tests provide a mock client with the same contract shape.
 
-The page: `client/src/pages/search.tsx` shows the shape. This results page follows the same shape:
+The page: `client/src/pages/search/index.tsx` shows the shape. This results page follows the same shape:
 
 ```tsx
-// The shared component renders loading, error, and empty, so each page writes only its success view.
-<DataState query={locationsQuery}>{(locations) => <ResultsList locations={locations} />}</DataState>
+// The route shows loading and error. The page reads the saved answer and writes only its success view.
+const { data: locations } = useSuspenseQuery(searchQueryOptions)
+<ResultsList locations={locations} />
 ```
 
 ### The filter bar (Stub 14, W-07)
@@ -768,20 +768,20 @@ Check: on a 390 px screen, press FILTER. The dialog opens and focus moves inside
 
 ### Step 6 — Loading, error, and empty states (Decorator)
 
-Wrap the list in `DataState`. Loading says "Loading results…". An error says what failed and what to do next. Zero results says "No results found" with the EDIT SEARCH button beside it.
+The route shows loading and error. The page shows the empty sentence when the list is empty. Loading says "Loading results…". An error says what failed and what to do next. Zero results says "No results found" with the EDIT SEARCH button beside it.
 
 The FREE and PAID sections come from the priority: saving money splits the list into Free and Paid. Saving time splits it into "This week" instead, per the Figma note.
 
 ```tsx
-<DataState query={locationsQuery}>
-  {(results) => (
-    <>
-      <p>Displaying 1 - 10 of {results.length}</p>
-      <section><h2>Free</h2>{/* free cards */}</section>
-      <section><h2>Paid</h2>{/* paid cards */}</section>
-    </>
-  )}
-</DataState>
+// The page reads the saved answer. An empty list shows the empty sentence, never a blank area.
+const { data: results } = useSuspenseQuery(searchQueryOptions)
+if (results.length === 0) {
+  return <p>No results found</p>
+}
+// The success view shows the first 10, in FREE and PAID sections.
+<p>Displaying 1 - 10 of {results.length}</p>
+<section><h2>Free</h2>{/* free cards */}</section>
+<section><h2>Paid</h2>{/* paid cards */}</section>
 ```
 
 Count text (`.sr-count`) is plain text before the list, in reading order, stating the count and the first-10 cut. Example: "Displaying 1 – 10 of 22 results for 'TV repair' near 02131." A selected result gets a 3px Charles Blue border (`.sr--sel`). FREE and PAID is a text tag (`.sr-tag--free`, `.sr-tag--paid`), never colour alone.
@@ -942,14 +942,11 @@ Events come from the API through the query client. The page holds no event data 
 
 ```tsx
 // The events come from the API. Do not hard-code an event in the page.
-// The page holds no event data itself, so the list always matches the server.
-<DataState query={eventsQuery}>
-  {(events) => (
-    <ul className="ef">
-      {events.map((e) => <EventCard key={e.id} event={e} />)}
-    </ul>
-  )}
-</DataState>
+// The page reads the saved answer and renders the event list from it.
+const { data: events } = useSuspenseQuery(searchQueryOptions)
+<ul className="ef">
+  {events.map((e) => <EventCard key={e.id} event={e} />)}
+</ul>
 ```
 
 What you should see: nothing on screen yet. The page model is written. The list comes next.

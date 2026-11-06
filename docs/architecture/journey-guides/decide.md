@@ -340,7 +340,6 @@ browser, with no error in the console.
 | Mediator | A pattern. One part links two parts that never talk direct. |
 | Iterator | A pattern. Take items in order, stop after ten, move to the next ten. |
 | Provider | A React idiom. One value, given at the entry, reaches every screen. |
-| DataState | The shared component that renders loading, error, and empty views. |
 | Live region | A hidden part of the page that a screen reader reads aloud. |
 | Screen reader | Software that reads the page aloud for a person who cannot see it. |
 | Focus | The control the keyboard acts on now. Tab moves focus. |
@@ -388,7 +387,7 @@ per piece of state. Two owners for one piece is a defect.
 
 ### Step 6: Add the loading / error / empty states (Decorator)
 
-Wrap the page in `DataState`. The page writes only its success view.
+The route shows loading and error. The page writes only its success view.
 Loading says so in words. An error says so in words, with a next
 step. Empty says so in words, never a blank area.
 
@@ -609,7 +608,7 @@ Type this code under the hero.
 ```tsx
 // client/src/components/ui/SearchInput.tsx
 // The parent owns the query, so the input holds nothing and the page stays in charge.
-// The hook waits 200 ms for a pause, then calls the service. The pause stops a call on every keystroke, so typing stays fast.
+// The hook waits 200 ms for a pause, then matches the typed word against the list. The pause stops work on every keystroke, so typing stays fast.
 const [query, setQuery] = useState("");
 const results = useDebouncedSearch(query, 200);
 <input className="sf" type="text" value={query} onChange={(e) => setQuery(e.target.value)} />

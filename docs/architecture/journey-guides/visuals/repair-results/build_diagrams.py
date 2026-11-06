@@ -271,7 +271,7 @@ def build_map():
         ("1  /repair", ["W-01 Estimator", "W-06 Search input", "W-08 Validation"]),
         ("2  /repair/results", ["W-05 Results list", "W-07 Filter bar", "W-09 Map  W-12 Card"]),
         ("3  /repair/form", ["W-02 Registration", "W-08 Validation", "W-16 Stepper"]),
-        ("4  /repair/events", ["W-11 Event finder", "W-26 DataState", "Event cards"]),
+        ("4  /repair/events", ["W-11 Event finder", "W-26 States", "Event cards"]),
         ("5  /providers/:id", ["W-12 Provider card", "Details list", "Referral box"]),
         ("6  Confirmation", ["Share card", "W-14 Feedback", "POST /feedback"]),
     ]
@@ -347,7 +347,7 @@ def wiring_results():
                        ["item=tv, item=jacket", "mode=self, priority=money",
                         "zip=02122, distance=4", "page=1"]))
     p.append(state_box(48, 430, 420, 200, "QUERY CLIENT",
-                       ["results, cached", "by URL params"]))
+                       ["results, cached", "key: search"]))
     p.append(state_box(48, 660, 420, 170, "PAGE STATE",
                        ["selectedId: string | null"]))
     p.append(arrow_h(472, 285, 520, CARD, 4))
@@ -367,12 +367,11 @@ def wiring_results():
     p.append(arrow_h(1218, 330, 1266, CARD, 4))
     p.append(card_box(1270, 200, 282, 260, "PROVIDER CARD  .pv",
                       ["Name", "Services", "Price, distance, stars"]))
-    p.append(state_box(1000, 530, 552, 300, "SERVICES",
-                       ["client/src/lib/locations.ts",
-                        "getLocations(params)",
-                        "client/src/lib/use-locations.ts",
-                        "GET /api/v1/service-locations",
-                        "20 mock results, first 10 shown"]))
+    p.append(state_box(1000, 530, 552, 300, "SEARCH QUERY",
+                       ["client/src/api/search.ts",
+                        "searchQueryOptions",
+                        "GET /api/v1/search",
+                        "Every location, first 10 shown"]))
     return wiring_footer(p, y=920)
 
 
@@ -412,8 +411,8 @@ def wiring_events():
                     "Events come from the API. The page holds no event data itself.")
     p.append(state_box(48, 170, 420, 230, "QUERY CLIENT",
                        ["events, cached", "from the API"]))
-    p.append(state_box(48, 430, 420, 200, "SERVICE",
-                       ["eventsQuery", "through DataState"]))
+    p.append(state_box(48, 430, 420, 200, "SEARCH QUERY",
+                       ["searchQueryOptions", "GET /api/v1/search"]))
     p.append(arrow_h(472, 285, 520, CARD, 4))
     p.append(arrow_h(472, 530, 520, CARD, 4))
     p.append(list_box(520, 170, 430, 330, "EVENT LIST  .ef",

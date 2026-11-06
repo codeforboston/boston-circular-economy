@@ -220,7 +220,6 @@ Check: after each fix, the terminal build passes or the browser shows the page a
 | Mediator | A pattern. One part links two parts that never talk direct. |
 | Iterator | A pattern. Take items in order, stop after ten, move to the next ten. |
 | Provider | A React idiom. One value, given at the entry, reaches every screen. |
-| DataState | The shared component that renders loading, error, and empty views. |
 | Live region | A hidden part of the page that a screen reader reads aloud. |
 | Screen reader | Software that reads the page aloud for a person who cannot see it. |
 | Focus | The control the keyboard acts on now. Tab moves focus. |
@@ -415,9 +414,11 @@ client/src/
   components/
     donate/
       AcceptanceChecker.tsx
-  lib/
-    locations.ts
-    use-locations.ts
+  api/
+    client.ts
+    queryClient.ts
+    search.ts
+    schema.d.ts
   pages/
     __root.tsx
 ```
@@ -497,9 +498,11 @@ client/src/
   components/
     donate/
       AcceptanceChecker.tsx
-  lib/
-    locations.ts
-    use-locations.ts
+  api/
+    client.ts
+    queryClient.ts
+    search.ts
+    schema.d.ts
     validate.ts
   pages/
     __root.tsx
@@ -507,7 +510,7 @@ client/src/
 
 ### Step 5 — Loading, error, and empty states
 
-Wrap the checker in `DataState`. The page writes only its success view. Loading says so in words, with a progress bar (`.prg`). An error says what failed and what to do next. Empty says so in words, never a blank area.
+The route shows loading and error. The page writes only its success view. Loading says so in words, with a progress bar (`.prg`). An error says what failed and what to do next. Empty says so in words, never a blank area.
 
 Check: while the rules load, the words "Loading results…" show with the progress bar. If the rules fail to load, the page says what failed and what to do next, and the form stays on screen.
 
@@ -588,9 +591,11 @@ client/src/
     donate/
       AcceptanceChecker.tsx
       PickupScheduler.tsx
-  lib/
-    locations.ts
-    use-locations.ts
+  api/
+    client.ts
+    queryClient.ts
+    search.ts
+    schema.d.ts
     validate.ts
   pages/
     __root.tsx
@@ -648,7 +653,7 @@ Check: press ahead with no day picked. The message under the date field reads "P
 
 ### Step 6 — Loading, error, and empty states
 
-Wrap the scheduler in `DataState`. The page writes only its success view. Loading says "Loading slots…" with a progress bar. An error says what failed and what to do next. Empty says so in words: a day with no open slots is a sentence, never a blank area.
+The route shows loading and error. The page writes only its success view. Loading says "Loading slots…" with a progress bar. An error says what failed and what to do next. Empty says so in words: a day with no open slots is a sentence, never a blank area.
 
 Check: pick a day while the slots load. The words "Loading slots…" show with the progress bar. If the load fails, the page says what failed and what to do next, and the size and day stay on screen.
 
@@ -726,9 +731,11 @@ client/src/
       PickupScheduler.tsx
     map/
       DropOffLocator.tsx
-  lib/
-    locations.ts
-    use-locations.ts
+  api/
+    client.ts
+    queryClient.ts
+    search.ts
+    schema.d.ts
     validate.ts
   pages/
     __root.tsx
@@ -783,7 +790,7 @@ Check: block the map from loading and open the page. The message shows in words 
 
 ### Step 5 — Loading, error, and empty states
 
-Wrap the locator in `DataState`. The page writes only its success view. Loading says "Loading results…" with a progress bar. An error says what failed and what to do next. Empty says so in words, never a blank area. A mode with no sites says "No drop-off sites for walking near you. Try transit or car." The count text sits in the live region, so a screen reader hears it when the sites arrive.
+The route shows loading and error. The page writes only its success view. Loading says "Loading results…" with a progress bar. An error says what failed and what to do next. Empty says so in words, never a blank area. A mode with no sites says "No drop-off sites for walking near you. Try transit or car." The count text sits in the live region, so a screen reader hears it when the sites arrive.
 
 Check: pick a mode with no sites. The plain-word sentence shows and no map markers show. If the page shows a blank map, the empty state is missing. Fix it before you go on.
 
@@ -820,9 +827,11 @@ client/src/
     map/
       DropOffLocator.tsx
       SearchMap.tsx
-  lib/
-    locations.ts
-    use-locations.ts
+  api/
+    client.ts
+    queryClient.ts
+    search.ts
+    schema.d.ts
     validate.ts
   pages/
     __root.tsx

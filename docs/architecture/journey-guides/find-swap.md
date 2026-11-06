@@ -351,16 +351,15 @@ Nothing visible changes yet. The hook has no screen of its own. The loading line
 
 ### Step 0.4 — The four states
 
-**What you build:** the shared wrapper that renders loading, error, and empty around the success view. Every data page has four states: loading, error, empty, success. One shared component renders the first three, so each page writes only its success view.
+**What you build:** the four states of every data page: loading, error, empty, success. The route shows loading and error. The page shows empty and success, so each page writes only its success view.
 
-**The code:** wrap each list in `DataState`.
+**The code:** read the saved answer and render the success view.
 
 ```tsx
-// DataState is the Decorator (GoF). It adds the loading, error, and empty views around the success view, so the page writes only its success view.
+// The route adds the loading and error views around the page. This is the Decorator (GoF).
 // Loading says so in words. An error says what failed and what to do next. Empty says so in words, never a blank area.
-<DataState query={locationsQuery}>
-  {(locations) => <ResultsList locations={locations} />}
-</DataState>
+const { data: locations } = useSuspenseQuery(searchQueryOptions)
+<ResultsList locations={locations} />
 // Zero results says "No results found" with the EDIT SEARCH button beside it. A page with no items shows the empty state, not a blank page.
 ```
 
@@ -424,7 +423,7 @@ The screen is empty below the header. That is correct. The model is written, and
 // client/src/components/ui/SearchInput.tsx — W-06, the search input.
 // The parent owns the query. The input holds nothing, so the value lives in one place and the page can read it.
 const [query, setQuery] = useState("");
-// The hook waits 200 ms for a pause, then calls the service. The pause stops a call on every keystroke, so typing stays fast.
+// The hook waits 200 ms for a pause, then filters the saved list. The pause stops work on every keystroke, so typing stays fast.
 const results = useDebouncedSearch(query, 200);
 // The matched letters show in bold (Yellow background, Charles Blue text, bold). The match is never marked by colour alone, so a user who cannot see colour still sees it.
 <input className="sf" type="text" value={query} onChange={(e) => setQuery(e.target.value)} />
@@ -442,9 +441,11 @@ client/
     components/
       ui/
         SearchInput.tsx
-    lib/
-      locations.ts
-      use-locations.ts
+    api/
+      client.ts
+      queryClient.ts
+      search.ts
+      schema.d.ts
     pages/
       __root.tsx
       hello.tsx
@@ -456,7 +457,7 @@ client/
 
 The big search field sits under the header. Type a word. Matches appear below it, with the matched letters in bold. Clear the field. The matches go away.
 
-**Check:** type one letter. No call runs until you pause. Type a full word. Matches appear with the matched letters bold. Clear the field. Nothing shows, not the whole list.
+**Check:** type one letter. Nothing changes until you pause. Type a full word. Matches appear with the matched letters bold. Clear the field. Nothing shows, not the whole list.
 
 ### Step 1.3 — The filter bar
 
@@ -466,12 +467,12 @@ The big search field sits under the header. Type a word. Matches appear below it
 
 ```ts
 // client/src/components/search/FilterBar.tsx — W-07, the filter bar.
-// The bar never filters the list itself. It only holds the values the page sends to the API, so the list never needs to know the filters.
+// The bar never filters the list itself. It only holds the values the page filters by, so the list never needs to know the filters.
 const filters: Filter[] = [byCategory(category), byPickup(pickup), byLanguage(language)];
 // Strategy: one function per filter. Each filter is a pure function, so you add a filter by adding one function.
 const shown = filters.reduce((list, f) => f(list), results);
 // Each filter is a pure function: (list: SearchResult[]) => SearchResult[]
-// The nearby choice is a value the bar holds and sends to the API with the other values. The server narrows by it, so the list code never changes for it.
+// The nearby choice is a value the bar holds. The page narrows by it, so the list code never changes for it.
 // CLEAR ALL resets every filter to "Any". One button clears the whole bar, so the resident starts fresh with one press.
 ```
 
@@ -487,10 +488,13 @@ client/
         FilterBar.tsx
       ui/
         SearchInput.tsx
+    api/
+      client.ts
+      queryClient.ts
+      search.ts
+      schema.d.ts
     lib/
       filters.ts
-      locations.ts
-      use-locations.ts
     pages/
       __root.tsx
       hello.tsx
@@ -534,10 +538,13 @@ client/
       ui/
         LanguageSwitcher.tsx
         SearchInput.tsx
+    api/
+      client.ts
+      queryClient.ts
+      search.ts
+      schema.d.ts
     lib/
       filters.ts
-      locations.ts
-      use-locations.ts
     pages/
       __root.tsx
       hello.tsx
@@ -566,7 +573,7 @@ const { data: listings } = useSuspenseQuery(searchQueryOptions); // The query cl
 const [boardFilter, setBoardFilter] = useState("all");
 ```
 
-![Wiring diagram for the search screen: search input, filter bar, and language switcher feed the page, which reads the URL and the query client and calls the service](visuals/find-swap/wiring-search.png)
+![Wiring diagram for the search screen: search input, filter bar, and language switcher feed the page, which reads the URL and the query client](visuals/find-swap/wiring-search.png)
 
 **What you should see:**
 
@@ -661,10 +668,13 @@ client/
       ui/
         LanguageSwitcher.tsx
         SearchInput.tsx
+    api/
+      client.ts
+      queryClient.ts
+      search.ts
+      schema.d.ts
     lib/
       filters.ts
-      locations.ts
-      use-locations.ts
     pages/
       __root.tsx
       hello.tsx
@@ -713,10 +723,13 @@ client/
       ui/
         LanguageSwitcher.tsx
         SearchInput.tsx
+    api/
+      client.ts
+      queryClient.ts
+      search.ts
+      schema.d.ts
     lib/
       filters.ts
-      locations.ts
-      use-locations.ts
     pages/
       __root.tsx
       hello.tsx
@@ -815,18 +828,15 @@ tsc -b && vite build
 
 **What you build:** the list of the first ten results, in response order. W-05 and W-29, Stub 4. Pattern: Provider / hook / container (React idiom). The page is the container. The list is presentational.
 
-**The code:** type the list in the find page, wrapped in `DataState`.
+**The code:** type the list in the find page.
 
 ```tsx
-// The page writes only its success view. DataState renders loading, error, and empty, so the list code never handles those states.
-<DataState query={locationsQuery}>
-  {(locations) => (
-    // The list shows the first ten, in response order. Ten is the page size, so page two never repeats page one.
-    <ul className="sr-list">
-      {locations.slice(0, 10).map((l) => <ListingCard key={l.id} listing={l} />)}
-    </ul>
-  )}
-</DataState>
+// The page reads the saved answer. The route shows loading and error, so the list code never handles those states.
+const { data: locations } = useSuspenseQuery(searchQueryOptions)
+// The list shows the first ten, in response order. Ten is the page size, so page two never repeats page one.
+<ul className="sr-list">
+  {locations.slice(0, 10).map((l) => <ListingCard key={l.id} listing={l} />)}
+</ul>
 // The list takes the listings as props and renders them. It fetches nothing, so the page stays the one place that holds data.
 ```
 
@@ -898,10 +908,13 @@ client/
         LanguageSwitcher.tsx
         Pagination.tsx
         SearchInput.tsx
+    api/
+      client.ts
+      queryClient.ts
+      search.ts
+      schema.d.ts
     lib/
       filters.ts
-      locations.ts
-      use-locations.ts
     pages/
       __root.tsx
       hello.tsx
@@ -951,10 +964,13 @@ client/
         LanguageSwitcher.tsx
         Pagination.tsx
         SearchInput.tsx
+    api/
+      client.ts
+      queryClient.ts
+      search.ts
+      schema.d.ts
     lib/
       filters.ts
-      locations.ts
-      use-locations.ts
     pages/
       __root.tsx
       hello.tsx

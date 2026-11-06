@@ -12,9 +12,9 @@
 <text x="76" y="296" font-family="Lora, Georgia, serif" font-size="15" font-weight="normal" fill="#58585B" text-anchor="start">Live region</text>
 <rect x="350" y="180" width="260" height="260" rx="0" fill="#EDF2F9" stroke="#091F2F" stroke-width="2" />
 <rect x="350" y="180" width="260" height="44" rx="0" fill="#091F2F" />
-<text x="366" y="209" font-family="Montserrat, Arial, sans-serif" font-size="16" font-weight="bold" fill="#FFFFFF" text-anchor="start">2. Service and hook</text>
-<text x="366" y="252" font-family="Lora, Georgia, serif" font-size="15" font-weight="normal" fill="#58585B" text-anchor="start">locations.ts</text>
-<text x="366" y="274" font-family="Lora, Georgia, serif" font-size="15" font-weight="normal" fill="#58585B" text-anchor="start">use-locations.ts</text>
+<text x="366" y="209" font-family="Montserrat, Arial, sans-serif" font-size="16" font-weight="bold" fill="#FFFFFF" text-anchor="start">2. Search query</text>
+<text x="366" y="252" font-family="Lora, Georgia, serif" font-size="15" font-weight="normal" fill="#58585B" text-anchor="start">search.ts</text>
+<text x="366" y="274" font-family="Lora, Georgia, serif" font-size="15" font-weight="normal" fill="#58585B" text-anchor="start">searchQueryOptions</text>
 <text x="366" y="296" font-family="Lora, Georgia, serif" font-size="15" font-weight="normal" fill="#58585B" text-anchor="start">One API call</text>
 <rect x="640" y="180" width="260" height="260" rx="0" fill="#EDF2F9" stroke="#091F2F" stroke-width="2" />
 <rect x="640" y="180" width="260" height="44" rx="0" fill="#091F2F" />

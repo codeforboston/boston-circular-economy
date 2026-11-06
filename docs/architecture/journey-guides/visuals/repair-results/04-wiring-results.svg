@@ -13,7 +13,7 @@
 <rect x="48" y="430" width="420" height="200" rx="10" fill="#0B1524" />
 <text x="66" y="462" font-family="Montserrat, Arial, sans-serif" font-size="19" fill="#DCE6F4" text-anchor="start" font-weight="bold">QUERY CLIENT</text>
 <text x="66" y="492" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#DCE6F4" text-anchor="start">results, cached</text>
-<text x="66" y="518" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#DCE6F4" text-anchor="start">by URL params</text>
+<text x="66" y="518" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#DCE6F4" text-anchor="start">key: search</text>
 <rect x="48" y="660" width="420" height="170" rx="10" fill="#0B1524" />
 <text x="66" y="692" font-family="Montserrat, Arial, sans-serif" font-size="19" fill="#DCE6F4" text-anchor="start" font-weight="bold">PAGE STATE</text>
 <text x="66" y="722" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#DCE6F4" text-anchor="start">selectedId: string | null</text>
@@ -46,12 +46,11 @@
 <text x="1288" y="288" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#FFFFFF" text-anchor="start">Services</text>
 <text x="1288" y="314" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#FFFFFF" text-anchor="start">Price, distance, stars</text>
 <rect x="1000" y="530" width="552" height="300" rx="10" fill="#0B1524" />
-<text x="1018" y="562" font-family="Montserrat, Arial, sans-serif" font-size="19" fill="#DCE6F4" text-anchor="start" font-weight="bold">SERVICES</text>
-<text x="1018" y="592" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#DCE6F4" text-anchor="start">client/src/lib/locations.ts</text>
-<text x="1018" y="618" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#DCE6F4" text-anchor="start">getLocations(params)</text>
-<text x="1018" y="644" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#DCE6F4" text-anchor="start">client/src/lib/use-locations.ts</text>
-<text x="1018" y="670" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#DCE6F4" text-anchor="start">GET /api/v1/service-locations</text>
-<text x="1018" y="696" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#DCE6F4" text-anchor="start">20 mock results, first 10 shown</text>
+<text x="1018" y="562" font-family="Montserrat, Arial, sans-serif" font-size="19" fill="#DCE6F4" text-anchor="start" font-weight="bold">SEARCH QUERY</text>
+<text x="1018" y="592" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#DCE6F4" text-anchor="start">client/src/api/search.ts</text>
+<text x="1018" y="618" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#DCE6F4" text-anchor="start">searchQueryOptions</text>
+<text x="1018" y="644" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#DCE6F4" text-anchor="start">GET /api/v1/search</text>
+<text x="1018" y="670" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#DCE6F4" text-anchor="start">Every location, first 10 shown</text>
 <text x="48" y="906" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#58585B" text-anchor="start" font-weight="bold">HOW TO READ THIS PICTURE</text>
 <rect x="48" y="926" width="34" height="22" rx="6" fill="#1871BD" />
 <text x="90" y="943" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#091F2F" text-anchor="start">Card</text>

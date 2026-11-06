@@ -279,8 +279,8 @@ def build_map():
     cols = [
         ("STAGE 0 — SHARED PARTS",
          [("Shell", ["skip link, main,", "live region"], True),
-          ("Service", ["getLocations", "calls the API"], True),
-          ("Hook", ["useLocations", "caches answers"], True),
+          ("Search query", ["searchQueryOptions", "one API call"], True),
+          ("Query client", ["caches the answer", "ten minutes"], True),
           ("Four states", ["loading, error,", "empty, success"], True)]),
         ("SCREEN 1 — SEARCH",
          [("Search input", ["W-06, type", "and match"], False),
@@ -372,24 +372,24 @@ def wiring_search():
                   ["No fetch runs.", "The page says why."], fill=DARKRED))
     # services column: three navy boxes, 92 tall
     b.append(text(1100, y - 18, "SERVICES", 15, CHARLES, MONTS, "bold"))
-    b.append(navy_box(980, y, 240, 92, "getLocations",
+    b.append(navy_box(980, y, 240, 92, "searchQueryOptions",
                        ["the one API call"]))
-    b.append(navy_box(980, y + 108, 240, 92, "useLocations",
-                       ["hook, caches"]))
-    b.append(navy_box(980, y + 216, 240, 92, "Query client",
-                       ["cache by params"]))
+    b.append(navy_box(980, y + 108, 240, 92, "Query client",
+                       ["caches the answer"]))
+    b.append(navy_box(980, y + 216, 240, 92, "Route loader",
+                       ["warms the cache"]))
     for yy in (y + 46, y + 154, y + 262):
         b.append(arrow(dcx + 92, dcy, 974, yy))
     # API
     b.append(navy_box(1280, y + 60, 260, 96, "API",
-                       ["GET /api/v1/", "service-locations"]))
+                       ["GET /api/v1/search"]))
     b.append(arrow(1220, y + 154, 1274, y + 106))
-    b.append(text(1410, y + 186, "20 mock results", 14, BODY, LORA,
+    b.append(text(1410, y + 186, "Every location", 14, BODY, LORA,
                   "normal", style="italic"))
     # bottom strip
     b.append(rrect(60, 700, 1480, 56, PALE, rx=10))
-    b.append(text(800, 734, "DataState wraps the list: loading, error, "
-                  "empty, success. The page writes only the success view.",
+    b.append(text(800, 734, "The route shows loading and error. "
+                  "The page writes only the success view.",
                   16, CHARLES, MONTS, "bold"))
     legend(b, 800, W)
     render("wiring-search", W, H, b)
@@ -469,8 +469,8 @@ def wiring_results():
                 "The query client feeds the list, the count, and the pages.")
     y = 250
     b.append(navy_box(40, y, 210, 120, "QUERY CLIENT",
-                       ["listings,", "cached by", "URL params"]))
-    b.append(card(290, y, 210, 120, "DATASTATE",
+                       ["listings,", "cached under", "one key: search"]))
+    b.append(card(290, y, 210, 120, "FOUR STATES",
                   ["loading, error,", "empty, success"]))
     b.append(arrow(250, y + 60, 284, y + 60))
     # list as teal rows

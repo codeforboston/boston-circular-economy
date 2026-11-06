@@ -12,7 +12,7 @@ title_block(p, W, "CODE FOR BOSTON  —  CIRCULAR ECONOMY",
 
 frames = [
     (60, "1. Shared shell", ["__root.tsx", "Skip link", "Live region"]),
-    (350, "2. Service and hook", ["locations.ts", "use-locations.ts", "One API call"]),
+    (350, "2. Search query", ["search.ts", "searchQueryOptions", "One API call"]),
     (640, "3. Checker", ["AcceptanceChecker.tsx", "W-10", "Yes, No, Maybe"]),
     (930, "4. Scheduler", ["PickupScheduler.tsx", "W-03", "Size, day, slot"]),
     (1220, "5. Locator", ["DropOffLocator.tsx", "W-13", "Walking, transit, car"]),
