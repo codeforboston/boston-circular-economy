@@ -2,6 +2,19 @@
 
 Client-side application for the Boston Circular Economy project.
 
+## Table of Contents
+
+- [Running locally](#running-locally)
+- [Architecture](#architecture)
+  - [The four layers](#the-four-layers)
+  - [Where new code goes](#where-new-code-goes)
+  - [Dependencies](#dependencies)
+  - [Security](#security)
+- [Routes](#routes)
+  - [Route components](#route-components)
+- [API calls](#api-calls)
+  - [After changing the API](#after-changing-the-api)
+
 ## Running locally
 
 Pages that load data need the API running alongside the frontend.
