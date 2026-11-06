@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="560" viewBox="0 0 390 560">
+<rect width="390" height="560" fill="#EDF2F9"/>
+<rect x="0" y="0" width="390" height="56" rx="0" fill="#091F2F"/><text x="20" y="35" font-family="Montserrat, Arial, sans-serif" font-size="16" font-weight="bold" fill="#FFFFFF" text-anchor="start">FIND AND SWAP</text><text x="370" y="35" font-family="Montserrat, Arial, sans-serif" font-size="13" font-weight="bold" fill="#FFFFFF" text-anchor="end">ESPAÑOL</text>
+<rect x="16" y="80" width="358" height="64" rx="6" fill="#6FA8F5"/><rect x="26" y="92" width="338" height="40" rx="4" fill="#FFFFFF"/><text x="40" y="118.0" font-family="Lora, Georgia, serif" font-size="18" font-weight="normal" fill="#091F2F" text-anchor="start" font-style="italic">chair</text>
+<rect x="16" y="160" width="358" height="44" rx="6" fill="#FFFFFF" stroke="#1871BD" stroke-width="2"/><rect x="30" y="171" width="41" height="22" rx="3" fill="#FCB61A"/><text x="34" y="188" font-family="Montserrat, Arial, sans-serif" font-size="16" font-weight="bold" fill="#091F2F" text-anchor="start">chair</text>
+<text x="195.0" y="250" font-family="Lora, Georgia, serif" font-size="15" font-weight="normal" fill="#58585B" text-anchor="middle" font-style="italic">Matched letters show in bold.</text>
+</svg>

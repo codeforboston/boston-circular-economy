@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="560" viewBox="0 0 390 560">
+<rect width="390" height="560" fill="#EDF2F9"/>
+<rect x="0" y="0" width="390" height="56" rx="0" fill="#091F2F"/><text x="20" y="35" font-family="Montserrat, Arial, sans-serif" font-size="16" font-weight="bold" fill="#FFFFFF" text-anchor="start">FIND AND SWAP</text>
+<rect x="16" y="80" width="358" height="44" rx="6" fill="#0E7C7B"/><text x="34" y="107.0" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="bold" fill="#FFFFFF" text-anchor="start">Location 1</text><rect x="16" y="134" width="358" height="44" rx="6" fill="#0E7C7B"/><text x="34" y="161.0" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="bold" fill="#FFFFFF" text-anchor="start">Location 2</text><rect x="16" y="188" width="358" height="44" rx="6" fill="#0E7C7B"/><text x="34" y="215.0" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="bold" fill="#FFFFFF" text-anchor="start">Location 3</text>
+<text x="195.0" y="300" font-family="Lora, Georgia, serif" font-size="15" font-weight="normal" fill="#58585B" text-anchor="middle" font-style="italic">Answers from the API.</text>
+</svg>

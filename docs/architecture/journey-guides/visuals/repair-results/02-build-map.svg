@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1080" viewBox="0 0 1600 1080">
+<rect x="0" y="0" width="1600" height="1080" rx="0" fill="#FFFFFF" />
+<rect x="0" y="0" width="1600" height="118" rx="0" fill="#091F2F" />
+<text x="48" y="38" font-family="Montserrat, Arial, sans-serif" font-size="17" fill="#6FA8F5" text-anchor="start" font-weight="bold">CITY OF BOSTON  —  CIRCULAR ECONOMY</text>
+<text x="48" y="76" font-family="Montserrat, Arial, sans-serif" font-size="34" fill="#FFFFFF" text-anchor="start" font-weight="bold">Repair results — the build map</text>
+<text x="48" y="106" font-family="Lora, Georgia, serif" font-size="19" fill="#DCE6F4" text-anchor="start" font-style="italic">Build screen by screen, in layer order. One component per step. Check each screen before the next.</text>
+<text x="48" y="168" font-family="Montserrat, Arial, sans-serif" font-size="17" fill="#1871BD" text-anchor="start" font-weight="bold">LAYER ORDER — FOLLOW IT ON EVERY SCREEN</text>
+<rect x="48" y="186" width="240" height="78" rx="10" fill="#DCE6F4" stroke="#0B1524" stroke-width="2" />
+<text x="64" y="216" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#0B1524" text-anchor="start" font-weight="bold">1  Journey and</text>
+<text x="64" y="242" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#0B1524" text-anchor="start">page model</text>
+<line x1="292" y1="225" x2="290" y2="225" stroke="#1871BD" stroke-width="3" /><polygon points="290,217 304,225 290,233" fill="#1871BD" />
+<rect x="306" y="186" width="240" height="78" rx="10" fill="#DCE6F4" stroke="#0B1524" stroke-width="2" />
+<text x="322" y="216" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#0B1524" text-anchor="start" font-weight="bold">2  Shell</text>
+<line x1="550" y1="225" x2="548" y2="225" stroke="#1871BD" stroke-width="3" /><polygon points="548,217 562,225 548,233" fill="#1871BD" />
+<rect x="564" y="186" width="240" height="78" rx="10" fill="#DCE6F4" stroke="#0B1524" stroke-width="2" />
+<text x="580" y="216" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#0B1524" text-anchor="start" font-weight="bold">3  Widgets</text>
+<line x1="808" y1="225" x2="806" y2="225" stroke="#1871BD" stroke-width="3" /><polygon points="806,217 820,225 806,233" fill="#1871BD" />
+<rect x="822" y="186" width="240" height="78" rx="10" fill="#DCE6F4" stroke="#0B1524" stroke-width="2" />
+<text x="838" y="216" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#0B1524" text-anchor="start" font-weight="bold">4  State wiring</text>
+<line x1="1066" y1="225" x2="1064" y2="225" stroke="#1871BD" stroke-width="3" /><polygon points="1064,217 1078,225 1064,233" fill="#1871BD" />
+<rect x="1080" y="186" width="240" height="78" rx="10" fill="#DCE6F4" stroke="#0B1524" stroke-width="2" />
+<text x="1096" y="216" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#0B1524" text-anchor="start" font-weight="bold">5  Services</text>
+<line x1="1324" y1="225" x2="1322" y2="225" stroke="#1871BD" stroke-width="3" /><polygon points="1322,217 1336,225 1322,233" fill="#1871BD" />
+<rect x="1338" y="186" width="240" height="78" rx="10" fill="#DCE6F4" stroke="#0B1524" stroke-width="2" />
+<text x="1354" y="216" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#0B1524" text-anchor="start" font-weight="bold">6  States, access,</text>
+<text x="1354" y="242" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#0B1524" text-anchor="start">and mobile</text>
+<rect x="48" y="300" width="470" height="200" rx="10" fill="#EDF2F9" stroke="#091F2F" stroke-width="3" />
+<rect x="48" y="300" width="470" height="52" rx="10" fill="#091F2F" />
+<rect x="48" y="340" width="470" height="14" rx="0" fill="#091F2F" />
+<text x="66" y="334" font-family="Montserrat, Arial, sans-serif" font-size="19" fill="#FFFFFF" text-anchor="start" font-weight="bold">1  /repair</text>
+<text x="66" y="382" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#091F2F" text-anchor="start">W-01 Estimator</text>
+<text x="66" y="410" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#091F2F" text-anchor="start">W-06 Search input</text>
+<text x="66" y="438" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#091F2F" text-anchor="start">W-08 Validation</text>
+<line x1="522" y1="400.0" x2="546" y2="400.0" stroke="#1871BD" stroke-width="4" /><polygon points="546,392.0 560,400.0 546,408.0" fill="#1871BD" />
+<rect x="564" y="300" width="470" height="200" rx="10" fill="#EDF2F9" stroke="#091F2F" stroke-width="3" />
+<rect x="564" y="300" width="470" height="52" rx="10" fill="#091F2F" />
+<rect x="564" y="340" width="470" height="14" rx="0" fill="#091F2F" />
+<text x="582" y="334" font-family="Montserrat, Arial, sans-serif" font-size="19" fill="#FFFFFF" text-anchor="start" font-weight="bold">2  /repair/results</text>
+<text x="582" y="382" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#091F2F" text-anchor="start">W-05 Results list</text>
+<text x="582" y="410" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#091F2F" text-anchor="start">W-07 Filter bar</text>
+<text x="582" y="438" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#091F2F" text-anchor="start">W-09 Map  W-12 Card</text>
+<line x1="1038" y1="400.0" x2="1062" y2="400.0" stroke="#1871BD" stroke-width="4" /><polygon points="1062,392.0 1076,400.0 1062,408.0" fill="#1871BD" />
+<rect x="1080" y="300" width="470" height="200" rx="10" fill="#EDF2F9" stroke="#091F2F" stroke-width="3" />
+<rect x="1080" y="300" width="470" height="52" rx="10" fill="#091F2F" />
+<rect x="1080" y="340" width="470" height="14" rx="0" fill="#091F2F" />
+<text x="1098" y="334" font-family="Montserrat, Arial, sans-serif" font-size="19" fill="#FFFFFF" text-anchor="start" font-weight="bold">3  /repair/form</text>
+<text x="1098" y="382" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#091F2F" text-anchor="start">W-02 Registration</text>
+<text x="1098" y="410" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#091F2F" text-anchor="start">W-08 Validation</text>
+<text x="1098" y="438" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#091F2F" text-anchor="start">W-16 Stepper</text>
+<line x1="1315.0" y1="504" x2="1315.0" y2="552" stroke="#1871BD" stroke-width="4" /><polygon points="1307.0,552 1315.0,566 1323.0,552" fill="#1871BD" />
+<rect x="48" y="570" width="470" height="200" rx="10" fill="#EDF2F9" stroke="#091F2F" stroke-width="3" />
+<rect x="48" y="570" width="470" height="52" rx="10" fill="#091F2F" />
+<rect x="48" y="610" width="470" height="14" rx="0" fill="#091F2F" />
+<text x="66" y="604" font-family="Montserrat, Arial, sans-serif" font-size="19" fill="#FFFFFF" text-anchor="start" font-weight="bold">4  /repair/events</text>
+<text x="66" y="652" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#091F2F" text-anchor="start">W-11 Event finder</text>
+<text x="66" y="680" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#091F2F" text-anchor="start">W-26 States</text>
+<text x="66" y="708" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#091F2F" text-anchor="start">Event cards</text>
+<line x1="522" y1="670.0" x2="546" y2="670.0" stroke="#1871BD" stroke-width="4" /><polygon points="546,662.0 560,670.0 546,678.0" fill="#1871BD" />
+<rect x="564" y="570" width="470" height="200" rx="10" fill="#EDF2F9" stroke="#091F2F" stroke-width="3" />
+<rect x="564" y="570" width="470" height="52" rx="10" fill="#091F2F" />
+<rect x="564" y="610" width="470" height="14" rx="0" fill="#091F2F" />
+<text x="582" y="604" font-family="Montserrat, Arial, sans-serif" font-size="19" fill="#FFFFFF" text-anchor="start" font-weight="bold">5  /providers/:id</text>
+<text x="582" y="652" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#091F2F" text-anchor="start">W-12 Provider card</text>
+<text x="582" y="680" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#091F2F" text-anchor="start">Details list</text>
+<text x="582" y="708" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#091F2F" text-anchor="start">Referral box</text>
+<line x1="1038" y1="670.0" x2="1062" y2="670.0" stroke="#1871BD" stroke-width="4" /><polygon points="1062,662.0 1076,670.0 1062,678.0" fill="#1871BD" />
+<rect x="1080" y="570" width="470" height="200" rx="10" fill="#EDF2F9" stroke="#091F2F" stroke-width="3" />
+<rect x="1080" y="570" width="470" height="52" rx="10" fill="#091F2F" />
+<rect x="1080" y="610" width="470" height="14" rx="0" fill="#091F2F" />
+<text x="1098" y="604" font-family="Montserrat, Arial, sans-serif" font-size="19" fill="#FFFFFF" text-anchor="start" font-weight="bold">6  Confirmation</text>
+<text x="1098" y="652" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#091F2F" text-anchor="start">Share card</text>
+<text x="1098" y="680" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#091F2F" text-anchor="start">W-14 Feedback</text>
+<text x="1098" y="708" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#091F2F" text-anchor="start">POST /feedback</text>
+<text x="48" y="852" font-family="Montserrat, Arial, sans-serif" font-size="18" fill="#091F2F" text-anchor="start">Each screen ends with a check: what you should see in the browser, in Fleet colors.</text>
+<text x="48" y="880" font-family="Montserrat, Arial, sans-serif" font-size="18" fill="#091F2F" text-anchor="start">Run the check before you move on to the next screen.</text>
+<text x="48" y="936" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#58585B" text-anchor="start" font-weight="bold">HOW TO READ THIS PICTURE</text>
+<rect x="48" y="956" width="34" height="22" rx="6" fill="#1871BD" />
+<text x="90" y="973" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#091F2F" text-anchor="start">Card</text>
+<rect x="266" y="956" width="34" height="22" rx="11" fill="#FB4D42" />
+<text x="308" y="973" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#091F2F" text-anchor="start">Button</text>
+<rect x="484" y="956" width="34" height="22" rx="3" fill="#0E7C7B" />
+<rect x="489" y="961" width="24" height="3" rx="1" fill="#FFFFFF" />
+<rect x="489" y="969" width="24" height="3" rx="1" fill="#FFFFFF" />
+<text x="526" y="973" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#091F2F" text-anchor="start">List</text>
+<rect x="702" y="956" width="34" height="22" rx="3" fill="#6FA8F5" />
+<rect x="707" y="962" width="24" height="2" rx="0" fill="#FFFFFF" />
+<rect x="707" y="969" width="24" height="2" rx="0" fill="#FFFFFF" />
+<text x="744" y="973" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#091F2F" text-anchor="start">Form</text>
+<polygon points="937,956.0 950.0,967 937,978.0 924.0,967" fill="#FFD98A" stroke="#B98A1F" stroke-width="3" />
+<text x="962" y="973" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#091F2F" text-anchor="start">Decision gate</text>
+<rect x="1138" y="956" width="34" height="22" rx="3" fill="#EDF2F9" stroke="#091F2F" stroke-width="2" />
+<rect x="1138" y="956" width="34" height="8" rx="3" fill="#091F2F" />
+<text x="1180" y="973" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#091F2F" text-anchor="start">Screen frame</text>
+<rect x="1356" y="956" width="34" height="22" rx="3" fill="#0B1524" />
+<rect x="1361" y="962" width="24" height="3" rx="1" fill="#DCE6F4" />
+<rect x="1361" y="969" width="24" height="3" rx="1" fill="#DCE6F4" />
+<text x="1398" y="973" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#091F2F" text-anchor="start">State / service</text>
+<text x="48" y="1025" font-family="Lora, Georgia, serif" font-size="15" fill="#58585B" text-anchor="start" font-style="italic">Derived from the Developer Guide eight-step page-design sequence and the wiring layers.</text>
+</svg>
