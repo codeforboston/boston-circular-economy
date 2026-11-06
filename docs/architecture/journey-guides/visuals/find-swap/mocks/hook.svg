@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="560" viewBox="0 0 390 560">
+<rect width="390" height="560" fill="#EDF2F9"/>
+<rect x="0" y="0" width="390" height="56" rx="0" fill="#091F2F"/><text x="20" y="35" font-family="Montserrat, Arial, sans-serif" font-size="16" font-weight="bold" fill="#FFFFFF" text-anchor="start">FIND AND SWAP</text>
+<rect x="16" y="100" width="358" height="20" rx="4" fill="#FFFFFF" stroke="#091F2F" stroke-width="3"/><rect x="19" y="103" width="214" height="14" rx="2" fill="#1871BD"/><text x="195.0" y="148" font-family="Lora, Georgia, serif" font-size="15" font-weight="normal" fill="#58585B" text-anchor="middle">Loading results…</text>
+</svg>

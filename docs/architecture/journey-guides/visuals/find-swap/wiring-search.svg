@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+<rect width="1600" height="900" fill="#FFFFFF"/>
+<text x="800.0" y="46" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="bold" fill="#1871BD" text-anchor="middle" letter-spacing="3">CODE FOR BOSTON  —  CIRCULAR ECONOMY</text>
+<text x="800.0" y="88" font-family="Montserrat, Arial, sans-serif" font-size="34" font-weight="bold" fill="#091F2F" text-anchor="middle">Wiring: the search screen</text>
+<text x="800.0" y="122" font-family="Lora, Georgia, serif" font-size="19" font-weight="normal" fill="#58585B" text-anchor="middle" font-style="italic">Search input, filter bar, and language switcher feed the page state.</text>
+<line x1="60" y1="142" x2="1540" y2="142" stroke="#C8C8C8" stroke-width="1"/>
+<rect x="40" y="250" width="150" height="130" rx="12" fill="#1871BD"/><text x="115.0" y="284" font-family="Montserrat, Arial, sans-serif" font-size="17" font-weight="bold" fill="#FFFFFF" text-anchor="middle">MARISOL</text><text x="115.0" y="312" font-family="Lora, Georgia, serif" font-size="14" font-weight="normal" fill="#FFFFFF" text-anchor="middle">types,</text><text x="115.0" y="332" font-family="Lora, Georgia, serif" font-size="14" font-weight="normal" fill="#FFFFFF" text-anchor="middle">picks,</text><text x="115.0" y="352" font-family="Lora, Georgia, serif" font-size="14" font-weight="normal" fill="#FFFFFF" text-anchor="middle">reads.</text>
+<text x="330" y="232" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="bold" fill="#091F2F" text-anchor="middle">COMPONENTS</text>
+<rect x="220" y="250" width="220" height="44" rx="6" fill="#6FA8F5"/>
+<text x="330" y="278" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="bold" fill="#091F2F" text-anchor="middle">Search input  .sf</text>
+<rect x="220" y="310" width="220" height="44" rx="6" fill="#6FA8F5"/>
+<text x="330" y="338" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="bold" fill="#091F2F" text-anchor="middle">Filter bar  .fl</text>
+<rect x="220" y="370" width="220" height="44" rx="6" fill="#6FA8F5"/>
+<text x="330" y="398" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="bold" fill="#091F2F" text-anchor="middle">Language  .tr</text>
+<line x1="190" y1="315" x2="207.17687377030208" y2="284.22476782820877" stroke="#091F2F" stroke-width="3"/><polygon points="214,272 213.28925768440646,287.6363309430577 201.0644898561977,280.8132047133598" fill="#091F2F"/>
+<line x1="190" y1="315" x2="202.57565726457682" y2="323.90775722907523" stroke="#091F2F" stroke-width="3"/><polygon points="214,332 198.52953587911443,329.6199285967868 206.6217786500392,318.19558586136367" fill="#091F2F"/>
+<line x1="190" y1="315" x2="209.83403490405522" y2="378.63419531717716" stroke="#091F2F" stroke-width="3"/><polygon points="214,392 203.1511325626438,380.71717786514955 216.51693724546664,376.55121276920477" fill="#091F2F"/>
+<text x="600" y="232" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="bold" fill="#091F2F" text-anchor="middle">PAGE STATE</text>
+<rect x="480" y="250" width="240" height="92" rx="10" fill="#0B1524"/><text x="600.0" y="284" font-family="Montserrat, Arial, sans-serif" font-size="17" font-weight="bold" fill="#DCE6F4" text-anchor="middle">URL params</text><text x="600.0" y="312" font-family="Lora, Georgia, serif" font-size="14" font-weight="normal" fill="#DCE6F4" text-anchor="middle">category, page</text>
+<rect x="480" y="358" width="240" height="92" rx="10" fill="#0B1524"/><text x="600.0" y="392" font-family="Montserrat, Arial, sans-serif" font-size="17" font-weight="bold" fill="#DCE6F4" text-anchor="middle">Board filter</text><text x="600.0" y="420" font-family="Lora, Georgia, serif" font-size="14" font-weight="normal" fill="#DCE6F4" text-anchor="middle">wanted / offered / all</text>
+<rect x="480" y="466" width="240" height="92" rx="10" fill="#0B1524"/><text x="600.0" y="500" font-family="Montserrat, Arial, sans-serif" font-size="17" font-weight="bold" fill="#DCE6F4" text-anchor="middle">Language</text><text x="600.0" y="528" font-family="Lora, Georgia, serif" font-size="14" font-weight="normal" fill="#DCE6F4" text-anchor="middle">provider, at entry</text>
+<line x1="440" y1="332" x2="464.38727053850795" y2="306.17818413569745" stroke="#091F2F" stroke-width="3"/><polygon points="474,296 469.47636260635664,310.98454886644345 459.29817847065925,301.37181940495145" fill="#091F2F"/>
+<line x1="440" y1="332" x2="468.0219117242904" y2="391.34051894555614" stroke="#091F2F" stroke-width="3"/><polygon points="474,404 461.6921711970685,394.32956308341096 474.35165225151235,388.3514748077013" fill="#091F2F"/>
+<line x1="440" y1="332" x2="471.40150515338695" y2="498.24326257675443" stroke="#091F2F" stroke-width="3"/><polygon points="474,512 464.52313644176417,499.542510000061 478.27987386500973,496.9440151534479" fill="#091F2F"/>
+<line x1="720" y1="404" x2="733.0842718177626" y2="369.1086084859666" stroke="#091F2F" stroke-width="3"/><polygon points="738,356 739.6385760607459,371.56647257708534 726.5299675747792,366.6507443948479" fill="#091F2F"/>
+<polygon points="830,281.0 915.0,356 830,431.0 745.0,356" fill="#FFD98A" stroke="#D9A400" stroke-width="3"/><text x="830" y="345" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="bold" fill="#091F2F" text-anchor="middle">PARAMS</text><text x="830" y="367" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="bold" fill="#091F2F" text-anchor="middle">VALID?</text>
+<text x="802" y="480" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="bold" fill="#D22D23" text-anchor="start">NO</text>
+<line x1="790" y1="434" x2="790.0" y2="546.0" stroke="#091F2F" stroke-width="3"/><polygon points="790,560 783.0,546.0 797.0,546.0" fill="#091F2F"/>
+<rect x="655" y="560" width="270" height="96" rx="12" fill="#D22D23"/><text x="790.0" y="594" font-family="Montserrat, Arial, sans-serif" font-size="17" font-weight="bold" fill="#FFFFFF" text-anchor="middle">PLAIN-WORD ALERT</text><text x="790.0" y="622" font-family="Lora, Georgia, serif" font-size="14" font-weight="normal" fill="#FFFFFF" text-anchor="middle">No fetch runs.</text><text x="790.0" y="642" font-family="Lora, Georgia, serif" font-size="14" font-weight="normal" fill="#FFFFFF" text-anchor="middle">The page says why.</text>
+<text x="1100" y="232" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="bold" fill="#091F2F" text-anchor="middle">SERVICES</text>
+<rect x="980" y="250" width="240" height="92" rx="10" fill="#0B1524"/><text x="1100.0" y="284" font-family="Montserrat, Arial, sans-serif" font-size="17" font-weight="bold" fill="#DCE6F4" text-anchor="middle">getLocations</text><text x="1100.0" y="312" font-family="Lora, Georgia, serif" font-size="14" font-weight="normal" fill="#DCE6F4" text-anchor="middle">the one API call</text>
+<rect x="980" y="358" width="240" height="92" rx="10" fill="#0B1524"/><text x="1100.0" y="392" font-family="Montserrat, Arial, sans-serif" font-size="17" font-weight="bold" fill="#DCE6F4" text-anchor="middle">useLocations</text><text x="1100.0" y="420" font-family="Lora, Georgia, serif" font-size="14" font-weight="normal" fill="#DCE6F4" text-anchor="middle">hook, caches</text>
+<rect x="980" y="466" width="240" height="92" rx="10" fill="#0B1524"/><text x="1100.0" y="500" font-family="Montserrat, Arial, sans-serif" font-size="17" font-weight="bold" fill="#DCE6F4" text-anchor="middle">Query client</text><text x="1100.0" y="528" font-family="Lora, Georgia, serif" font-size="14" font-weight="normal" fill="#DCE6F4" text-anchor="middle">cache by params</text>
+<line x1="922" y1="356" x2="964.8309724621502" y2="306.57964715905746" stroke="#091F2F" stroke-width="3"/><polygon points="974,296 970.1207960416789,311.1641609279824 959.5411488826214,301.99513339013254" fill="#091F2F"/>
+<line x1="922" y1="356" x2="963.7127517752152" y2="394.50407856173706" stroke="#091F2F" stroke-width="3"/><polygon points="974,404 958.9647910560838,399.64770267412945 968.4607124943467,389.3604544493447" fill="#091F2F"/>
+<line x1="922" y1="356" x2="969.5728112757643" y2="498.7184338272928" stroke="#091F2F" stroke-width="3"/><polygon points="974,512 962.9320281894106,500.9320281894107 976.2135943621179,496.50483946517494" fill="#091F2F"/>
+<rect x="1280" y="310" width="260" height="96" rx="10" fill="#0B1524"/><text x="1410.0" y="344" font-family="Montserrat, Arial, sans-serif" font-size="17" font-weight="bold" fill="#DCE6F4" text-anchor="middle">API</text><text x="1410.0" y="372" font-family="Lora, Georgia, serif" font-size="14" font-weight="normal" fill="#DCE6F4" text-anchor="middle">GET /api/v1/</text><text x="1410.0" y="392" font-family="Lora, Georgia, serif" font-size="14" font-weight="normal" fill="#DCE6F4" text-anchor="middle">service-locations</text>
+<line x1="1220" y1="404" x2="1263.5362695384288" y2="365.3010937436189" stroke="#091F2F" stroke-width="3"/><polygon points="1274,356 1268.1868164102382,370.5329589744045 1258.8857226666194,360.06922851283326" fill="#091F2F"/>
+<text x="1410" y="436" font-family="Lora, Georgia, serif" font-size="14" font-weight="normal" fill="#58585B" text-anchor="middle" font-style="italic">20 mock results</text>
+<rect x="60" y="700" width="1480" height="56" rx="10" fill="#EDF2F9"/>
+<text x="800" y="734" font-family="Montserrat, Arial, sans-serif" font-size="16" font-weight="bold" fill="#091F2F" text-anchor="middle">DataState wraps the list: loading, error, empty, success. The page writes only the success view.</text>
+<text x="800.0" y="800" font-family="Montserrat, Arial, sans-serif" font-size="14" font-weight="bold" fill="#091F2F" text-anchor="middle" letter-spacing="2">HOW TO READ THIS PICTURE</text>
+<rect x="194.0" y="820" width="34" height="22" rx="6" fill="#1871BD"/>
+<text x="236.0" y="837" font-family="Montserrat, Arial, sans-serif" font-size="14" font-weight="bold" fill="#091F2F" text-anchor="start">card</text>
+<rect x="344.0" y="820" width="34" height="22" rx="11" fill="#FB4D42"/>
+<text x="386.0" y="837" font-family="Montserrat, Arial, sans-serif" font-size="14" font-weight="bold" fill="#091F2F" text-anchor="start">button</text>
+<rect x="514.0" y="820" width="34" height="5" rx="2" fill="#0E7C7B"/>
+<rect x="514.0" y="828" width="34" height="5" rx="2" fill="#0E7C7B"/>
+<rect x="514.0" y="836" width="34" height="5" rx="2" fill="#0E7C7B"/>
+<text x="556.0" y="837" font-family="Montserrat, Arial, sans-serif" font-size="14" font-weight="bold" fill="#091F2F" text-anchor="start">list</text>
+<rect x="664.0" y="820" width="34" height="22" rx="3" fill="#6FA8F5"/>
+<line x1="670.0" y1="828" x2="692.0" y2="828" stroke="#FFFFFF" stroke-width="2"/>
+<line x1="670.0" y1="835" x2="686.0" y2="835" stroke="#FFFFFF" stroke-width="2"/>
+<text x="706.0" y="837" font-family="Montserrat, Arial, sans-serif" font-size="14" font-weight="bold" fill="#091F2F" text-anchor="start">form</text>
+<polygon points="831.0,816 850.0,831 831.0,850 812.0,831" fill="#FFD98A" stroke="#D9A400" stroke-width="2"/>
+<text x="856.0" y="837" font-family="Montserrat, Arial, sans-serif" font-size="14" font-weight="bold" fill="#091F2F" text-anchor="start">gate</text>
+<rect x="1024.0" y="820" width="34" height="22" rx="3" fill="#EDF2F9" stroke="#091F2F" stroke-width="1"/>
+<rect x="1024.0" y="820" width="34" height="8" rx="3" fill="#091F2F"/>
+<text x="1066.0" y="837" font-family="Montserrat, Arial, sans-serif" font-size="14" font-weight="bold" fill="#091F2F" text-anchor="start">screen</text>
+<rect x="1234.0" y="820" width="34" height="22" rx="3" fill="#0B1524"/>
+<line x1="1240.0" y1="828" x2="1262.0" y2="828" stroke="#DCE6F4" stroke-width="2"/>
+<line x1="1240.0" y1="835" x2="1256.0" y2="835" stroke="#DCE6F4" stroke-width="2"/>
+<text x="1276.0" y="837" font-family="Montserrat, Arial, sans-serif" font-size="14" font-weight="bold" fill="#091F2F" text-anchor="start">state</text>
+</svg>

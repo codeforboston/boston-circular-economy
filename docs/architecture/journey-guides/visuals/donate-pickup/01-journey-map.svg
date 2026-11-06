@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+<rect x="0" y="0" width="1600" height="1000" rx="0" fill="#FFFFFF" />
+<text x="60" y="46" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="bold" fill="#1871BD" text-anchor="start" letter-spacing="2">CODE FOR BOSTON  —  CIRCULAR ECONOMY</text>
+<text x="60" y="88" font-family="Montserrat, Arial, sans-serif" font-size="33" font-weight="bold" fill="#091F2F" text-anchor="start">Donate and pickup: the journey Jason takes</text>
+<text x="60" y="122" font-family="Lora, Georgia, serif" font-size="19" font-weight="normal" fill="#58585B" text-anchor="start">Jason moves out. He checks an item, books a pickup, and finds a drop-off site on foot or by transit.</text>
+<line x1="60" y1="140" x2="1540" y2="140" stroke="#C8C8C8" stroke-width="2" />
+<rect x="60" y="190" width="215" height="210" rx="10" fill="#1871BD" />
+<text x="78" y="224" font-family="Montserrat, Arial, sans-serif" font-size="19" font-weight="bold" fill="#FFFFFF" text-anchor="start">1. Jason moves out</text>
+<text x="78" y="252" font-family="Lora, Georgia, serif" font-size="16" font-weight="normal" fill="#FFFFFF" text-anchor="start">Bulky items</text>
+<text x="78" y="276" font-family="Lora, Georgia, serif" font-size="16" font-weight="normal" fill="#FFFFFF" text-anchor="start">to give away</text>
+<text x="78" y="300" font-family="Lora, Georgia, serif" font-size="16" font-weight="normal" fill="#FFFFFF" text-anchor="start">No car</text>
+<line x1="275" y1="295" x2="305" y2="295" stroke="#091F2F" stroke-width="3" />
+<polygon points="305,295 291,288 291,302" fill="#091F2F" />
+<rect x="305" y="190" width="215" height="210" rx="10" fill="#1871BD" />
+<text x="323" y="224" font-family="Montserrat, Arial, sans-serif" font-size="19" font-weight="bold" fill="#FFFFFF" text-anchor="start">2. Checker</text>
+<text x="323" y="252" font-family="Lora, Georgia, serif" font-size="16" font-weight="normal" fill="#FFFFFF" text-anchor="start">Names an item</text>
+<text x="323" y="276" font-family="Lora, Georgia, serif" font-size="16" font-weight="normal" fill="#FFFFFF" text-anchor="start">Answer in words</text>
+<text x="323" y="300" font-family="Lora, Georgia, serif" font-size="16" font-weight="normal" fill="#FFFFFF" text-anchor="start">Yes, No, Maybe</text>
+<line x1="520" y1="295" x2="530" y2="295" stroke="#091F2F" stroke-width="3" />
+<polygon points="530,295 516,288 516,302" fill="#091F2F" />
+<polygon points="640,199 752,295 640,391 528,295" fill="#FFD98A" stroke="#091F2F" stroke-width="2" />
+<text x="640" y="291" font-family="Montserrat, Arial, sans-serif" font-size="17" font-weight="bold" fill="#091F2F" text-anchor="middle">Will they</text>
+<text x="640" y="312" font-family="Montserrat, Arial, sans-serif" font-size="17" font-weight="bold" fill="#091F2F" text-anchor="middle">take it?</text>
+<line x1="752" y1="295" x2="775" y2="295" stroke="#091F2F" stroke-width="3" />
+<polygon points="775,295 761,288 761,302" fill="#091F2F" />
+<rect x="775" y="190" width="215" height="210" rx="10" fill="#1871BD" />
+<text x="793" y="224" font-family="Montserrat, Arial, sans-serif" font-size="19" font-weight="bold" fill="#FFFFFF" text-anchor="start">3. Scheduler</text>
+<text x="793" y="252" font-family="Lora, Georgia, serif" font-size="16" font-weight="normal" fill="#FFFFFF" text-anchor="start">Size, day, slot</text>
+<text x="793" y="276" font-family="Lora, Georgia, serif" font-size="16" font-weight="normal" fill="#FFFFFF" text-anchor="start">Summary</text>
+<text x="793" y="300" font-family="Lora, Georgia, serif" font-size="16" font-weight="normal" fill="#FFFFFF" text-anchor="start">in words</text>
+<line x1="990" y1="295" x2="1020" y2="295" stroke="#091F2F" stroke-width="3" />
+<polygon points="1020,295 1006,288 1006,302" fill="#091F2F" />
+<rect x="1020" y="190" width="215" height="210" rx="10" fill="#1871BD" />
+<text x="1038" y="224" font-family="Montserrat, Arial, sans-serif" font-size="19" font-weight="bold" fill="#FFFFFF" text-anchor="start">4. Locator</text>
+<text x="1038" y="252" font-family="Lora, Georgia, serif" font-size="16" font-weight="normal" fill="#FFFFFF" text-anchor="start">Walking, transit</text>
+<text x="1038" y="276" font-family="Lora, Georgia, serif" font-size="16" font-weight="normal" fill="#FFFFFF" text-anchor="start">or car</text>
+<text x="1038" y="300" font-family="Lora, Georgia, serif" font-size="16" font-weight="normal" fill="#FFFFFF" text-anchor="start">Map and list</text>
+<text x="1038" y="324" font-family="Lora, Georgia, serif" font-size="16" font-weight="normal" fill="#FFFFFF" text-anchor="start">in sync</text>
+<line x1="1235" y1="295" x2="1265" y2="295" stroke="#091F2F" stroke-width="3" />
+<polygon points="1265,295 1251,288 1251,302" fill="#091F2F" />
+<rect x="1265" y="190" width="275" height="210" rx="4" fill="#0B1524" />
+<text x="1283" y="224" font-family="Montserrat, Arial, sans-serif" font-size="18" font-weight="bold" fill="#DCE6F4" text-anchor="start">Done</text>
+<text x="1283" y="252" font-family="Lora, Georgia, serif" font-size="15" font-weight="normal" fill="#DCE6F4" text-anchor="start">Item leaves</text>
+<text x="1283" y="274" font-family="Lora, Georgia, serif" font-size="15" font-weight="normal" fill="#DCE6F4" text-anchor="start">the home</text>
+<text x="640" y="452" font-family="Lora, Georgia, serif" font-size="17" font-weight="normal" fill="#58585B" text-anchor="middle">Yes, No, or Maybe, in words, with the reason.</text>
+<rect x="60" y="490" width="1480" height="110" rx="4" fill="#0B1524" />
+<text x="78" y="524" font-family="Montserrat, Arial, sans-serif" font-size="18" font-weight="bold" fill="#DCE6F4" text-anchor="start">No-car access is the point</text>
+<text x="78" y="552" font-family="Lora, Georgia, serif" font-size="15" font-weight="normal" fill="#DCE6F4" text-anchor="start">Six of nine residents move bulky items without a car.</text>
+<text x="78" y="574" font-family="Lora, Georgia, serif" font-size="15" font-weight="normal" fill="#DCE6F4" text-anchor="start">Walking and transit filters sit on the locator, not after it.</text>
+<rect x="60" y="630" width="1480" height="130" rx="0" fill="#EDF2F9" stroke="#091F2F" stroke-width="2" />
+<rect x="60" y="630" width="1480" height="44" rx="0" fill="#091F2F" />
+<text x="76" y="659" font-family="Montserrat, Arial, sans-serif" font-size="16" font-weight="bold" fill="#FFFFFF" text-anchor="start">Persona: Jason, move-out journey</text>
+<text x="76" y="702" font-family="Lora, Georgia, serif" font-size="17" font-weight="normal" fill="#58585B" text-anchor="start">Trigger: bulky items are hard to give away. Plan: donate items people want.</text>
+<text x="76" y="724" font-family="Lora, Georgia, serif" font-size="17" font-weight="normal" fill="#58585B" text-anchor="start">Worry: penalties for poor-condition items.</text>
+<rect x="40" y="850" width="1520" height="104" rx="0" fill="#FFFFFF" stroke="#C8C8C8" stroke-width="1" />
+<text x="60" y="878" font-family="Montserrat, Arial, sans-serif" font-size="14" font-weight="bold" fill="#091F2F" text-anchor="start" letter-spacing="1">LEGEND  —  THE SAME SHAPES IN EVERY PICTURE</text>
+<rect x="60" y="894" width="40" height="24" rx="6" fill="#1871BD" />
+<text x="110" y="912" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="normal" fill="#58585B" text-anchor="start">Card</text>
+<rect x="430" y="894" width="40" height="24" rx="12" fill="#FB4D42" />
+<text x="480" y="912" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="normal" fill="#58585B" text-anchor="start">Primary button</text>
+<rect x="800" y="894" width="40" height="5" rx="2" fill="#0E7C7B" />
+<rect x="800" y="902" width="40" height="5" rx="2" fill="#0E7C7B" />
+<rect x="800" y="910" width="40" height="5" rx="2" fill="#0E7C7B" />
+<text x="850" y="912" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="normal" fill="#58585B" text-anchor="start">List</text>
+<rect x="1170" y="894" width="40" height="24" rx="2" fill="#6FA8F5" />
+<line x1="1176" y1="902" x2="1204" y2="902" stroke="#FFFFFF" stroke-width="2" />
+<line x1="1176" y1="910" x2="1198" y2="910" stroke="#FFFFFF" stroke-width="2" />
+<text x="1220" y="912" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="normal" fill="#58585B" text-anchor="start">Form</text>
+<polygon points="80,928 100,940 80,952 60,940" fill="#FFD98A" stroke="#091F2F" stroke-width="1" />
+<text x="110" y="946" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="normal" fill="#58585B" text-anchor="start">Decision gate</text>
+<rect x="430" y="928" width="40" height="24" rx="0" fill="#EDF2F9" stroke="#091F2F" stroke-width="1" />
+<rect x="430" y="928" width="40" height="8" rx="0" fill="#091F2F" />
+<text x="480" y="946" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="normal" fill="#58585B" text-anchor="start">Screen frame</text>
+<rect x="800" y="928" width="40" height="24" rx="2" fill="#0B1524" />
+<line x1="806" y1="936" x2="834" y2="936" stroke="#DCE6F4" stroke-width="2" />
+<line x1="806" y1="944" x2="828" y2="944" stroke="#DCE6F4" stroke-width="2" />
+<text x="850" y="946" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="normal" fill="#58585B" text-anchor="start">State / service</text>
+</svg>
