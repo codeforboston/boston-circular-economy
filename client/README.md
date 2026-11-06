@@ -33,8 +33,6 @@ Vite forwards requests for `/api/...` to the API at `http://127.0.0.1:8000`, so 
 
 If the page says "Location data is not available yet", the API can't find ETL output. Set `ETL_DATA_DIR` as described in [`server/README.md`](../server/README.md).
 
-Don't use `npm run dev` from the repo root yet. It still starts an old Express server instead of the FastAPI one.
-
 ## Architecture
 
 ![Client architecture diagram](../docs/client-architecture.svg)
