@@ -10,7 +10,7 @@ The journey has three parts, all on `/donate`:
 2. The pickup scheduler. Jason picks an item size, a day, and a time slot. He reads a plain-word summary of his pickup.
 3. The drop-off locator. Jason picks how he gets there: walking, transit, or car. The map shows the drop-off sites he can reach that way.
 
-This guide is for a developer who has never coded a webpage before. Part 1 starts from zero. It explains every term in plain words. Part 2 builds the journey, one component at a time. You type the code as you go. You check each step in a browser before you move on.
+This guide is for contributors to the dev effort. Part 1 starts from zero. It explains every term in plain words. Part 2 builds the journey, one component at a time. You type the code as you go. You check each step in a browser before you move on.
 
 ## The journey at a glance
 
