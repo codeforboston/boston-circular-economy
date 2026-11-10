@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="800" viewBox="0 0 390 800">
+<rect x="0" y="0" width="390" height="800" rx="0" fill="#FFFFFF" />
+<rect x="10" y="10" width="370" height="650" rx="0" fill="#EDF2F9" stroke="#091F2F" stroke-width="2" />
+<rect x="10" y="10" width="370" height="46" rx="0" fill="#091F2F" />
+<text x="26" y="39" font-family="Montserrat, Arial, sans-serif" font-size="16" font-weight="bold" fill="#FFFFFF" text-anchor="start">Donate — book a pickup</text>
+<rect x="26" y="72" width="338" height="250" rx="4" fill="#6FA8F5" />
+<text x="42" y="104" font-family="Montserrat, Arial, sans-serif" font-size="14" font-weight="bold" fill="#091F2F" text-anchor="start">ITEM SIZE</text>
+<circle cx="53" cy="129" r="11" fill="#FFFFFF" stroke="#091F2F" stroke-width="3" />
+<text x="72" y="134" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="normal" fill="#091F2F" text-anchor="start">Small</text>
+<circle cx="151" cy="129" r="11" fill="#FFFFFF" stroke="#091F2F" stroke-width="3" />
+<circle cx="151" cy="129" r="5" fill="#1871BD" />
+<text x="170" y="134" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="normal" fill="#091F2F" text-anchor="start">Medium</text>
+<circle cx="263" cy="129" r="11" fill="#FFFFFF" stroke="#091F2F" stroke-width="3" />
+<text x="282" y="134" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="normal" fill="#091F2F" text-anchor="start">Large</text>
+<text x="42" y="176" font-family="Montserrat, Arial, sans-serif" font-size="14" font-weight="bold" fill="#091F2F" text-anchor="start">DAY</text>
+<rect x="42" y="188" width="306" height="44" rx="2" fill="#FFFFFF" />
+<text x="52" y="216" font-family="Lora, Georgia, serif" font-size="16" font-weight="normal" fill="#091F2F" text-anchor="start">2026-11-12</text>
+<rect x="26" y="344" width="100" height="44" rx="4" fill="#FFFFFF" stroke="#091F2F" stroke-width="2" />
+<text x="76" y="372" font-family="Montserrat, Arial, sans-serif" font-size="14" font-weight="bold" fill="#091F2F" text-anchor="middle">10:00 AM</text>
+<rect x="138" y="344" width="100" height="44" rx="4" fill="#1871BD" />
+<text x="188" y="372" font-family="Montserrat, Arial, sans-serif" font-size="14" font-weight="bold" fill="#FFFFFF" text-anchor="middle">11:00 AM</text>
+<rect x="250" y="344" width="100" height="44" rx="4" fill="#FFFFFF" stroke="#091F2F" stroke-width="2" />
+<text x="300" y="372" font-family="Montserrat, Arial, sans-serif" font-size="14" font-weight="bold" fill="#091F2F" text-anchor="middle">1:00 PM</text>
+<rect x="10" y="672" width="370" height="118" rx="0" fill="#FFFFFF" stroke="#C8C8C8" stroke-width="1" />
+<text x="22" y="694" font-family="Montserrat, Arial, sans-serif" font-size="11" font-weight="bold" fill="#091F2F" text-anchor="start" letter-spacing="1">LEGEND</text>
+<rect x="22" y="704" width="24" height="14" rx="3" fill="#1871BD" />
+<text x="54" y="715" font-family="Montserrat, Arial, sans-serif" font-size="11" font-weight="normal" fill="#58585B" text-anchor="start">Card</text>
+<rect x="207" y="704" width="24" height="14" rx="7" fill="#FB4D42" />
+<text x="239" y="715" font-family="Montserrat, Arial, sans-serif" font-size="11" font-weight="normal" fill="#58585B" text-anchor="start">Primary button</text>
+<rect x="22" y="725" width="24" height="3" rx="1" fill="#0E7C7B" />
+<rect x="22" y="730" width="24" height="3" rx="1" fill="#0E7C7B" />
+<rect x="22" y="735" width="24" height="3" rx="1" fill="#0E7C7B" />
+<text x="54" y="736" font-family="Montserrat, Arial, sans-serif" font-size="11" font-weight="normal" fill="#58585B" text-anchor="start">List</text>
+<rect x="207" y="725" width="24" height="14" rx="1" fill="#6FA8F5" />
+<line x1="210" y1="730" x2="228" y2="730" stroke="#FFFFFF" stroke-width="1.5" />
+<line x1="210" y1="735" x2="224" y2="735" stroke="#FFFFFF" stroke-width="1.5" />
+<text x="239" y="736" font-family="Montserrat, Arial, sans-serif" font-size="11" font-weight="normal" fill="#58585B" text-anchor="start">Form</text>
+<polygon points="34,746 46,753 34,760 22,753" fill="#FFD98A" stroke="#091F2F" stroke-width="1" />
+<text x="54" y="757" font-family="Montserrat, Arial, sans-serif" font-size="11" font-weight="normal" fill="#58585B" text-anchor="start">Decision gate</text>
+<rect x="207" y="746" width="24" height="14" rx="0" fill="#EDF2F9" stroke="#091F2F" stroke-width="1" />
+<rect x="207" y="746" width="24" height="5" rx="0" fill="#091F2F" />
+<text x="239" y="757" font-family="Montserrat, Arial, sans-serif" font-size="11" font-weight="normal" fill="#58585B" text-anchor="start">Screen frame</text>
+<rect x="22" y="767" width="24" height="14" rx="1" fill="#0B1524" />
+<line x1="25" y1="772" x2="43" y2="772" stroke="#DCE6F4" stroke-width="1.5" />
+<line x1="25" y1="777" x2="39" y2="777" stroke="#DCE6F4" stroke-width="1.5" />
+<text x="54" y="778" font-family="Montserrat, Arial, sans-serif" font-size="11" font-weight="normal" fill="#58585B" text-anchor="start">State / service</text>
+</svg>
