@@ -1,7 +1,7 @@
 import json
 
 import pytest
-from contracts.domain import DataSource
+from contracts.domain import DataSource, Location
 from data_store import LocalDataStore
 
 
@@ -57,7 +57,13 @@ def test_write_empty_snapshot_produces_empty_list_on_read(store):
 
 
 def test_write_output_locations_writes_to_output_file(store, make_location, tmp_path):
-    locations = [make_location(data_source_id="a"), make_location(data_source_id="b")]
+    locations = [
+        Location(
+            id=f"google_places:{source_id}",
+            **make_location().model_dump(exclude={"data_source", "data_source_id"}),
+        )
+        for source_id in ["a", "b"]
+    ]
 
     store.write_output_locations(locations)
 
@@ -65,7 +71,9 @@ def test_write_output_locations_writes_to_output_file(store, make_location, tmp_
     assert output_file.exists()
     with open(output_file) as file:
         payload = json.load(file)
-    assert [item["data_source_id"] for item in payload["locations"]] == ["a", "b"]
+    assert [item["id"] for item in payload["locations"]] == [
+        "google_places:a", "google_places:b"
+    ]
     assert store.read_output_locations() == locations
 
 

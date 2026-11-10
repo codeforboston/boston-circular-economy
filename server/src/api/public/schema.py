@@ -1,6 +1,6 @@
 from typing import Literal
 
-from contracts.domain import Address, Availability, Contact, NormalizedLocation, Service
+from contracts.domain import Address, Availability, Contact, Location, Service
 from pydantic import BaseModel, Field
 
 
@@ -8,7 +8,7 @@ class SearchResult(BaseModel):
     id: str = Field(
         ...,
         description=(
-            "Location identifier in the form '<data_source>:<data_source_id>'. "
+            "Opaque application-level location identifier."
         ),
     )
     name: str
@@ -21,11 +21,8 @@ class SearchResult(BaseModel):
     last_verified: str | None = None
 
     @classmethod
-    def from_location(cls, location: NormalizedLocation) -> "SearchResult":
-        return cls(
-            id=f"{location.data_source.value}:{location.data_source_id}",
-            **location.model_dump(),
-        )
+    def from_location(cls, location: Location) -> "SearchResult":
+        return cls(**location.model_dump())
 
 class SearchResponse(BaseModel):
     results: list[SearchResult] = Field(
