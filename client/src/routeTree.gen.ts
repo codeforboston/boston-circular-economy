@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './pages/__root'
 import { Route as IndexRouteImport } from './pages/index'
 import { Route as DecideIndexRouteImport } from './pages/decide/index'
 import { Route as DevIndexRouteImport } from './pages/dev/index'
+import { Route as SearchIndexRouteImport } from './pages/search/index'
 import { Route as DevFuzzySearchIndexRouteImport } from './pages/dev/fuzzy-search/index'
 import { Route as DevPrototypeFolderExampleIndexRouteImport } from './pages/dev/prototype-folder-example/index'
 
@@ -30,6 +31,11 @@ const DevIndexRoute = DevIndexRouteImport.update({
   path: '/dev/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SearchIndexRoute = SearchIndexRouteImport.update({
+  id: '/search/',
+  path: '/search/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DevFuzzySearchIndexRoute = DevFuzzySearchIndexRouteImport.update({
   id: '/dev/fuzzy-search/',
   path: '/dev/fuzzy-search/',
@@ -46,6 +52,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/decide/': typeof DecideIndexRoute
   '/dev/': typeof DevIndexRoute
+  '/search/': typeof SearchIndexRoute
   '/dev/fuzzy-search/': typeof DevFuzzySearchIndexRoute
   '/dev/prototype-folder-example/': typeof DevPrototypeFolderExampleIndexRoute
 }
@@ -53,6 +60,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/decide': typeof DecideIndexRoute
   '/dev': typeof DevIndexRoute
+  '/search': typeof SearchIndexRoute
   '/dev/fuzzy-search': typeof DevFuzzySearchIndexRoute
   '/dev/prototype-folder-example': typeof DevPrototypeFolderExampleIndexRoute
 }
@@ -61,6 +69,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/decide/': typeof DecideIndexRoute
   '/dev/': typeof DevIndexRoute
+  '/search/': typeof SearchIndexRoute
   '/dev/fuzzy-search/': typeof DevFuzzySearchIndexRoute
   '/dev/prototype-folder-example/': typeof DevPrototypeFolderExampleIndexRoute
 }
@@ -70,6 +79,7 @@ export interface FileRouteTypes {
     | '/'
     | '/decide/'
     | '/dev/'
+    | '/search/'
     | '/dev/fuzzy-search/'
     | '/dev/prototype-folder-example/'
   fileRoutesByTo: FileRoutesByTo
@@ -77,6 +87,7 @@ export interface FileRouteTypes {
     | '/'
     | '/decide'
     | '/dev'
+    | '/search'
     | '/dev/fuzzy-search'
     | '/dev/prototype-folder-example'
   id:
@@ -84,6 +95,7 @@ export interface FileRouteTypes {
     | '/'
     | '/decide/'
     | '/dev/'
+    | '/search/'
     | '/dev/fuzzy-search/'
     | '/dev/prototype-folder-example/'
   fileRoutesById: FileRoutesById
@@ -92,6 +104,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DecideIndexRoute: typeof DecideIndexRoute
   DevIndexRoute: typeof DevIndexRoute
+  SearchIndexRoute: typeof SearchIndexRoute
   DevFuzzySearchIndexRoute: typeof DevFuzzySearchIndexRoute
   DevPrototypeFolderExampleIndexRoute: typeof DevPrototypeFolderExampleIndexRoute
 }
@@ -119,6 +132,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DevIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/search/': {
+      id: '/search/'
+      path: '/search'
+      fullPath: '/search/'
+      preLoaderRoute: typeof SearchIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dev/fuzzy-search/': {
       id: '/dev/fuzzy-search/'
       path: '/dev/fuzzy-search'
@@ -140,6 +160,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DecideIndexRoute: DecideIndexRoute,
   DevIndexRoute: DevIndexRoute,
+  SearchIndexRoute: SearchIndexRoute,
   DevFuzzySearchIndexRoute: DevFuzzySearchIndexRoute,
   DevPrototypeFolderExampleIndexRoute: DevPrototypeFolderExampleIndexRoute,
 }
