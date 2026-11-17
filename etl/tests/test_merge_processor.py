@@ -248,8 +248,7 @@ class TestMergeProcessorEndToEnd:
         assert merged.name == "Goodwill Store"
         assert merged.lat == 42.3588
         assert merged.lon == -71.0707
-        assert merged.data_source == DataSource.GOOGLE_PLACES
-        assert merged.data_source_id == "g1"
+        assert merged.id == "google_places:g1"
 
         # Should use OSM's more complete address
         assert merged.address.postcode == "02144"
@@ -288,8 +287,8 @@ class TestMergeProcessorEndToEnd:
         assert len(result) == 2
 
         # Should preserve original IDs
-        ids = {loc.data_source_id for loc in result}
-        assert ids == {"g1", "o1"}
+        ids = {loc.id for loc in result}
+        assert ids == {"google_places:g1", "openstreetmap:o1"}
 
     def test_chain_with_close_locations_one_source_knows_both(
         self, processor, make_location
@@ -340,11 +339,11 @@ class TestMergeProcessorEndToEnd:
         assert len(result) == 2
 
         # Find which is merged
-        google_ids = {loc.data_source_id for loc in result}
-        assert "g2" in google_ids  # g2 stayed separate
+        google_ids = {loc.id for loc in result}
+        assert "google_places:g2" in google_ids  # g2 stayed separate
 
         # One should have g1's ID (the merged one)
-        merged = next(loc for loc in result if loc.data_source_id == "g1")
+        merged = next(loc for loc in result if loc.id == "google_places:g1")
         # Verify it has merged contact data
         assert merged.contact.phone == "617-555-0100"
 
@@ -398,8 +397,8 @@ class TestMergeProcessorEndToEnd:
         assert len(result) == 2
 
         # Both should have Google IDs (priority)
-        google_ids = {loc.data_source_id for loc in result}
-        assert google_ids == {"g1", "g2"}
+        google_ids = {loc.id for loc in result}
+        assert google_ids == {"google_places:g1", "google_places:g2"}
 
         # Verify names didn't get crossed
         names = {loc.name for loc in result}
@@ -452,8 +451,8 @@ class TestMergeProcessorEndToEnd:
         assert len(result) == 3
 
         # All should have their original IDs
-        source_ids = {loc.data_source_id for loc in result}
-        assert source_ids == {"g1", "o1", "o2"}
+        source_ids = {loc.id for loc in result}
+        assert source_ids == {"google_places:g1", "openstreetmap:o1", "openstreetmap:o2"}
 
     def test_same_building_different_units_stay_separate(
         self, processor, make_location
@@ -492,7 +491,7 @@ class TestMergeProcessorEndToEnd:
 
         # Should return 2 separate locations (different units, different names, different phones)
         assert len(result) == 2
-        assert {loc.data_source_id for loc in result} == {"g1", "o1"}
+        assert {loc.id for loc in result} == {"google_places:g1", "openstreetmap:o1"}
 
     def test_asymmetric_match_quality(self, processor, make_location):
         """
@@ -537,6 +536,6 @@ class TestMergeProcessorEndToEnd:
         assert len(result) == 2
 
         # Find the merged one
-        merged = next(loc for loc in result if loc.data_source_id == "g1")
+        merged = next(loc for loc in result if loc.id == "google_places:g1")
         # Should have phone from both sources
         assert merged.contact.phone == "617-555-0100"

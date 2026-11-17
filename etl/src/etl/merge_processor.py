@@ -1,4 +1,4 @@
-from contracts.domain import DataSource, NormalizedLocation
+from contracts.domain import DataSource, Location, NormalizedLocation
 
 from etl.dtos import MatchGroup
 from etl.field_merge import merge_group
@@ -9,7 +9,7 @@ class MergeProcessor:
     def process(
         self,
         locations_by_source: dict[DataSource, list[NormalizedLocation]],
-    ) -> list[NormalizedLocation]:
+    ) -> list[Location]:
         matched_pairs = self.group(locations_by_source)
         match_groups = self.prioritize(matched_pairs, locations_by_source)
         return self.merge(match_groups)
@@ -137,13 +137,13 @@ class MergeProcessor:
     def merge(
         self,
         match_groups: list[MatchGroup],
-    ) -> list[NormalizedLocation]:
+    ) -> list[Location]:
         """
-        Merge each MatchGroup into a single NormalizedLocation.
+        Merge each MatchGroup into a single Location.
 
         Delegates to merge_group() for field-level merging logic.
 
         Returns:
-            List of merged NormalizedLocations, one per MatchGroup.
+            List of final Locations, one per MatchGroup.
         """
         return [merge_group(group) for group in match_groups]
