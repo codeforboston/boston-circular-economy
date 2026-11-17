@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1080" viewBox="0 0 1600 1080">
+<rect x="0" y="0" width="1600" height="1080" rx="0" fill="#FFFFFF" />
+<rect x="0" y="0" width="1600" height="118" rx="0" fill="#091F2F" />
+<text x="48" y="38" font-family="Montserrat, Arial, sans-serif" font-size="17" fill="#6FA8F5" text-anchor="start" font-weight="bold">CITY OF BOSTON  —  CIRCULAR ECONOMY</text>
+<text x="48" y="76" font-family="Montserrat, Arial, sans-serif" font-size="34" fill="#FFFFFF" text-anchor="start" font-weight="bold">Wiring — confirmation and feedback</text>
+<text x="48" y="106" font-family="Lora, Georgia, serif" font-size="19" fill="#DCE6F4" text-anchor="start" font-style="italic">The share card is derived. The feedback widget has three states: vote, message, sent.</text>
+<rect x="48" y="170" width="420" height="200" rx="10" fill="#0B1524" />
+<text x="66" y="202" font-family="Montserrat, Arial, sans-serif" font-size="19" fill="#DCE6F4" text-anchor="start" font-weight="bold">REGISTRATION ID</text>
+<text x="66" y="232" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#DCE6F4" text-anchor="start">URL / email link</text>
+<rect x="48" y="400" width="420" height="200" rx="10" fill="#0B1524" />
+<text x="66" y="432" font-family="Montserrat, Arial, sans-serif" font-size="19" fill="#DCE6F4" text-anchor="start" font-weight="bold">DERIVED — NO STATE</text>
+<text x="66" y="462" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#DCE6F4" text-anchor="start">impact values</text>
+<text x="66" y="488" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#DCE6F4" text-anchor="start">share card</text>
+<rect x="48" y="630" width="420" height="200" rx="10" fill="#0B1524" />
+<text x="66" y="662" font-family="Montserrat, Arial, sans-serif" font-size="19" fill="#DCE6F4" text-anchor="start" font-weight="bold">COMPONENT STATE</text>
+<text x="66" y="692" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#DCE6F4" text-anchor="start">vote, message, sent</text>
+<line x1="472" y1="270" x2="506" y2="270" stroke="#1871BD" stroke-width="4" /><polygon points="506,262 520,270 506,278" fill="#1871BD" />
+<line x1="472" y1="500" x2="506" y2="500" stroke="#1871BD" stroke-width="4" /><polygon points="506,492 520,500 506,508" fill="#1871BD" />
+<line x1="472" y1="730" x2="506" y2="730" stroke="#1871BD" stroke-width="4" /><polygon points="506,722 520,730 506,738" fill="#1871BD" />
+<rect x="520" y="170" width="430" height="330" rx="12" fill="#1871BD" />
+<text x="538" y="202" font-family="Montserrat, Arial, sans-serif" font-size="19" fill="#FFFFFF" text-anchor="start" font-weight="bold">SHARE CARD  .sh</text>
+<text x="538" y="232" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#FFFFFF" text-anchor="start">Estimated impact</text>
+<text x="538" y="258" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#FFFFFF" text-anchor="start">Facebook / Instagram links</text>
+<text x="538" y="284" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#FFFFFF" text-anchor="start">QR code note in text</text>
+<rect x="520" y="530" width="430" height="300" rx="10" fill="#6FA8F5" />
+<text x="538" y="562" font-family="Montserrat, Arial, sans-serif" font-size="19" fill="#091F2F" text-anchor="start" font-weight="bold">FEEDBACK  .fb</text>
+<text x="538" y="588" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#091F2F" text-anchor="start">Like or dislike</text>
+<rect x="538" y="610" width="394" height="26" rx="4" fill="#FFFFFF" stroke="#091F2F" stroke-width="2" />
+<text x="538" y="650" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#091F2F" text-anchor="start">Message</text>
+<rect x="538" y="672" width="394" height="26" rx="4" fill="#FFFFFF" stroke="#091F2F" stroke-width="2" />
+<line x1="954" y1="330" x2="988" y2="330" stroke="#1871BD" stroke-width="4" /><polygon points="988,322 1002,330 988,338" fill="#1871BD" />
+<polygon points="1120,265.0 1215.0,330 1120,395.0 1025.0,330" fill="#FFD98A" stroke="#B98A1F" stroke-width="3" />
+<text x="1120" y="324" font-family="Montserrat, Arial, sans-serif" font-size="17" fill="#091F2F" text-anchor="middle" font-weight="bold">Vote</text>
+<text x="1120" y="348" font-family="Montserrat, Arial, sans-serif" font-size="17" fill="#091F2F" text-anchor="middle" font-weight="bold">given?</text>
+<text x="1120" y="420" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#58585B" text-anchor="middle">No: stay on vote</text>
+<line x1="1218" y1="330" x2="1252" y2="330" stroke="#1871BD" stroke-width="4" /><polygon points="1252,322 1266,330 1252,338" fill="#1871BD" />
+<rect x="1270" y="307" width="180" height="46" rx="23" fill="#FB4D42" /><text x="1360.0" y="337" font-family="Montserrat, Arial, sans-serif" font-size="17" fill="#FFFFFF" text-anchor="middle" font-weight="bold">SUBMIT</text>
+<text x="1360" y="390" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#091F2F" text-anchor="middle">POST /feedback</text>
+<text x="1360" y="412" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#091F2F" text-anchor="middle">Sends once only</text>
+<rect x="1000" y="530" width="552" height="300" rx="12" fill="#1871BD" />
+<text x="1018" y="562" font-family="Montserrat, Arial, sans-serif" font-size="19" fill="#FFFFFF" text-anchor="start" font-weight="bold">SENT STATE  .nt</text>
+<text x="1018" y="592" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#FFFFFF" text-anchor="start">Thank you. Your feedback was sent.</text>
+<text x="1018" y="618" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#FFFFFF" text-anchor="start">The widget does not send twice.</text>
+<text x="1018" y="644" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#FFFFFF" text-anchor="start">File: client/src/components/feedback/FeedbackWidget.tsx</text>
+<text x="48" y="906" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#58585B" text-anchor="start" font-weight="bold">HOW TO READ THIS PICTURE</text>
+<rect x="48" y="926" width="34" height="22" rx="6" fill="#1871BD" />
+<text x="90" y="943" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#091F2F" text-anchor="start">Card</text>
+<rect x="266" y="926" width="34" height="22" rx="11" fill="#FB4D42" />
+<text x="308" y="943" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#091F2F" text-anchor="start">Button</text>
+<rect x="484" y="926" width="34" height="22" rx="3" fill="#0E7C7B" />
+<rect x="489" y="931" width="24" height="3" rx="1" fill="#FFFFFF" />
+<rect x="489" y="939" width="24" height="3" rx="1" fill="#FFFFFF" />
+<text x="526" y="943" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#091F2F" text-anchor="start">List</text>
+<rect x="702" y="926" width="34" height="22" rx="3" fill="#6FA8F5" />
+<rect x="707" y="932" width="24" height="2" rx="0" fill="#FFFFFF" />
+<rect x="707" y="939" width="24" height="2" rx="0" fill="#FFFFFF" />
+<text x="744" y="943" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#091F2F" text-anchor="start">Form</text>
+<polygon points="937,926.0 950.0,937 937,948.0 924.0,937" fill="#FFD98A" stroke="#B98A1F" stroke-width="3" />
+<text x="962" y="943" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#091F2F" text-anchor="start">Decision gate</text>
+<rect x="1138" y="926" width="34" height="22" rx="3" fill="#EDF2F9" stroke="#091F2F" stroke-width="2" />
+<rect x="1138" y="926" width="34" height="8" rx="3" fill="#091F2F" />
+<text x="1180" y="943" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#091F2F" text-anchor="start">Screen frame</text>
+<rect x="1356" y="926" width="34" height="22" rx="3" fill="#0B1524" />
+<rect x="1361" y="932" width="24" height="3" rx="1" fill="#DCE6F4" />
+<rect x="1361" y="939" width="24" height="3" rx="1" fill="#DCE6F4" />
+<text x="1398" y="943" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#091F2F" text-anchor="start">State / service</text>
+<text x="48" y="995" font-family="Lora, Georgia, serif" font-size="15" fill="#58585B" text-anchor="start" font-style="italic">Derived from the Developer Guide page models, stubs, and the Repair journey digest.</text>
+</svg>

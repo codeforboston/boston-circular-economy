@@ -50,6 +50,8 @@ If the page says "Location data is not available yet", the API can't find ETL ou
 
 ![Client architecture diagram](../docs/client-architecture.svg)
 
+Big-picture layout of the whole app: [docs/architecture/README.md](../docs/architecture/README.md).
+
 The client is organized into four layers. Each layer imports only from the
 layer below it so new code has one clear home.
 
