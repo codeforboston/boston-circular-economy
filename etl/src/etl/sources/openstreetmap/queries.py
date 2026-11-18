@@ -10,15 +10,6 @@ from etl.dtos import QueryArgs
 
 
 # --------------------------------------------------------------------------
-# Services, reused across queries
-# --------------------------------------------------------------------------
-
-BUY_CLOTHING = Service(activity=Activity.RESALE_BUY, item_category=ItemCategory.CLOTHING)
-REPAIR_CLOTHING = Service(activity=Activity.REPAIR_PAID, item_category=ItemCategory.CLOTHING)
-DONATE_CLOTHING = Service(activity=Activity.DONATION_DROP, item_category=ItemCategory.CLOTHING)
-
-
-# --------------------------------------------------------------------------
 # Category filters
 # --------------------------------------------------------------------------
 
@@ -135,23 +126,45 @@ ORGANIZATION_FILTERS = organization_filters(ORGANIZATIONS)
 OPENSTREETMAP_QUERY_ARGS: list[QueryArgs] = [
     {
         "querier": {"tag_filters": CLOTHING_RESALE_FILTERS},
-        "normalizer": {"services": [BUY_CLOTHING]},
+        "normalizer": {
+            "services": [
+                Service(activity=Activity.RESALE_BUY, item_category=ItemCategory.CLOTHING),
+            ],
+        },
     },
     {
         "querier": {"tag_filters": CLOTHING_REPAIR_FILTERS},
-        "normalizer": {"services": [REPAIR_CLOTHING]},
+        "normalizer": {
+            "services": [
+                Service(activity=Activity.REPAIR_PAID, item_category=ItemCategory.CLOTHING),
+            ],
+        },
     },
     {
         "querier": {"tag_filters": CHARITY_SHOP_FILTERS},
-        "normalizer": {"services": [BUY_CLOTHING, DONATE_CLOTHING]},
+        "normalizer": {
+            "services": [
+                Service(activity=Activity.RESALE_BUY, item_category=ItemCategory.CLOTHING),
+                Service(activity=Activity.DONATION_DROP, item_category=ItemCategory.CLOTHING),
+            ],
+        },
     },
     {
         "querier": {"tag_filters": CLOTHING_DROP_OFF_FILTERS},
-        "normalizer": {"services": [DONATE_CLOTHING]},
+        "normalizer": {
+            "services": [
+                Service(activity=Activity.DONATION_DROP, item_category=ItemCategory.CLOTHING),
+            ],
+        },
     },
     {
         "querier": {"tag_filters": organization_filters(THRIFT_CHAINS)},
-        "normalizer": {"services": [BUY_CLOTHING, DONATE_CLOTHING]},
+        "normalizer": {
+            "services": [
+                Service(activity=Activity.RESALE_BUY, item_category=ItemCategory.CLOTHING),
+                Service(activity=Activity.DONATION_DROP, item_category=ItemCategory.CLOTHING),
+            ],
+        },
     },
     {
         "querier": {"tag_filters": organization_filters(HABITAT_RESTORE)},
@@ -166,6 +179,10 @@ OPENSTREETMAP_QUERY_ARGS: list[QueryArgs] = [
     },
     {
         "querier": {"tag_filters": organization_filters(DONATION_BIN_OPERATORS)},
-        "normalizer": {"services": [DONATE_CLOTHING]},
+        "normalizer": {
+            "services": [
+                Service(activity=Activity.DONATION_DROP, item_category=ItemCategory.CLOTHING),
+            ],
+        },
     },
 ]
