@@ -11,7 +11,7 @@ import re
 import pytest
 
 from etl.sources.openstreetmap.querier import OpenStreetMapQuerier
-from etl.sources.openstreetmap.queries import (
+from etl.sources.openstreetmap.org_queries import (
     DONATION_BIN_OPERATORS,
     HABITAT_RESTORE,
     THRIFT_CHAINS,

@@ -11,11 +11,13 @@ import re
 import pytest
 
 from etl.sources.openstreetmap.querier import OpenStreetMapQuerier
-from etl.sources.openstreetmap.queries import (
+from etl.sources.openstreetmap.item_queries.clothing import (
     CHARITY_SHOP_FILTERS,
     CLOTHING_DROP_OFF_FILTERS,
     CLOTHING_REPAIR_FILTERS,
     CLOTHING_RESALE_FILTERS,
+)
+from etl.sources.openstreetmap.org_queries import (
     DONATION_BIN_OPERATORS,
     HABITAT_RESTORE,
     THRIFT_CHAINS,
