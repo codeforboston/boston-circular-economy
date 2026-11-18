@@ -11,12 +11,7 @@ import re
 import pytest
 
 from etl.sources.openstreetmap.querier import OpenStreetMapQuerier
-from etl.sources.openstreetmap.item_queries.clothing import (
-    CHARITY_SHOP_FILTERS,
-    CLOTHING_DROP_OFF_FILTERS,
-    CLOTHING_REPAIR_FILTERS,
-    CLOTHING_RESALE_FILTERS,
-)
+from etl.sources.openstreetmap.item_queries.clothing import CLOTHING_QUERY_ARGS
 from etl.sources.openstreetmap.org_queries import (
     DONATION_BIN_OPERATORS,
     HABITAT_RESTORE,
@@ -27,12 +22,7 @@ from etl.sources.openstreetmap.org_queries import (
 
 ORGANIZATIONS = THRIFT_CHAINS + HABITAT_RESTORE + DONATION_BIN_OPERATORS
 ORGANIZATION_FILTERS = organization_filters(ORGANIZATIONS)
-CLOTHING_FILTERS = (
-    CLOTHING_RESALE_FILTERS
-    + CLOTHING_REPAIR_FILTERS
-    + CHARITY_SHOP_FILTERS
-    + CLOTHING_DROP_OFF_FILTERS
-)
+CLOTHING_FILTERS = [f for query in CLOTHING_QUERY_ARGS for f in query["querier"]["tag_filters"]]
 
 BY_KEY = {org.key: org for org in ORGANIZATIONS}
 
