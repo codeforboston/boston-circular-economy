@@ -4,29 +4,12 @@ from pathlib import Path
 from contracts.domain import DataSource
 from data_store import LocalDataStore
 
-from etl.dtos import QueryArgs
 from etl.sources.google_places.normalizer import GooglePlacesNormalizer
 from etl.sources.google_places.querier import GooglePlacesQuerier
+from etl.sources.google_places.queries import GOOGLE_PLACES_QUERY_ARGS
 from etl.sources.openstreetmap.normalizer import OpenStreetMapNormalizer
 from etl.sources.openstreetmap.querier import OpenStreetMapQuerier
-from etl.sources.openstreetmap.queries import CLOTHING_FILTERS, ORGANIZATION_FILTERS
-
-
-google_places_query_args: list[QueryArgs] = [
-    {
-        "querier": {},
-        "normalizer": {},
-    },
-
-]
-openstreetmap_query_args: list[QueryArgs] = [
-    {
-        "querier": {
-            "tag_filters": CLOTHING_FILTERS + ORGANIZATION_FILTERS,
-        },
-        "normalizer": {},
-    },
-]
+from etl.sources.openstreetmap.queries import OPENSTREETMAP_QUERY_ARGS
 
 
 def main() -> None:
@@ -36,7 +19,7 @@ def main() -> None:
     data_dir = Path(os.environ.get("ETL_DATA_DIR", "data"))
     store = LocalDataStore(data_dir)
 
-    for query_args in google_places_query_args:
+    for query_args in GOOGLE_PLACES_QUERY_ARGS:
         # queries the Google Places API
         querier = GooglePlacesQuerier(**query_args["querier"])
         raw_locations = querier.fetch()
@@ -48,7 +31,7 @@ def main() -> None:
         # writes the normalized locations to the local output file
         store.write_source_snapshot(DataSource.GOOGLE_PLACES, normalized_locations)
 
-    for query_args in openstreetmap_query_args:
+    for query_args in OPENSTREETMAP_QUERY_ARGS:
         # queries the OpenStreetMap API
         querier = OpenStreetMapQuerier(**query_args["querier"])
         raw_locations = querier.fetch()
