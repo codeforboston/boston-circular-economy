@@ -4,6 +4,8 @@
 """
 from dataclasses import dataclass
 
+from etl.dtos import QueryArgs
+
 
 CLOTHING_FILTERS = [
     # Resale (buy/sell secondhand clothing)
@@ -69,3 +71,14 @@ ORGANIZATIONS = [
 # The querier wraps each one as `nwr<selector>(bbox);` and unions (ORs) them
 # all, together with CLOTHING_FILTERS, into a single Overpass request.
 ORGANIZATION_FILTERS = [f for org in ORGANIZATIONS for f in org.filters()]
+
+
+# Each entry is one querier + normalizer run in scrape_to_local.
+OPENSTREETMAP_QUERY_ARGS: list[QueryArgs] = [
+    {
+        "querier": {
+            "tag_filters": CLOTHING_FILTERS + ORGANIZATION_FILTERS,
+        },
+        "normalizer": {},
+    },
+]
