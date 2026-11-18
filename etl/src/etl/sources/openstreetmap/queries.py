@@ -37,14 +37,6 @@ CLOTHING_DROP_OFF_FILTERS = [
     '["amenity"="recycling"]["recycling:clothes"="yes"]',
 ]
 
-# Every category filter, for tests and for building a single combined query.
-CLOTHING_FILTERS = (
-    CLOTHING_RESALE_FILTERS
-    + CLOTHING_REPAIR_FILTERS
-    + CHARITY_SHOP_FILTERS
-    + CLOTHING_DROP_OFF_FILTERS
-)
-
 
 # --------------------------------------------------------------------------
 # Organization filters
@@ -72,6 +64,14 @@ class Organization:
         return selectors
 
 
+# Each organization expands to one selector per identity field, plus one for
+# its Wikidata ID. E.g. Goodwill:
+#     ["name"~"Goodwill",i]["shop"]
+#     ["brand"~"Goodwill",i]["shop"]
+#     ["operator"~"Goodwill",i]["shop"]
+#     ["brand:wikidata"="Q5583655"]["shop"]
+# The querier wraps each one as `nwr<selector>(bbox);` and unions (ORs) all
+# the filters in one query into a single Overpass request.
 def organization_filters(organizations: list[Organization]) -> list[str]:
     return [f for org in organizations for f in org.filters()]
 
@@ -102,19 +102,6 @@ DONATION_BIN_OPERATORS = [
     # Identified only as an operator; limited to recycling sites for now.
     Organization("city_of_cambridge", "City of Cambridge", '["amenity"="recycling"]', fields=("operator",)),
 ]
-
-# Every organization, for tests and for building a single combined query.
-ORGANIZATIONS = THRIFT_CHAINS + HABITAT_RESTORE + DONATION_BIN_OPERATORS
-
-# Each organization expands to one selector per identity field, plus one for
-# its Wikidata ID. E.g. Goodwill:
-#     ["name"~"Goodwill",i]["shop"]
-#     ["brand"~"Goodwill",i]["shop"]
-#     ["operator"~"Goodwill",i]["shop"]
-#     ["brand:wikidata"="Q5583655"]["shop"]
-# The querier wraps each one as `nwr<selector>(bbox);` and unions (ORs) all
-# the filters in one query into a single Overpass request.
-ORGANIZATION_FILTERS = organization_filters(ORGANIZATIONS)
 
 
 # --------------------------------------------------------------------------

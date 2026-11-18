@@ -12,10 +12,24 @@ import pytest
 
 from etl.sources.openstreetmap.querier import OpenStreetMapQuerier
 from etl.sources.openstreetmap.queries import (
-    CLOTHING_FILTERS,
-    ORGANIZATION_FILTERS,
-    ORGANIZATIONS,
+    CHARITY_SHOP_FILTERS,
+    CLOTHING_DROP_OFF_FILTERS,
+    CLOTHING_REPAIR_FILTERS,
+    CLOTHING_RESALE_FILTERS,
+    DONATION_BIN_OPERATORS,
+    HABITAT_RESTORE,
+    THRIFT_CHAINS,
     Organization,
+    organization_filters,
+)
+
+ORGANIZATIONS = THRIFT_CHAINS + HABITAT_RESTORE + DONATION_BIN_OPERATORS
+ORGANIZATION_FILTERS = organization_filters(ORGANIZATIONS)
+CLOTHING_FILTERS = (
+    CLOTHING_RESALE_FILTERS
+    + CLOTHING_REPAIR_FILTERS
+    + CHARITY_SHOP_FILTERS
+    + CLOTHING_DROP_OFF_FILTERS
 )
 
 BY_KEY = {org.key: org for org in ORGANIZATIONS}
