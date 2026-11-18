@@ -1,20 +1,15 @@
 import os
 from pathlib import Path
-from typing import Any, TypedDict
 
 from contracts.domain import DataSource
 from data_store import LocalDataStore
 
+from etl.dtos import QueryArgs
 from etl.sources.google_places.normalizer import GooglePlacesNormalizer
 from etl.sources.google_places.querier import GooglePlacesQuerier
 from etl.sources.openstreetmap.normalizer import OpenStreetMapNormalizer
 from etl.sources.openstreetmap.querier import OpenStreetMapQuerier
 from etl.sources.openstreetmap.queries import CLOTHING_FILTERS, ORGANIZATION_FILTERS
-
-
-class QueryArgs(TypedDict):
-    querier_args: dict[str, Any]
-    normalizer_args: dict[str, Any]
 
 
 google_places_query_args: list[QueryArgs] = [
