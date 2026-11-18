@@ -80,7 +80,7 @@ def test_selectors_are_case_insensitive():
 # Exact selectors for each organization, so its pattern, scope, fields and
 # Wikidata ID are all pinned. Changing an organization's query should mean
 # updating its row here. The goodwill row also keeps the example comment above
-# ORGANIZATION_FILTERS in queries.py accurate.
+# organization_filters in org_queries.py accurate.
 EXPECTED_FILTERS = {
     "goodwill": [
         '["name"~"Goodwill",i]["shop"]',
