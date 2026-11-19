@@ -39,15 +39,44 @@ def test_snapshots_are_isolated_per_source(store, make_location):
     assert store.read_source_snapshot(DataSource.OPENSTREETMAP) == osm_locations
 
 
-def test_write_source_snapshot_overwrites_existing(store, make_location):
-    store.write_source_snapshot(
-        DataSource.GOOGLE_PLACES, [make_location(data_source_id="stale")]
+def test_write_source_snapshot_keeps_existing_records(store, make_location):
+    existing_location = make_location(data_source_id="existing")
+    new_location = make_location(data_source_id="new")
+
+    store.write_source_snapshot(DataSource.GOOGLE_PLACES, [existing_location])
+    store.write_source_snapshot(DataSource.GOOGLE_PLACES, [new_location])
+
+    assert store.read_source_snapshot(DataSource.GOOGLE_PLACES) == [
+        existing_location,
+        new_location,
+    ]
+
+
+def test_write_source_snapshot_updates_existing_record(store, make_location):
+    original_location = make_location(data_source_id="a", name="Location A")
+    other_location = make_location(data_source_id="b")
+    updated_location = original_location.model_copy(
+        update={"name": "Location A (Updated)"}
     )
 
-    fresh_locations = [make_location(data_source_id="fresh")]
-    store.write_source_snapshot(DataSource.GOOGLE_PLACES, fresh_locations)
+    store.write_source_snapshot(
+        DataSource.GOOGLE_PLACES, [original_location, other_location]
+    )
+    store.write_source_snapshot(DataSource.GOOGLE_PLACES, [updated_location])
 
-    assert store.read_source_snapshot(DataSource.GOOGLE_PLACES) == fresh_locations
+    assert store.read_source_snapshot(DataSource.GOOGLE_PLACES) == [
+        updated_location,
+        other_location,
+    ]
+
+
+def test_write_source_snapshot_empty_list_keeps_existing(store, make_location):
+    existing_location = make_location(data_source_id="existing")
+
+    store.write_source_snapshot(DataSource.GOOGLE_PLACES, [existing_location])
+    store.write_source_snapshot(DataSource.GOOGLE_PLACES, [])
+
+    assert store.read_source_snapshot(DataSource.GOOGLE_PLACES) == [existing_location]
 
 
 def test_write_empty_snapshot_produces_empty_list_on_read(store):
