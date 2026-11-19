@@ -11,7 +11,16 @@ import re
 import pytest
 
 from etl.sources.openstreetmap.querier import OpenStreetMapQuerier
-from etl.sources.openstreetmap.queries import ORGANIZATION_FILTERS, ORGANIZATIONS, Organization
+from etl.sources.openstreetmap.org_queries import (
+    DONATION_BIN_OPERATORS,
+    HABITAT_RESTORE,
+    THRIFT_CHAINS,
+    Organization,
+    organization_filters,
+)
+
+ORGANIZATIONS = THRIFT_CHAINS + HABITAT_RESTORE + DONATION_BIN_OPERATORS
+ORGANIZATION_FILTERS = organization_filters(ORGANIZATIONS)
 
 
 def _matches(org: Organization, tags: dict) -> bool:

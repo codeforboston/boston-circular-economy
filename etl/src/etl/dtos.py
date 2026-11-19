@@ -1,6 +1,7 @@
 from datetime import datetime
+from typing import Any, TypedDict
 
-from contracts.domain import DataSource, NormalizedLocation
+from contracts.domain import DataSource, NormalizedLocation, Service
 from pydantic import BaseModel
 
 """
@@ -21,6 +22,17 @@ class RawLocation(BaseModel):
     data_source_id: str
     fetched_at: datetime
     payload: dict
+
+# NormalizerArgs are the constructor kwargs shared by every normalizer.
+class NormalizerArgs(TypedDict):
+    # Services every location returned by this query offers.
+    services: list[Service]
+
+# QueryArgs holds the constructor kwargs for one querier + normalizer run.
+# Querier kwargs differ per source, so they stay a plain dict.
+class QueryArgs(TypedDict):
+    querier: dict[str, Any]
+    normalizer: NormalizerArgs
 
 # MatchGroup is the boundary between MergeProcessor.match() and .prioritize().
 # Keyed by DataSource; a source is only present if it has a NormalizedLocation
