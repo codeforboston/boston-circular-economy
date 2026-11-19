@@ -24,9 +24,46 @@ Each pipeline has a **Querier** that fetches raw data from a source and a **Norm
 1. Create a new directory under [`src/etl/sources/`](src/etl/sources/) for your source (e.g. `src/etl/sources/openstreetmap/`)
 2. Implement [`BaseQuerier`](src/etl/base/querier.py) in `querier.py` — `fetch()` should return a `list[RawLocation]`, handling pagination internally
 3. Implement [`BaseNormalizer`](src/etl/base/normalizer.py) in `normalizer.py` — `normalize()` should map each [`RawLocation`](src/etl/dtos.py) payload to a [`NormalizedLocation`](src/etl/dtos.py)
-4. Add tests under [`tests/`](tests/), mirroring the source path (e.g. `tests/sources/openstreetmap/test_pipeline.py`)
+4. Define what to search for in `queries.py`, which exports a `list[QueryArgs]`. See [Queries](#queries) below.
+5. Loop over that list in [`scrape_to_local.py`](src/etl/jobs/scrape_to_local.py), building a querier and normalizer from each entry
+6. Add tests under [`tests/`](tests/), mirroring the source path (e.g. `tests/sources/openstreetmap/test_pipeline.py`)
 
-See [`src/etl/sources/google_places/`](src/etl/sources/google_places/) for a reference implementation.
+See [`src/etl/sources/openstreetmap/`](src/etl/sources/openstreetmap/) for a reference implementation.
+
+## Queries
+
+Each source lists what to search for as a `list[QueryArgs]`. [`QueryArgs`](src/etl/dtos.py) holds the constructor arguments for one querier and normalizer run:
+
+- **`querier`**: source-specific arguments, e.g. `tag_filters` for OpenStreetMap
+- **`normalizer`**: `services`, the services every location from this query offers
+
+The services are set before the search runs. The querier's results alone can't always say what a place offers, but the query can. A search for tailors, for example, returns places that repair clothing.
+
+```python
+{
+    "querier": {"tag_filters": ['["shop"="tailor"]', '["craft"="tailor"]']},
+    "normalizer": {
+        "services": [
+            Service(activity=Activity.REPAIR_PAID, item_category=ItemCategory.CLOTHING),
+        ],
+    },
+}
+```
+
+A place can match more than one query.
+
+Queries are split by how they find places. OpenStreetMap is laid out like this:
+
+```
+openstreetmap/
+    queries.py          # combines the lists below into OPENSTREETMAP_QUERY_ARGS
+    item_queries/       # find places by what they are (tags), one file per item category
+        __init__.py
+        clothing.py
+    org_queries.py      # find places by who runs them (name, brand, operator)
+```
+
+To add a category, create `item_queries/<category>.py` and add its list to `item_queries/__init__.py`. To add an organization, add it to `org_queries.py`.
 
 ## Querier
 
@@ -43,6 +80,7 @@ The [`BaseNormalizer`](src/etl/base/normalizer.py) is implemented once per pipel
 Key behaviors:
 
 - **`normalize()`** — maps each `RawLocation` payload to a `NormalizedLocation`, translating source-specific field names and formats into the shared schema.
+- **`services`**: set from the query's `normalizer` args when the normalizer is built. Every location from that query gets these services.
 
 ## DataStore
 
