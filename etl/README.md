@@ -127,10 +127,12 @@ See [`src/etl/jobs/merge_process_to_local.py`](src/etl/jobs/merge_process_to_loc
 
 ## Testing
 
-Tests live under [`tests/`](tests/), mirroring the layout of `src/etl/`. Run them with:
+Tests live under [`tests/`](tests/), mirroring the layout of `src/etl/`. Run them from anywhere in the repo with:
 
 ```bash
 uv run pytest
 ```
+
+pytest is configured in the root [`pyproject.toml`](../pyproject.toml). Tests marked `network` hit live APIs and are skipped by default. Run them with `uv run pytest -m network`.
 
 Shared fixtures (e.g. `make_location`, a factory for a valid `NormalizedLocation`) live in [`tests/conftest.py`](tests/conftest.py).
