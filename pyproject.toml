@@ -1,0 +1,18 @@
+# uv workspace root: one lockfile and one .venv for every Python project in the repo.
+# There is no [project] table, so the root itself is not a package.
+# See https://docs.astral.sh/uv/concepts/projects/workspaces/
+
+[tool.uv.workspace]
+members = ["etl", "server", "packages/*"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+]
+
+# pytest finds this config from any directory in the repo, so `uv run pytest`
+# behaves the same from the root, etl/, or anywhere else.
+[tool.pytest.ini_options]
+testpaths = ["etl/tests"]
+addopts = ["-m", "not network"]
+markers = ["network: hits a live external API; run with `-m network`"]
