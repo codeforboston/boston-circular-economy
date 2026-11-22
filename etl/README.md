@@ -53,6 +53,9 @@ Key behaviors:
 - **`write_source_snapshot()`** — writes a list of `NormalizedLocation` records to the database.
   - **Update or Create** — records are keyed on `(data_source, data_source_id)`. Existing records are updated in place; new records are inserted.
   - **Source** — every record retains its `data_source` and `data_source_id`, which makes cross-source deduplication tractable later without requiring it now.
+- **`write_service_claims()`** — writes a list of `ServiceClaim` records. Each claim says one location, by `(data_source, data_source_id)`, offers one service.
+  - **Create, skip duplicates** — a claim has no fields beyond its identity, so writing the same claim twice keeps one copy. Claims are never deleted.
+- **`read_service_claims()`** — loads all claims across all sources.
 
 ## MergeProcessor
 

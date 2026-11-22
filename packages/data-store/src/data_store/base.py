@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from contracts.domain import DataSource, NormalizedLocation
+from contracts.domain import DataSource, NormalizedLocation, ServiceClaim
 
 
 class BaseDataStore(ABC):
@@ -21,6 +21,19 @@ class BaseDataStore(ABC):
         source: DataSource,
     ) -> list[NormalizedLocation]:
         """Load the latest NormalizedLocation snapshot for one source."""
+        pass
+
+    @abstractmethod
+    def write_service_claims(
+        self,
+        service_claims: list[ServiceClaim],
+    ) -> None:
+        """Create or update ServiceClaims across all sources. Never deletes."""
+        pass
+
+    @abstractmethod
+    def read_service_claims(self) -> list[ServiceClaim]:
+        """Load all ServiceClaims across all sources."""
         pass
 
     @abstractmethod
