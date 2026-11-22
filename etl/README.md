@@ -48,7 +48,9 @@ The services are set before the search runs. The querier's results alone can't a
 }
 ```
 
-A place can match more than one query.
+After each query, [`build_service_claims()`](src/etl/service_claims.py) creates one `ServiceClaim` per location and service, and `scrape_to_local.py` writes them with `write_service_claims()`.
+
+A place can match more than one query. It then gets claims from each query.
 
 Queries are split by how they find places. OpenStreetMap is laid out like this:
 
