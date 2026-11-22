@@ -8,7 +8,7 @@ This project connects Greater Boston residents with local places to repair, reus
 
 ## Join us
 
-Everyone is welcome. Alongside developers, we need designers, researchers, and product thinkers. We meet at Code for Boston hack nights, online every Tuesday from 7 to 9:30 p.m. ET and in person on the first and third Tuesday of each month. See [codeforboston.org](https://codeforboston.org/) for how to join and RSVP, and say hi in `#circular-economy` on the [Code for Boston Slack](https://inviter.co/cfb-slack).
+Everyone is welcome. Alongside developers, we need designers, researchers, and product thinkers. We meet at Code for Boston hack nights, online every Tuesday from 7 to 9:00 p.m. ET and in person on the first and third Tuesday of each month. See [codeforboston.org](https://codeforboston.org/) for how to join and RSVP, and say hi in `#circular-economy` on the [Code for Boston Slack](https://inviter.co/cfb-slack).
 
 Once you're in, start with our [onboarding document](https://docs.google.com/document/d/1ja4MXAvy5s0U7pD5Xx5rr62x4_BU_biYdjbRFC0GQyU/edit?tab=t.0#heading=h.80ojjizca2at).
 
