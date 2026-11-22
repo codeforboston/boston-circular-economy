@@ -15,11 +15,9 @@ CLOTHING_QUERY_ARGS: list[QueryArgs] = [
                 '["shop"="clothes"]["second_hand"="yes"]',
             ],
         },
-        "normalizer": {
-            "services": [
-                Service(activity=Activity.RESALE_BUY, item_category=ItemCategory.CLOTHING),
-            ],
-        },
+        "services": [
+            Service(activity=Activity.RESALE_BUY, item_category=ItemCategory.CLOTHING),
+        ],
     },
     # Repair / alter clothing
     {
@@ -30,11 +28,9 @@ CLOTHING_QUERY_ARGS: list[QueryArgs] = [
                 '["repair"="clothes"]',
             ],
         },
-        "normalizer": {
-            "services": [
-                Service(activity=Activity.REPAIR_PAID, item_category=ItemCategory.CLOTHING),
-            ],
-        },
+        "services": [
+            Service(activity=Activity.REPAIR_PAID, item_category=ItemCategory.CLOTHING),
+        ],
     },
     # Charity shops sell donated goods and accept donations
     {
@@ -44,12 +40,10 @@ CLOTHING_QUERY_ARGS: list[QueryArgs] = [
                 '["charity"="yes"]',
             ],
         },
-        "normalizer": {
-            "services": [
-                Service(activity=Activity.RESALE_BUY, item_category=ItemCategory.CLOTHING),
-                Service(activity=Activity.DONATION_DROP, item_category=ItemCategory.CLOTHING),
-            ],
-        },
+        "services": [
+            Service(activity=Activity.RESALE_BUY, item_category=ItemCategory.CLOTHING),
+            Service(activity=Activity.DONATION_DROP, item_category=ItemCategory.CLOTHING),
+        ],
     },
     # Clothing drop-off bins and recycling points
     {
@@ -58,10 +52,8 @@ CLOTHING_QUERY_ARGS: list[QueryArgs] = [
                 '["amenity"="recycling"]["recycling:clothes"="yes"]',
             ],
         },
-        "normalizer": {
-            "services": [
-                Service(activity=Activity.DONATION_DROP, item_category=ItemCategory.CLOTHING),
-            ],
-        },
+        "services": [
+            Service(activity=Activity.DONATION_DROP, item_category=ItemCategory.CLOTHING),
+        ],
     },
 ]

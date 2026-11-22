@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from contracts.domain import NormalizedLocation, Service
+from contracts.domain import NormalizedLocation
 
 from etl.dtos import RawLocation
 
@@ -13,10 +13,6 @@ class BaseNormalizer(ABC):
     NormalizedLocations, mapping source-specific fields to the
     shared schema.
     """
-
-    def __init__(self, services: list[Service]):
-        # Services every location from this query offers, e.g. clothing repair.
-        self.services = services
 
     @abstractmethod
     def normalize(self, raw_locations: list[RawLocation]) -> list[NormalizedLocation]:

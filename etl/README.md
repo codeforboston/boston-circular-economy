@@ -25,28 +25,26 @@ Each pipeline has a **Querier** that fetches raw data from a source and a **Norm
 2. Implement [`BaseQuerier`](src/etl/base/querier.py) in `querier.py` — `fetch()` should return a `list[RawLocation]`, handling pagination internally
 3. Implement [`BaseNormalizer`](src/etl/base/normalizer.py) in `normalizer.py` — `normalize()` should map each [`RawLocation`](src/etl/dtos.py) payload to a [`NormalizedLocation`](src/etl/dtos.py)
 4. Define what to search for in `queries.py`, which exports a `list[QueryArgs]`. See [Queries](#queries) below.
-5. Loop over that list in [`scrape_to_local.py`](src/etl/jobs/scrape_to_local.py), building a querier and normalizer from each entry
+5. Loop over that list in [`scrape_to_local.py`](src/etl/jobs/scrape_to_local.py), building a querier from each entry
 6. Add tests under [`tests/`](tests/), mirroring the source path (e.g. `tests/sources/openstreetmap/test_pipeline.py`)
 
 See [`src/etl/sources/openstreetmap/`](src/etl/sources/openstreetmap/) for a reference implementation.
 
 ## Queries
 
-Each source lists what to search for as a `list[QueryArgs]`. [`QueryArgs`](src/etl/dtos.py) holds the constructor arguments for one querier and normalizer run:
+Each source lists what to search for as a `list[QueryArgs]`. Each [`QueryArgs`](src/etl/dtos.py) entry describes one query:
 
-- **`querier`**: source-specific arguments, e.g. `tag_filters` for OpenStreetMap
-- **`normalizer`**: `services`, the services every location from this query offers
+- **`querier`**: source-specific constructor arguments, e.g. `tag_filters` for OpenStreetMap
+- **`services`**: the services every location from this query offers
 
 The services are set before the search runs. The querier's results alone can't always say what a place offers, but the query can. A search for tailors, for example, returns places that repair clothing.
 
 ```python
 {
     "querier": {"tag_filters": ['["shop"="tailor"]', '["craft"="tailor"]']},
-    "normalizer": {
-        "services": [
-            Service(activity=Activity.REPAIR_PAID, item_category=ItemCategory.CLOTHING),
-        ],
-    },
+    "services": [
+        Service(activity=Activity.REPAIR_PAID, item_category=ItemCategory.CLOTHING),
+    ],
 }
 ```
 
@@ -80,8 +78,6 @@ The [`BaseNormalizer`](src/etl/base/normalizer.py) is implemented once per pipel
 Key behaviors:
 
 - **`normalize()`** — maps each `RawLocation` payload to a `NormalizedLocation`, translating source-specific field names and formats into the shared schema.
-- **`services`**: set from the query's `normalizer` args when the normalizer is built. Every location from that query gets these services.
-
 ## DataStore
 
 The [`DataStore`](src/etl/base/data_store.py) reads and writes data for persistant storage. It is shared across all pipelines — you do not implement it per source.

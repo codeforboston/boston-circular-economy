@@ -25,7 +25,7 @@ def main() -> None:
         raw_locations = querier.fetch()
 
         # maps Google Places payloads to the shared schema
-        normalizer = GooglePlacesNormalizer(**query_args["normalizer"])
+        normalizer = GooglePlacesNormalizer()
         normalized_locations = normalizer.normalize(raw_locations)
 
         # writes the normalized locations to the local output file
@@ -37,7 +37,7 @@ def main() -> None:
         raw_locations = querier.fetch()
 
         # maps OpenStreetMap payloads to the shared schema
-        normalizer = OpenStreetMapNormalizer(**query_args["normalizer"])
+        normalizer = OpenStreetMapNormalizer()
         normalized_locations = normalizer.normalize(raw_locations)
 
         # writes the normalized locations to the local output file
