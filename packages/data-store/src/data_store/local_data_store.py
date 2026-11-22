@@ -22,7 +22,14 @@ class LocalDataStore(BaseDataStore):
         normalized_locations: list[NormalizedLocation],
     ) -> None:
         file_path = self._get_snapshot_path(source)
-        self._write_locations(file_path, normalized_locations)
+        existing_locations = (
+            self._read_locations(file_path) if file_path.exists() else []
+        )
+        merged_locations = {
+            location.data_source_id: location
+            for location in [*existing_locations, *normalized_locations]
+        }
+        self._write_locations(file_path, list(merged_locations.values()))
 
     def read_source_snapshot(
         self,

@@ -12,7 +12,7 @@ class BaseDataStore(ABC):
         source: DataSource,
         normalized_locations: list[NormalizedLocation],
     ) -> None:
-        """Persist a full snapshot of NormalizedLocations for one source."""
+        """Create or update NormalizedLocations for one source. Never deletes."""
         pass
 
     @abstractmethod
