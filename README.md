@@ -46,9 +46,11 @@ All contributors are expected to follow the Code for Boston [Code of Conduct](ht
 
 ## Points of contact
 
-| Role | Name |
-| --- | --- |
-| Project lead | Matt Clarke ([@MattClarke131](https://github.com/MattClarke131)) |
+| Role | Name | Contact |
+| --- | --- | --- |
+| Project lead | Matt Clarke | Slack: `@Matt Clarke`, Github: [@MattClarke131](https://github.com/MattClarke131) |
+| Project Sponsor | Allon Dubler | Slack: `@Allon Dubler`
+| Lead Designer | Kitty Chan | Slack: `@Kitty Chan`, Github: [@kittychandesign](https://github.com/kittychandesign) |
 
 ## License
 
