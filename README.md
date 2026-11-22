@@ -21,7 +21,7 @@ flowchart LR
 
 | Part | What it is | Setup and details |
 | --- | --- | --- |
-| [`client/`](client/) | React + Vite website | [Client README](client/README.md) |
+| [`client/`](client/) | React + Typescript website | [Client README](client/README.md) |
 | [`server/`](server/) | FastAPI backend that serves location data | [Server README](server/README.md) |
 | [`etl/`](etl/) | Pipeline that fetches, normalizes, and merges locations from sources like Google Places and OpenStreetMap | [ETL README](etl/README.md) |
 | [`packages/`](packages/) | Shared Python code used by `etl/` and `server/` | [contracts](packages/contracts/README.md), [data-store](packages/data-store/README.md) |
