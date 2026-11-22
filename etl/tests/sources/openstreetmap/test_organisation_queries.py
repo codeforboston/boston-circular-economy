@@ -11,12 +11,18 @@ import re
 import pytest
 
 from etl.sources.openstreetmap.querier import OpenStreetMapQuerier
-from etl.sources.openstreetmap.queries import (
-    CLOTHING_FILTERS,
-    ORGANIZATION_FILTERS,
-    ORGANIZATIONS,
+from etl.sources.openstreetmap.item_queries.clothing import CLOTHING_QUERY_ARGS
+from etl.sources.openstreetmap.org_queries import (
+    DONATION_BIN_OPERATORS,
+    HABITAT_RESTORE,
+    THRIFT_CHAINS,
     Organization,
+    organization_filters,
 )
+
+ORGANIZATIONS = THRIFT_CHAINS + HABITAT_RESTORE + DONATION_BIN_OPERATORS
+ORGANIZATION_FILTERS = organization_filters(ORGANIZATIONS)
+CLOTHING_FILTERS = [f for query in CLOTHING_QUERY_ARGS for f in query["querier"]["tag_filters"]]
 
 BY_KEY = {org.key: org for org in ORGANIZATIONS}
 
@@ -64,7 +70,7 @@ def test_selectors_are_case_insensitive():
 # Exact selectors for each organization, so its pattern, scope, fields and
 # Wikidata ID are all pinned. Changing an organization's query should mean
 # updating its row here. The goodwill row also keeps the example comment above
-# ORGANIZATION_FILTERS in queries.py accurate.
+# organization_filters in org_queries.py accurate.
 EXPECTED_FILTERS = {
     "goodwill": [
         '["name"~"Goodwill",i]["shop"]',

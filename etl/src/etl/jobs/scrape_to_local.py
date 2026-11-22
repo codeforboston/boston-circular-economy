@@ -6,14 +6,10 @@ from data_store import LocalDataStore
 
 from etl.sources.google_places.normalizer import GooglePlacesNormalizer
 from etl.sources.google_places.querier import GooglePlacesQuerier
+from etl.sources.google_places.queries import GOOGLE_PLACES_QUERY_ARGS
 from etl.sources.openstreetmap.normalizer import OpenStreetMapNormalizer
 from etl.sources.openstreetmap.querier import OpenStreetMapQuerier
-from etl.sources.openstreetmap.queries import CLOTHING_FILTERS, ORGANIZATION_FILTERS
-
-google_places_query_args: list[dict[str, str]] = []
-openstreetmap_query_args: list[dict[str, str]] = [
-     {"tag_filters": CLOTHING_FILTERS + ORGANIZATION_FILTERS},
-]
+from etl.sources.openstreetmap.queries import OPENSTREETMAP_QUERY_ARGS
 
 
 def main() -> None:
@@ -23,25 +19,25 @@ def main() -> None:
     data_dir = Path(os.environ.get("ETL_DATA_DIR", "data"))
     store = LocalDataStore(data_dir)
 
-    for args in google_places_query_args:
+    for query_args in GOOGLE_PLACES_QUERY_ARGS:
         # queries the Google Places API
-        querier = GooglePlacesQuerier()
+        querier = GooglePlacesQuerier(**query_args["querier"])
         raw_locations = querier.fetch()
 
         # maps Google Places payloads to the shared schema
-        normalizer = GooglePlacesNormalizer()
+        normalizer = GooglePlacesNormalizer(**query_args["normalizer"])
         normalized_locations = normalizer.normalize(raw_locations)
 
         # writes the normalized locations to the local output file
         store.write_source_snapshot(DataSource.GOOGLE_PLACES, normalized_locations)
 
-    for args in openstreetmap_query_args:
+    for query_args in OPENSTREETMAP_QUERY_ARGS:
         # queries the OpenStreetMap API
-        querier = OpenStreetMapQuerier(**args)
+        querier = OpenStreetMapQuerier(**query_args["querier"])
         raw_locations = querier.fetch()
 
         # maps OpenStreetMap payloads to the shared schema
-        normalizer = OpenStreetMapNormalizer()
+        normalizer = OpenStreetMapNormalizer(**query_args["normalizer"])
         normalized_locations = normalizer.normalize(raw_locations)
 
         # writes the normalized locations to the local output file
