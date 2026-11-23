@@ -66,3 +66,13 @@ class NormalizedLocation(BaseModel):
     services: list[Service]
     availability: Availability
     last_verified: str | None = None
+
+
+# ServiceClaim says one location offers one service. Locations and claims are
+# stored separately because a location's services come from the query that
+# found it, not from the location record itself.
+class ServiceClaim(BaseModel):
+    data_source: DataSource
+    data_source_id: str  # the claimed location's id within its data source
+    activity: Activity
+    item_category: ItemCategory

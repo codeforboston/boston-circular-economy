@@ -1,11 +1,12 @@
 import json
 from pathlib import Path
 
-from contracts.domain import DataSource, NormalizedLocation
+from contracts.domain import DataSource, NormalizedLocation, ServiceClaim
 
 from data_store.base import BaseDataStore
 
 loc_key = "locations"
+service_claims_key = "service_claims"
 
 
 class LocalDataStore(BaseDataStore):
@@ -36,6 +37,47 @@ class LocalDataStore(BaseDataStore):
     ) -> list[NormalizedLocation]:
         file_path = self._get_snapshot_path(source)
         return self._read_locations(file_path)
+
+    def write_service_claims(
+        self,
+        service_claims: list[ServiceClaim],
+    ) -> None:
+        file_path = self._get_service_claims_path()
+        existing_claims = (
+            self.read_service_claims() if file_path.exists() else []
+        )
+        # A claim has no fields beyond its identity, so writing an existing
+        # claim again keeps one copy instead of adding a duplicate.
+        merged_claims = {
+            (
+                claim.data_source,
+                claim.data_source_id,
+                claim.activity,
+                claim.item_category,
+            ): claim
+            for claim in [*existing_claims, *service_claims]
+        }
+        claims_serialized = [
+            claim.model_dump(mode="json") for claim in merged_claims.values()
+        ]
+        payload = {service_claims_key: claims_serialized}
+
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(file_path, "w") as file:
+            file.write(json.dumps(payload, indent=2))
+
+    def read_service_claims(self) -> list[ServiceClaim]:
+        file_path = self._get_service_claims_path()
+        if not file_path.exists():
+            raise FileNotFoundError(file_path)
+
+        with open(file_path, "r") as file:
+            claims_serialized = json.load(file)
+
+        return [
+            ServiceClaim.model_validate(claim)
+            for claim in claims_serialized[service_claims_key]
+        ]
 
     def read_output_locations(self) -> list[NormalizedLocation]:
         file_path = self.output_dir / "locations.json"
@@ -74,3 +116,6 @@ class LocalDataStore(BaseDataStore):
 
     def _get_snapshot_path(self, source: DataSource) -> Path:
         return self.snapshots_dir / f"{source.value}_snapshot.json"
+
+    def _get_service_claims_path(self) -> Path:
+        return self.snapshots_dir / "service_claims.json"
