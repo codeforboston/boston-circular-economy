@@ -132,7 +132,7 @@ export interface components {
         SearchResult: {
             /**
              * Id
-             * @description Location identifier in the form '<data_source>:<data_source_id>'.
+             * @description Opaque application-level location identifier.
              */
             id: string;
             /** Name */

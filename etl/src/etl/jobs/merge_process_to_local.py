@@ -5,6 +5,7 @@ from contracts.domain import DataSource
 from data_store import LocalDataStore
 
 from etl.merge_processor import MergeProcessor
+from etl.resolve_id import resolve_location_ids
 
 
 def main() -> None:
@@ -17,7 +18,16 @@ def main() -> None:
         DataSource.GOOGLE_PLACES: store.read_source_snapshot(DataSource.GOOGLE_PLACES),
         DataSource.OPENSTREETMAP: store.read_source_snapshot(DataSource.OPENSTREETMAP),
     }
-    merged_locations = MergeProcessor().process(locations_by_source)
+    merged_locations, merged_locations_provenance = MergeProcessor().process(locations_by_source)
+
+    # Lookup existing LocationProvenance data store:
+    #   - If any existing Location has same provenance, reuse that Location.id
+    merged_locations, merged_locations_provenance = resolve_location_ids(
+        merged_locations, 
+        merged_locations_provenance,
+        previous_location_provenance=store.read_location_provenance())
+
+    store.write_location_provenance(merged_locations_provenance)
     store.write_output_locations(merged_locations)
 
     print("merge-process-to-local finished")

@@ -1,8 +1,13 @@
-from collections.abc import Sequence
 import json
+from collections.abc import Sequence
 from pathlib import Path
 
-from contracts.domain import DataSource, Location, NormalizedLocation
+from contracts.domain import (
+    DataSource,
+    Location,
+    LocationProvenance,
+    NormalizedLocation,
+)
 
 from data_store.base import BaseDataStore
 
@@ -23,7 +28,7 @@ class LocalDataStore(BaseDataStore):
     ) -> None:
         file_path = self._get_snapshot_path(source)
         existing_locations = (
-            self._read_locations(file_path) if file_path.exists() else []
+            self._read_locations(file_path, NormalizedLocation) if file_path.exists() else []
         )
         merged_locations = {
             location.data_source_id: location
@@ -42,7 +47,13 @@ class LocalDataStore(BaseDataStore):
         file_path = self.output_dir / "locations.json"
         return self._read_locations(file_path, Location)
 
-    def _read_locations[T: Location | NormalizedLocation](
+    def read_location_provenance(self) -> list[LocationProvenance]:
+        file_path = self.output_dir / "location_provenance.json"
+        if not file_path.exists():
+            return []
+        return self._read_locations(file_path, LocationProvenance)
+
+    def _read_locations[T: Location | NormalizedLocation | LocationProvenance](
         self, file_path: Path, model: type[T]
     ) -> list[T]:
         if not file_path.exists():
@@ -63,10 +74,17 @@ class LocalDataStore(BaseDataStore):
         file_path = self.output_dir / "locations.json"
         self._write_locations(file_path, output_locations)
 
+    def write_location_provenance(
+            self,
+            output_location_provenance: list[LocationProvenance],
+    ) -> None:
+        file_path = self.output_dir / "location_provenance.json"
+        self._write_locations(file_path, output_location_provenance)
+
     def _write_locations(
         self,
         file_path: Path,
-        locations: Sequence[Location | NormalizedLocation],
+        locations: Sequence[Location | NormalizedLocation | LocationProvenance],
     ) -> None:
         locations_serialized = [location.model_dump(mode="json") for location in locations]
         payload = { loc_key: locations_serialized }

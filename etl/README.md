@@ -13,7 +13,7 @@ flowchart LR
 
     subgraph merge["Job 2: merge-process-to-local"]
         R["DataStore<br/>read_source_snapshot()"] -->|NormalizedLocation| M["MergeProcessor"]
-        M -->|Location| O["DataStore<br/>write_output_locations()"]
+        M -->|Location, LocationProvenance| O["DataStore<br/>write_output_locations()<br/>write_location_provenance()"]
     end
 
     I -->|Write snapshots| DB[(Shared data store)]
@@ -93,7 +93,9 @@ The [`MergeProcessor`](src/etl/merge_processor.py) deduplicates and merges locat
 - `availability`: prefers source with `opening_hours`
 - `last_verified`: latest date
 
-**Output:** One `Location` per real-world business, with the most complete data from its source records. IDs currently use `<preferred_source>:<source_id>` (Google preferred, OSM fallback); they may change if the preferred source changes.
+**Output:** One `Location` per real-world business, with the most complete data from its source records. Each
+`Location` has an accompanying `LocationProvenace`, which is linker table mapping `Location.id` to all of its
+sources and source ids.
 
 Rerun [`merge_process_to_local.py`](src/etl/jobs/merge_process_to_local.py) from existing source snapshots to regenerate old output with the required `Location.id`.
 
@@ -132,9 +134,10 @@ locations_by_source = {
 }
 
 processor = MergeProcessor()
-merged_locations = processor.process(locations_by_source)
+merged_locations, merged_location_provenance = processor.process(locations_by_source)
 
 store.write_output_locations(merged_locations)
+store.write_location_provenance(write_output_locations)
 ```
 
 See [`src/etl/jobs/merge_process_to_local.py`](src/etl/jobs/merge_process_to_local.py) for the full job implementation.

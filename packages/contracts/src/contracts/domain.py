@@ -53,10 +53,13 @@ class Availability(BaseModel):
     opening_hours: str | None = None
     is_persistent: bool = True
 
+class NormalizedLocation(BaseModel):
+    """A source-specific record produced by a normalizer in etl."""
 
-class LocationDetails(BaseModel):
-    """Location fields shared for NormalizedLocation and final Locations."""
-
+    # Source specific id
+    data_source_id: str 
+    data_source: DataSource
+    # Info
     name: str
     lat: float
     lon: float
@@ -67,14 +70,21 @@ class LocationDetails(BaseModel):
     last_verified: str | None = None
 
 
-class NormalizedLocation(LocationDetails):
-    """A source-specific record produced by a normalizer in etl."""
-
-    data_source_id: str  # unique identifier for this location within its data source
-    data_source: DataSource
-
-
-class Location(LocationDetails):
+class Location(BaseModel):
     """Final location to persist to data store and shared across the application (client, server etc.)."""
-
+    # Application-wide unique id
     id: str
+    # Info
+    name: str
+    lat: float
+    lon: float
+    address: Address
+    contact: Contact
+    services: list[Service]
+    availability: Availability
+    last_verified: str | None = None
+
+class LocationProvenance(BaseModel):
+    """Linker table linking Location id to its source (NormalizedLocation) id."""
+    location_id: str
+    source_to_id: dict[DataSource, str] # key: data source, val: data_source_id 

@@ -1,3 +1,4 @@
+import uuid
 
 from contracts.domain import (
     Activity,
@@ -19,10 +20,12 @@ class TestMergeGroup:
         loc = make_location(data_source_id="g1", data_source=DataSource.GOOGLE_PLACES)
         group = {DataSource.GOOGLE_PLACES: loc}
 
-        result = merge_group(group)
+        result, provenance = merge_group(group)
 
         assert type(result) is Location
-        assert result.id == "google_places:g1"
+        assert str(uuid.UUID(result.id)) == result.id
+        assert provenance.location_id == result.id
+        assert provenance.source_to_id == {DataSource.GOOGLE_PLACES: "g1"}
         assert result.model_dump(exclude={"id"}) == loc.model_dump(
             exclude={"data_source", "data_source_id"}
         )
@@ -37,7 +40,7 @@ class TestMergeGroup:
             ),
         }
 
-        result = merge_group(group)
+        result, _ = merge_group(group)
 
         # Google has priority
         assert result.name == "Google Name"
@@ -52,7 +55,7 @@ class TestMergeGroup:
             ),
         }
 
-        result = merge_group(group)
+        result, _ = merge_group(group)
 
         # Should take Google's coordinates as a pair
         assert result.lat == 42.3588
@@ -73,7 +76,7 @@ class TestMergeGroup:
             ),
         }
 
-        result = merge_group(group)
+        result, _ = merge_group(group)
 
         # Should take OSM's more complete address
         assert result.address == complete
@@ -93,7 +96,7 @@ class TestMergeGroup:
             ),
         }
 
-        result = merge_group(group)
+        result, _ = merge_group(group)
 
         # Should have phone and website from Google, email from OSM
         assert result.contact.phone == "617-555-0100"
@@ -127,7 +130,7 @@ class TestMergeGroup:
             ),
         }
 
-        result = merge_group(group)
+        result, _ = merge_group(group)
 
         # Should have 3 unique services (duplicate removed)
         assert len(result.services) == 3
@@ -151,7 +154,7 @@ class TestMergeGroup:
             ),
         }
 
-        result = merge_group(group)
+        result, _ = merge_group(group)
 
         # Should take OSM's availability with hours
         assert result.availability.opening_hours == "Mo-Fr 09:00-17:00"
@@ -166,7 +169,7 @@ class TestMergeGroup:
             ),
         }
 
-        result = merge_group(group)
+        result, _ = merge_group(group)
 
         # Should take the later date
         assert result.last_verified == "2024-03-20"
@@ -181,11 +184,11 @@ class TestMergeGroup:
             ),
         }
 
-        result = merge_group(group)
+        result, _ = merge_group(group)
 
         assert result.last_verified == "2024-03-20"
 
-    def test_id_from_preferred_source(self, make_location):
+    def test_provenance_keeps_all_source_ids(self, make_location):
         group = {
             DataSource.GOOGLE_PLACES: make_location(
                 data_source_id="google-123", data_source=DataSource.GOOGLE_PLACES
@@ -195,28 +198,39 @@ class TestMergeGroup:
             ),
         }
 
-        result = merge_group(group)
+        result, provenance = merge_group(group)
 
-        # Should use Google's ID for stability
-        assert result.id == "google_places:google-123"
+        assert provenance.location_id == result.id
+        assert provenance.source_to_id == {
+            DataSource.GOOGLE_PLACES: "google-123",
+            DataSource.OPENSTREETMAP: "osm-456",
+        }
         assert "data_source" not in result.model_dump()
         assert "data_source_id" not in result.model_dump()
 
-    def test_osm_only_group_uses_namespaced_id(self, make_location):
+    def test_osm_only_group_records_osm_provenance(self, make_location):
         group = {
             DataSource.OPENSTREETMAP: make_location(
                 data_source_id="osm-456", data_source=DataSource.OPENSTREETMAP
             ),
         }
 
-        result = merge_group(group)
+        result, provenance = merge_group(group)
 
-        assert result.id == "openstreetmap:osm-456"
         assert type(result) is Location
+        assert provenance.location_id == result.id
+        assert provenance.source_to_id == {DataSource.OPENSTREETMAP: "osm-456"}
 
-    def test_id_is_independent_of_group_insertion_order(self, make_location):
+    def test_merge_is_independent_of_group_insertion_order(self, make_location):
         google = make_location(data_source_id="g1")
         osm = make_location(data_source=DataSource.OPENSTREETMAP, data_source_id="o1")
-        assert merge_group({DataSource.OPENSTREETMAP: osm, DataSource.GOOGLE_PLACES: google}) == merge_group(
+
+        first, first_provenance = merge_group(
+            {DataSource.OPENSTREETMAP: osm, DataSource.GOOGLE_PLACES: google}
+        )
+        second, second_provenance = merge_group(
             {DataSource.GOOGLE_PLACES: google, DataSource.OPENSTREETMAP: osm}
         )
+
+        assert first.model_dump(exclude={"id"}) == second.model_dump(exclude={"id"})
+        assert first_provenance.source_to_id == second_provenance.source_to_id
