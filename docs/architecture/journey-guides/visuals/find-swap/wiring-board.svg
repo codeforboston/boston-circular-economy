@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980">
+<rect width="1600" height="980" fill="#FFFFFF"/>
+<text x="800.0" y="46" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="bold" fill="#1871BD" text-anchor="middle" letter-spacing="3">CODE FOR BOSTON  —  CIRCULAR ECONOMY</text>
+<text x="800.0" y="88" font-family="Montserrat, Arial, sans-serif" font-size="34" font-weight="bold" fill="#091F2F" text-anchor="middle">Wiring: the wanted and offered board</text>
+<text x="800.0" y="122" font-family="Lora, Georgia, serif" font-size="19" font-weight="normal" fill="#58585B" text-anchor="middle" font-style="italic">One fetch, one split, two columns, cards that show cost, distance, instructions.</text>
+<line x1="60" y1="142" x2="1540" y2="142" stroke="#C8C8C8" stroke-width="1"/>
+<rect x="40" y="380" width="200" height="120" rx="10" fill="#0B1524"/><text x="140.0" y="414" font-family="Montserrat, Arial, sans-serif" font-size="17" font-weight="bold" fill="#DCE6F4" text-anchor="middle">QUERY CLIENT</text><text x="140.0" y="442" font-family="Lora, Georgia, serif" font-size="14" font-weight="normal" fill="#DCE6F4" text-anchor="middle">listings</text><text x="140.0" y="462" font-family="Lora, Georgia, serif" font-size="14" font-weight="normal" fill="#DCE6F4" text-anchor="middle">from the API</text>
+<rect x="300" y="380" width="210" height="120" rx="12" fill="#1871BD"/><text x="405.0" y="414" font-family="Montserrat, Arial, sans-serif" font-size="17" font-weight="bold" fill="#FFFFFF" text-anchor="middle">BOARD  .wo</text><text x="405.0" y="442" font-family="Lora, Georgia, serif" font-size="14" font-weight="normal" fill="#FFFFFF" text-anchor="middle">WantedOffered</text><text x="405.0" y="462" font-family="Lora, Georgia, serif" font-size="14" font-weight="normal" fill="#FFFFFF" text-anchor="middle">Board</text>
+<line x1="240" y1="440" x2="280.0" y2="440.0" stroke="#091F2F" stroke-width="3"/><polygon points="294,440 280.0,447.0 280.0,433.0" fill="#091F2F"/>
+<text x="680" y="240" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="bold" fill="#091F2F" text-anchor="middle">WANTED COLUMN  .wo-col</text>
+<rect x="560" y="260" width="240" height="150" rx="10" fill="#0E7C7B"/>
+<rect x="576" y="280" width="208" height="52" rx="8" fill="#1871BD"/>
+<text x="680" y="300" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Listing card</text>
+<text x="680" y="322" font-family="Lora, Georgia, serif" font-size="13" font-weight="normal" fill="#FFFFFF" text-anchor="middle">cost · distance</text>
+<rect x="576" y="344" width="208" height="52" rx="8" fill="#1871BD"/>
+<text x="680" y="364" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Listing card</text>
+<text x="680" y="386" font-family="Lora, Georgia, serif" font-size="13" font-weight="normal" fill="#FFFFFF" text-anchor="middle">cost · distance</text>
+<text x="680" y="600" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="bold" fill="#091F2F" text-anchor="middle">OFFERED COLUMN  .wo-col</text>
+<rect x="560" y="620" width="240" height="150" rx="10" fill="#0E7C7B"/>
+<rect x="576" y="640" width="208" height="52" rx="8" fill="#1871BD"/>
+<text x="680" y="660" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Listing card</text>
+<text x="680" y="682" font-family="Lora, Georgia, serif" font-size="13" font-weight="normal" fill="#FFFFFF" text-anchor="middle">cost · distance</text>
+<rect x="576" y="704" width="208" height="52" rx="8" fill="#1871BD"/>
+<text x="680" y="724" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Listing card</text>
+<text x="680" y="746" font-family="Lora, Georgia, serif" font-size="13" font-weight="normal" fill="#FFFFFF" text-anchor="middle">cost · distance</text>
+<polyline points="510,420 530,420 530,335 554,335" fill="none" stroke="#091F2F" stroke-width="3"/><polygon points="554,335 540.0,342.0 540.0,328.0" fill="#091F2F"/>
+<polyline points="510,460 530,460 530,695 554,695" fill="none" stroke="#091F2F" stroke-width="3"/><polygon points="554,695 540.0,702.0 540.0,688.0" fill="#091F2F"/>
+<rect x="300" y="200" width="210" height="96" rx="10" fill="#0B1524"/><text x="405.0" y="234" font-family="Montserrat, Arial, sans-serif" font-size="17" font-weight="bold" fill="#DCE6F4" text-anchor="middle">BOARD FILTER</text><text x="405.0" y="262" font-family="Lora, Georgia, serif" font-size="14" font-weight="normal" fill="#DCE6F4" text-anchor="middle">wanted / offered / all</text>
+<line x1="405" y1="296" x2="405.0" y2="360.0" stroke="#091F2F" stroke-width="3"/><polygon points="405,374 398.0,360.0 412.0,360.0" fill="#091F2F"/>
+<polyline points="800,335 900,335 900,470 955,470" fill="none" stroke="#091F2F" stroke-width="3"/><polygon points="955,470 941.0,477.0 941.0,463.0" fill="#091F2F"/>
+<polyline points="800,695 900,695 900,560 955,560" fill="none" stroke="#091F2F" stroke-width="3"/><polygon points="955,560 941.0,567.0 941.0,553.0" fill="#091F2F"/>
+<polygon points="1000,435.0 1095.0,515 1000,595.0 905.0,515" fill="#FFD98A" stroke="#D9A400" stroke-width="3"/><text x="1000" y="504" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="bold" fill="#091F2F" text-anchor="middle">COLUMN</text><text x="1000" y="526" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="bold" fill="#091F2F" text-anchor="middle">EMPTY?</text>
+<text x="1008" y="390" font-family="Montserrat, Arial, sans-serif" font-size="13" font-weight="bold" fill="#58585B" text-anchor="middle">EACH COLUMN</text>
+<text x="1008" y="412" font-family="Montserrat, Arial, sans-serif" font-size="13" font-weight="bold" fill="#58585B" text-anchor="middle">CHECKS ITS OWN LIST</text>
+<text x="1105" y="507" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="bold" fill="#0E7C7B" text-anchor="start">NO</text>
+<line x1="1098" y1="515" x2="1206.0" y2="515.0" stroke="#091F2F" stroke-width="3"/><polygon points="1220,515 1206.0,522.0 1206.0,508.0" fill="#091F2F"/>
+<rect x="1226" y="440" width="320" height="150" rx="12" fill="#0E7C7B"/><text x="1386.0" y="474" font-family="Montserrat, Arial, sans-serif" font-size="17" font-weight="bold" fill="#FFFFFF" text-anchor="middle">CARDS SHOW</text><text x="1386.0" y="502" font-family="Lora, Georgia, serif" font-size="14" font-weight="normal" fill="#FFFFFF" text-anchor="middle">Cost, distance, and</text><text x="1386.0" y="522" font-family="Lora, Georgia, serif" font-size="14" font-weight="normal" fill="#FFFFFF" text-anchor="middle">clear instructions</text><text x="1386.0" y="542" font-family="Lora, Georgia, serif" font-size="14" font-weight="normal" fill="#FFFFFF" text-anchor="middle">in words.</text>
+<text x="1012" y="625" font-family="Montserrat, Arial, sans-serif" font-size="15" font-weight="bold" fill="#D22D23" text-anchor="start">YES</text>
+<line x1="980" y1="597" x2="980.0" y2="686.0" stroke="#091F2F" stroke-width="3"/><polygon points="980,700 973.0,686.0 987.0,686.0" fill="#091F2F"/>
+<rect x="840" y="700" width="320" height="96" rx="12" fill="#1871BD"/><text x="1000.0" y="734" font-family="Montserrat, Arial, sans-serif" font-size="17" font-weight="bold" fill="#FFFFFF" text-anchor="middle">EMPTY WORDS</text><text x="1000.0" y="762" font-family="Lora, Georgia, serif" font-size="14" font-weight="normal" fill="#FFFFFF" text-anchor="middle">“No wanted items yet.”</text><text x="1000.0" y="782" font-family="Lora, Georgia, serif" font-size="14" font-weight="normal" fill="#FFFFFF" text-anchor="middle">Never a blank column.</text>
+<text x="800.0" y="860" font-family="Montserrat, Arial, sans-serif" font-size="14" font-weight="bold" fill="#091F2F" text-anchor="middle" letter-spacing="2">HOW TO READ THIS PICTURE</text>
+<rect x="194.0" y="880" width="34" height="22" rx="6" fill="#1871BD"/>
+<text x="236.0" y="897" font-family="Montserrat, Arial, sans-serif" font-size="14" font-weight="bold" fill="#091F2F" text-anchor="start">card</text>
+<rect x="344.0" y="880" width="34" height="22" rx="11" fill="#FB4D42"/>
+<text x="386.0" y="897" font-family="Montserrat, Arial, sans-serif" font-size="14" font-weight="bold" fill="#091F2F" text-anchor="start">button</text>
+<rect x="514.0" y="880" width="34" height="5" rx="2" fill="#0E7C7B"/>
+<rect x="514.0" y="888" width="34" height="5" rx="2" fill="#0E7C7B"/>
+<rect x="514.0" y="896" width="34" height="5" rx="2" fill="#0E7C7B"/>
+<text x="556.0" y="897" font-family="Montserrat, Arial, sans-serif" font-size="14" font-weight="bold" fill="#091F2F" text-anchor="start">list</text>
+<rect x="664.0" y="880" width="34" height="22" rx="3" fill="#6FA8F5"/>
+<line x1="670.0" y1="888" x2="692.0" y2="888" stroke="#FFFFFF" stroke-width="2"/>
+<line x1="670.0" y1="895" x2="686.0" y2="895" stroke="#FFFFFF" stroke-width="2"/>
+<text x="706.0" y="897" font-family="Montserrat, Arial, sans-serif" font-size="14" font-weight="bold" fill="#091F2F" text-anchor="start">form</text>
+<polygon points="831.0,876 850.0,891 831.0,910 812.0,891" fill="#FFD98A" stroke="#D9A400" stroke-width="2"/>
+<text x="856.0" y="897" font-family="Montserrat, Arial, sans-serif" font-size="14" font-weight="bold" fill="#091F2F" text-anchor="start">gate</text>
+<rect x="1024.0" y="880" width="34" height="22" rx="3" fill="#EDF2F9" stroke="#091F2F" stroke-width="1"/>
+<rect x="1024.0" y="880" width="34" height="8" rx="3" fill="#091F2F"/>
+<text x="1066.0" y="897" font-family="Montserrat, Arial, sans-serif" font-size="14" font-weight="bold" fill="#091F2F" text-anchor="start">screen</text>
+<rect x="1234.0" y="880" width="34" height="22" rx="3" fill="#0B1524"/>
+<line x1="1240.0" y1="888" x2="1262.0" y2="888" stroke="#DCE6F4" stroke-width="2"/>
+<line x1="1240.0" y1="895" x2="1256.0" y2="895" stroke="#DCE6F4" stroke-width="2"/>
+<text x="1276.0" y="897" font-family="Montserrat, Arial, sans-serif" font-size="14" font-weight="bold" fill="#091F2F" text-anchor="start">state</text>
+</svg>

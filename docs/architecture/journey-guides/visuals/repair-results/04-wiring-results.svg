@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1080" viewBox="0 0 1600 1080">
+<rect x="0" y="0" width="1600" height="1080" rx="0" fill="#FFFFFF" />
+<rect x="0" y="0" width="1600" height="118" rx="0" fill="#091F2F" />
+<text x="48" y="38" font-family="Montserrat, Arial, sans-serif" font-size="17" fill="#6FA8F5" text-anchor="start" font-weight="bold">CITY OF BOSTON  —  CIRCULAR ECONOMY</text>
+<text x="48" y="76" font-family="Montserrat, Arial, sans-serif" font-size="34" fill="#FFFFFF" text-anchor="start" font-weight="bold">Wiring — /repair/results — results, map, and selection</text>
+<text x="48" y="106" font-family="Lora, Georgia, serif" font-size="19" fill="#DCE6F4" text-anchor="start" font-style="italic">The URL owns the search. The query client owns the results. The page owns the selection.</text>
+<rect x="48" y="170" width="420" height="230" rx="10" fill="#0B1524" />
+<text x="66" y="202" font-family="Montserrat, Arial, sans-serif" font-size="19" fill="#DCE6F4" text-anchor="start" font-weight="bold">URL STATE</text>
+<text x="66" y="232" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#DCE6F4" text-anchor="start">item=tv, item=jacket</text>
+<text x="66" y="258" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#DCE6F4" text-anchor="start">mode=self, priority=money</text>
+<text x="66" y="284" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#DCE6F4" text-anchor="start">zip=02122, distance=4</text>
+<text x="66" y="310" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#DCE6F4" text-anchor="start">page=1</text>
+<rect x="48" y="430" width="420" height="200" rx="10" fill="#0B1524" />
+<text x="66" y="462" font-family="Montserrat, Arial, sans-serif" font-size="19" fill="#DCE6F4" text-anchor="start" font-weight="bold">QUERY CLIENT</text>
+<text x="66" y="492" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#DCE6F4" text-anchor="start">results, cached</text>
+<text x="66" y="518" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#DCE6F4" text-anchor="start">key: search</text>
+<rect x="48" y="660" width="420" height="170" rx="10" fill="#0B1524" />
+<text x="66" y="692" font-family="Montserrat, Arial, sans-serif" font-size="19" fill="#DCE6F4" text-anchor="start" font-weight="bold">PAGE STATE</text>
+<text x="66" y="722" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#DCE6F4" text-anchor="start">selectedId: string | null</text>
+<line x1="472" y1="285" x2="506" y2="285" stroke="#1871BD" stroke-width="4" /><polygon points="506,277 520,285 506,293" fill="#1871BD" />
+<line x1="472" y1="530" x2="506" y2="530" stroke="#1871BD" stroke-width="4" /><polygon points="506,522 520,530 506,538" fill="#1871BD" />
+<line x1="472" y1="745" x2="506" y2="745" stroke="#1871BD" stroke-width="4" /><polygon points="506,737 520,745 506,753" fill="#1871BD" />
+<rect x="520" y="170" width="430" height="330" rx="10" fill="#0E7C7B" />
+<text x="538" y="202" font-family="Montserrat, Arial, sans-serif" font-size="19" fill="#FFFFFF" text-anchor="start" font-weight="bold">RESULTS LIST  .sr-list</text>
+<rect x="534" y="228" width="402" height="34" rx="6" fill="#FFFFFF" opacity="0.92" />
+<text x="546" y="251" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#091F2F" text-anchor="start">Fixit Clinic — Free</text>
+<rect x="534" y="272" width="402" height="34" rx="6" fill="#FFFFFF" opacity="0.92" />
+<text x="546" y="295" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#091F2F" text-anchor="start">Paid card 1</text>
+<rect x="534" y="316" width="402" height="34" rx="6" fill="#FFFFFF" opacity="0.92" />
+<text x="546" y="339" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#091F2F" text-anchor="start">Paid card 2</text>
+<rect x="520" y="530" width="430" height="300" rx="12" fill="#1871BD" />
+<text x="538" y="562" font-family="Montserrat, Arial, sans-serif" font-size="19" fill="#FFFFFF" text-anchor="start" font-weight="bold">MAP  .mp  +  FILTER BAR  .fl</text>
+<text x="538" y="592" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#FFFFFF" text-anchor="start">One marker per provider</text>
+<text x="538" y="618" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#FFFFFF" text-anchor="start">Markers are buttons</text>
+<text x="538" y="644" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#FFFFFF" text-anchor="start">Filter bar holds the values</text>
+<line x1="954" y1="330" x2="988" y2="330" stroke="#1871BD" stroke-width="4" /><polygon points="988,322 1002,330 988,338" fill="#1871BD" />
+<polygon points="1120,265.0 1215.0,330 1120,395.0 1025.0,330" fill="#FFD98A" stroke="#B98A1F" stroke-width="3" />
+<text x="1120" y="324" font-family="Montserrat, Arial, sans-serif" font-size="17" fill="#091F2F" text-anchor="middle" font-weight="bold">priority =</text>
+<text x="1120" y="348" font-family="Montserrat, Arial, sans-serif" font-size="17" fill="#091F2F" text-anchor="middle" font-weight="bold">money?</text>
+<text x="1120" y="420" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#58585B" text-anchor="middle">Yes: FREE / PAID</text>
+<text x="1120" y="442" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#58585B" text-anchor="middle">No: This week</text>
+<line x1="1218" y1="330" x2="1252" y2="330" stroke="#1871BD" stroke-width="4" /><polygon points="1252,322 1266,330 1252,338" fill="#1871BD" />
+<rect x="1270" y="200" width="282" height="260" rx="12" fill="#1871BD" />
+<text x="1288" y="232" font-family="Montserrat, Arial, sans-serif" font-size="19" fill="#FFFFFF" text-anchor="start" font-weight="bold">PROVIDER CARD  .pv</text>
+<text x="1288" y="262" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#FFFFFF" text-anchor="start">Name</text>
+<text x="1288" y="288" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#FFFFFF" text-anchor="start">Services</text>
+<text x="1288" y="314" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#FFFFFF" text-anchor="start">Price, distance, stars</text>
+<rect x="1000" y="530" width="552" height="300" rx="10" fill="#0B1524" />
+<text x="1018" y="562" font-family="Montserrat, Arial, sans-serif" font-size="19" fill="#DCE6F4" text-anchor="start" font-weight="bold">SEARCH QUERY</text>
+<text x="1018" y="592" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#DCE6F4" text-anchor="start">client/src/api/search.ts</text>
+<text x="1018" y="618" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#DCE6F4" text-anchor="start">searchQueryOptions</text>
+<text x="1018" y="644" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#DCE6F4" text-anchor="start">GET /api/v1/search</text>
+<text x="1018" y="670" font-family="Montserrat, Arial, sans-serif" font-size="16" fill="#DCE6F4" text-anchor="start">Every location, first 10 shown</text>
+<text x="48" y="906" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#58585B" text-anchor="start" font-weight="bold">HOW TO READ THIS PICTURE</text>
+<rect x="48" y="926" width="34" height="22" rx="6" fill="#1871BD" />
+<text x="90" y="943" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#091F2F" text-anchor="start">Card</text>
+<rect x="266" y="926" width="34" height="22" rx="11" fill="#FB4D42" />
+<text x="308" y="943" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#091F2F" text-anchor="start">Button</text>
+<rect x="484" y="926" width="34" height="22" rx="3" fill="#0E7C7B" />
+<rect x="489" y="931" width="24" height="3" rx="1" fill="#FFFFFF" />
+<rect x="489" y="939" width="24" height="3" rx="1" fill="#FFFFFF" />
+<text x="526" y="943" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#091F2F" text-anchor="start">List</text>
+<rect x="702" y="926" width="34" height="22" rx="3" fill="#6FA8F5" />
+<rect x="707" y="932" width="24" height="2" rx="0" fill="#FFFFFF" />
+<rect x="707" y="939" width="24" height="2" rx="0" fill="#FFFFFF" />
+<text x="744" y="943" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#091F2F" text-anchor="start">Form</text>
+<polygon points="937,926.0 950.0,937 937,948.0 924.0,937" fill="#FFD98A" stroke="#B98A1F" stroke-width="3" />
+<text x="962" y="943" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#091F2F" text-anchor="start">Decision gate</text>
+<rect x="1138" y="926" width="34" height="22" rx="3" fill="#EDF2F9" stroke="#091F2F" stroke-width="2" />
+<rect x="1138" y="926" width="34" height="8" rx="3" fill="#091F2F" />
+<text x="1180" y="943" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#091F2F" text-anchor="start">Screen frame</text>
+<rect x="1356" y="926" width="34" height="22" rx="3" fill="#0B1524" />
+<rect x="1361" y="932" width="24" height="3" rx="1" fill="#DCE6F4" />
+<rect x="1361" y="939" width="24" height="3" rx="1" fill="#DCE6F4" />
+<text x="1398" y="943" font-family="Montserrat, Arial, sans-serif" font-size="15" fill="#091F2F" text-anchor="start">State / service</text>
+<text x="48" y="995" font-family="Lora, Georgia, serif" font-size="15" fill="#58585B" text-anchor="start" font-style="italic">Derived from the Developer Guide page models, stubs, and the Repair journey digest.</text>
+</svg>
