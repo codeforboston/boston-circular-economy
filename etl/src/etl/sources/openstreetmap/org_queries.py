@@ -74,30 +74,24 @@ DONATION_BIN_OPERATORS = [
 ORG_QUERY_ARGS: list[QueryArgs] = [
     {
         "querier": {"tag_filters": organization_filters(THRIFT_CHAINS)},
-        "normalizer": {
-            "services": [
-                Service(activity=Activity.RESALE_BUY, item_category=ItemCategory.CLOTHING),
-                Service(activity=Activity.DONATION_DROP, item_category=ItemCategory.CLOTHING),
-            ],
-        },
+        "services": [
+            Service(activity=Activity.RESALE_BUY, item_category=ItemCategory.CLOTHING),
+            Service(activity=Activity.DONATION_DROP, item_category=ItemCategory.CLOTHING),
+        ],
     },
     {
         "querier": {"tag_filters": organization_filters(HABITAT_RESTORE)},
-        "normalizer": {
-            "services": [
-                Service(activity=Activity.RESALE_BUY, item_category=ItemCategory.FURNITURE),
-                Service(activity=Activity.RESALE_BUY, item_category=ItemCategory.TOOLS),
-                Service(activity=Activity.DONATION_DROP, item_category=ItemCategory.FURNITURE),
-                Service(activity=Activity.DONATION_DROP, item_category=ItemCategory.TOOLS),
-            ],
-        },
+        "services": [
+            Service(activity=Activity.RESALE_BUY, item_category=ItemCategory.FURNITURE),
+            Service(activity=Activity.RESALE_BUY, item_category=ItemCategory.TOOLS),
+            Service(activity=Activity.DONATION_DROP, item_category=ItemCategory.FURNITURE),
+            Service(activity=Activity.DONATION_DROP, item_category=ItemCategory.TOOLS),
+        ],
     },
     {
         "querier": {"tag_filters": organization_filters(DONATION_BIN_OPERATORS)},
-        "normalizer": {
-            "services": [
-                Service(activity=Activity.DONATION_DROP, item_category=ItemCategory.CLOTHING),
-            ],
-        },
+        "services": [
+            Service(activity=Activity.DONATION_DROP, item_category=ItemCategory.CLOTHING),
+        ],
     },
 ]

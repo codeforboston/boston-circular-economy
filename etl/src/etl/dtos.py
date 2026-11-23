@@ -23,16 +23,12 @@ class RawLocation(BaseModel):
     fetched_at: datetime
     payload: dict
 
-# NormalizerArgs are the constructor kwargs shared by every normalizer.
-class NormalizerArgs(TypedDict):
-    # Services every location returned by this query offers.
-    services: list[Service]
-
-# QueryArgs holds the constructor kwargs for one querier + normalizer run.
+# QueryArgs describes one query: how to run the querier and what its results offer.
 # Querier kwargs differ per source, so they stay a plain dict.
 class QueryArgs(TypedDict):
     querier: dict[str, Any]
-    normalizer: NormalizerArgs
+    # Services every location returned by this query offers.
+    services: list[Service]
 
 # MatchGroup is the boundary between MergeProcessor.match() and .prioritize().
 # Keyed by DataSource; a source is only present if it has a NormalizedLocation

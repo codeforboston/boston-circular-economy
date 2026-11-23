@@ -4,7 +4,7 @@
     - item_queries/: find places by what they are (tags), one file per item category
     - org_queries.py: find places by who runs them
 
-    Each entry is one querier + normalizer run, so one Overpass request.
+    Each entry is one query, so one Overpass request.
     A place can match more than one query.
 """
 from etl.dtos import QueryArgs
