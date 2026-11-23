@@ -40,7 +40,12 @@ You can propose work either by posting in [Slack](https://inviter.co/cfb-slack) 
 
 #### Working on predefined work
 
-Predefined work will exist as tickets with a defined scope of work. You can assign tickets to yourself through our [project management tool](https://github.com/orgs/codeforboston/projects/21). You can also ask for clarifying information, make suggestions, or propose alternatives as you see fit. You can do this either in Slack, the ticket itself, or during a hack night.
+Predefined work will exist as tickets with a defined scope of work. You can assign tickets to yourself through our [project management tool](https://github.com/orgs/codeforboston/projects/21).
+
+### Priority order — major parts first
+Before you pick up a small ticket, check the unfinished major parts first. Priority one is the major parts of the application, the stack, and the components — for this project, the Milestone 0 contracts, the Milestone 1 thin slice, real data behind it, the first journey, and the map. Priority three is tiny minor issues. **Never pick up a priority-three ticket while a priority-one part is unfinished.** A priority-one part counts while it is unfinished even if it was never listed as open anywhere — including major parts nobody has named or specified yet. Name them first (check the roadmap milestones and their exit tests, and the open issues) and finish them. If you are unsure whether your ticket is priority three, ask in Slack before starting it.
+
+You can also ask for clarifying information, make suggestions, or propose alternatives as you see fit. You can do this either in Slack, the ticket itself, or during a hack night.
 
 You may, in the process of working on predefined work, discover it is more complex than originally understood. You are encouraged to break up the work into smaller parts. We prefer a stream of frequent, small PRs to waiting months for a giant PR.
 
