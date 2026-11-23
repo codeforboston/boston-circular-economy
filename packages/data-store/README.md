@@ -5,11 +5,10 @@
 ## Install in a local project
 **(Already done for `etl/` and `server/`. Skip this section to *# Add more data store* section)**
 
-From the *consuming* project (eg. `etl/` or `server/`), add the package:
+From the *consuming* project (eg. `etl/` or `server/`), add the package. It is a member of the repo's uv workspace, so uv links it as `{ workspace = true }`:
 
 ```
-uv add --editable ../packages/data-store
-uv sync
+uv add boston-circular-economy-data-store
 ```
 
 Then import data store in consuming projects:
