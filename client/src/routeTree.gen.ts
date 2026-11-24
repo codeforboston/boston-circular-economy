@@ -10,25 +10,16 @@
 
 import { Route as rootRouteImport } from './pages/__root'
 import { Route as IndexRouteImport } from './pages/index'
-import { Route as DecideIndexRouteImport } from './pages/decide/index'
-import { Route as DevIndexRouteImport } from './pages/dev/index'
 import { Route as SearchIndexRouteImport } from './pages/search/index'
-import { Route as DevFuzzySearchIndexRouteImport } from './pages/dev/fuzzy-search/index'
+import { Route as DevIndexRouteImport } from './pages/dev/index'
+import { Route as DecideIndexRouteImport } from './pages/decide/index'
 import { Route as DevPrototypeFolderExampleIndexRouteImport } from './pages/dev/prototype-folder-example/index'
+import { Route as DevFuzzySearchIndexRouteImport } from './pages/dev/fuzzy-search/index'
+import { Route as DecideServiceTypeIndexRouteImport } from './pages/decide/service-type/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DecideIndexRoute = DecideIndexRouteImport.update({
-  id: '/decide/',
-  path: '/decide/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DevIndexRoute = DevIndexRouteImport.update({
-  id: '/dev/',
-  path: '/dev/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SearchIndexRoute = SearchIndexRouteImport.update({
@@ -36,9 +27,14 @@ const SearchIndexRoute = SearchIndexRouteImport.update({
   path: '/search/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DevFuzzySearchIndexRoute = DevFuzzySearchIndexRouteImport.update({
-  id: '/dev/fuzzy-search/',
-  path: '/dev/fuzzy-search/',
+const DevIndexRoute = DevIndexRouteImport.update({
+  id: '/dev/',
+  path: '/dev/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DecideIndexRoute = DecideIndexRouteImport.update({
+  id: '/decide/',
+  path: '/decide/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DevPrototypeFolderExampleIndexRoute =
@@ -47,12 +43,23 @@ const DevPrototypeFolderExampleIndexRoute =
     path: '/dev/prototype-folder-example/',
     getParentRoute: () => rootRouteImport,
   } as any)
+const DevFuzzySearchIndexRoute = DevFuzzySearchIndexRouteImport.update({
+  id: '/dev/fuzzy-search/',
+  path: '/dev/fuzzy-search/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DecideServiceTypeIndexRoute = DecideServiceTypeIndexRouteImport.update({
+  id: '/decide/service-type/',
+  path: '/decide/service-type/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/decide/': typeof DecideIndexRoute
   '/dev/': typeof DevIndexRoute
   '/search/': typeof SearchIndexRoute
+  '/decide/service-type/': typeof DecideServiceTypeIndexRoute
   '/dev/fuzzy-search/': typeof DevFuzzySearchIndexRoute
   '/dev/prototype-folder-example/': typeof DevPrototypeFolderExampleIndexRoute
 }
@@ -61,6 +68,7 @@ export interface FileRoutesByTo {
   '/decide': typeof DecideIndexRoute
   '/dev': typeof DevIndexRoute
   '/search': typeof SearchIndexRoute
+  '/decide/service-type': typeof DecideServiceTypeIndexRoute
   '/dev/fuzzy-search': typeof DevFuzzySearchIndexRoute
   '/dev/prototype-folder-example': typeof DevPrototypeFolderExampleIndexRoute
 }
@@ -70,6 +78,7 @@ export interface FileRoutesById {
   '/decide/': typeof DecideIndexRoute
   '/dev/': typeof DevIndexRoute
   '/search/': typeof SearchIndexRoute
+  '/decide/service-type/': typeof DecideServiceTypeIndexRoute
   '/dev/fuzzy-search/': typeof DevFuzzySearchIndexRoute
   '/dev/prototype-folder-example/': typeof DevPrototypeFolderExampleIndexRoute
 }
@@ -80,6 +89,7 @@ export interface FileRouteTypes {
     | '/decide/'
     | '/dev/'
     | '/search/'
+    | '/decide/service-type/'
     | '/dev/fuzzy-search/'
     | '/dev/prototype-folder-example/'
   fileRoutesByTo: FileRoutesByTo
@@ -88,6 +98,7 @@ export interface FileRouteTypes {
     | '/decide'
     | '/dev'
     | '/search'
+    | '/decide/service-type'
     | '/dev/fuzzy-search'
     | '/dev/prototype-folder-example'
   id:
@@ -96,6 +107,7 @@ export interface FileRouteTypes {
     | '/decide/'
     | '/dev/'
     | '/search/'
+    | '/decide/service-type/'
     | '/dev/fuzzy-search/'
     | '/dev/prototype-folder-example/'
   fileRoutesById: FileRoutesById
@@ -105,6 +117,7 @@ export interface RootRouteChildren {
   DecideIndexRoute: typeof DecideIndexRoute
   DevIndexRoute: typeof DevIndexRoute
   SearchIndexRoute: typeof SearchIndexRoute
+  DecideServiceTypeIndexRoute: typeof DecideServiceTypeIndexRoute
   DevFuzzySearchIndexRoute: typeof DevFuzzySearchIndexRoute
   DevPrototypeFolderExampleIndexRoute: typeof DevPrototypeFolderExampleIndexRoute
 }
@@ -118,11 +131,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/decide/': {
-      id: '/decide/'
-      path: '/decide'
-      fullPath: '/decide/'
-      preLoaderRoute: typeof DecideIndexRouteImport
+    '/search/': {
+      id: '/search/'
+      path: '/search'
+      fullPath: '/search/'
+      preLoaderRoute: typeof SearchIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dev/': {
@@ -132,11 +145,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DevIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/search/': {
-      id: '/search/'
-      path: '/search'
-      fullPath: '/search/'
-      preLoaderRoute: typeof SearchIndexRouteImport
+    '/decide/': {
+      id: '/decide/'
+      path: '/decide'
+      fullPath: '/decide/'
+      preLoaderRoute: typeof DecideIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dev/prototype-folder-example/': {
+      id: '/dev/prototype-folder-example/'
+      path: '/dev/prototype-folder-example'
+      fullPath: '/dev/prototype-folder-example/'
+      preLoaderRoute: typeof DevPrototypeFolderExampleIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dev/fuzzy-search/': {
@@ -146,11 +166,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DevFuzzySearchIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dev/prototype-folder-example/': {
-      id: '/dev/prototype-folder-example/'
-      path: '/dev/prototype-folder-example'
-      fullPath: '/dev/prototype-folder-example/'
-      preLoaderRoute: typeof DevPrototypeFolderExampleIndexRouteImport
+    '/decide/service-type/': {
+      id: '/decide/service-type/'
+      path: '/decide/service-type'
+      fullPath: '/decide/service-type/'
+      preLoaderRoute: typeof DecideServiceTypeIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -161,6 +181,7 @@ const rootRouteChildren: RootRouteChildren = {
   DecideIndexRoute: DecideIndexRoute,
   DevIndexRoute: DevIndexRoute,
   SearchIndexRoute: SearchIndexRoute,
+  DecideServiceTypeIndexRoute: DecideServiceTypeIndexRoute,
   DevFuzzySearchIndexRoute: DevFuzzySearchIndexRoute,
   DevPrototypeFolderExampleIndexRoute: DevPrototypeFolderExampleIndexRoute,
 }
