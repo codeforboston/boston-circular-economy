@@ -6,18 +6,28 @@ Data pipeline for collecting, normalizing, and storing circular economy location
 
 ```mermaid
 flowchart LR
-    Q["Querier\nfetch()"] -->|RawLocation| N["Normalizer\nnormalize()"]
-    N -->|NormalizedLocation| I["DataStore\nwrite_source_snapshot()"]
-    I --> DB[(Database)]
+    subgraph scrape["Job 1: scrape-to-local"]
+        Q["Querier<br/>fetch()"] -->|RawLocation| N["Normalizer<br/>normalize()"]
+        N -->|NormalizedLocation| I["DataStore<br/>write_source_snapshot()"]
+    end
+
+    subgraph merge["Job 2: merge-process-to-local"]
+        R["DataStore<br/>read_source_snapshot()"] -->|NormalizedLocation| M["MergeProcessor"]
+        M -->|Location, LocationProvenance| O["DataStore<br/>write_output_locations()<br/>write_location_provenance()"]
+    end
+
+    I -->|Write snapshots| DB[(Shared data store)]
+    DB -->|Read snapshots| R
+    O -->|Write final locations| DB
 
     classDef source fill:#1D9E75,stroke:#0F6E56,color:#E1F5EE
     classDef sourceTable fill:#7F77DD,stroke:#534AB7,color:#EEEDFE
 
-    class Q,N,I source
+    class Q,N,I,R,M,O source
     class DB sourceTable
 ```
 
-Each pipeline has a **Querier** that fetches raw data from a source and a **Normalizer** that maps it to the shared schema. The **DataStore** is shared across pipelines and handles persistence.
+Each pipeline has a **Querier** that fetches raw data from a source and a **Normalizer** that maps it to the shared schema. The **DataStore** is shared across pipelines and handles persistence. Source snapshots retain `NormalizedLocation` records; the **MergeProcessor** converts them into final `Location` records for the application.
 
 ## Adding a pipeline
 
@@ -80,7 +90,7 @@ Key behaviors:
 - **`normalize()`** — maps each `RawLocation` payload to a `NormalizedLocation`, translating source-specific field names and formats into the shared schema.
 ## DataStore
 
-The [`DataStore`](src/etl/base/data_store.py) reads and writes data for persistant storage. It is shared across all pipelines — you do not implement it per source.
+The [`DataStore`](../packages/data-store/src/data_store/base.py) reads and writes data for persistant storage. It is shared across all pipelines — you do not implement it per source.
 
 Key behaviors:
 
@@ -90,6 +100,7 @@ Key behaviors:
 - **`write_service_claims()`** — writes a list of `ServiceClaim` records. Each claim says one location, by `(data_source, data_source_id)`, offers one service.
   - **Create, skip duplicates** — a claim has no fields beyond its identity, so writing the same claim twice keeps one copy. Claims are never deleted.
 - **`read_service_claims()`** — loads all claims across all sources.
+- **`write_output_locations()` / `read_output_locations()`** — persist and load final `Location` records, containing an application `id` instead of `data_source` and `data_source_id`. Source snapshots remain unchanged.
 
 ## MergeProcessor
 
@@ -118,7 +129,11 @@ The [`MergeProcessor`](src/etl/merge_processor.py) deduplicates and merges locat
 - `availability`: prefers source with `opening_hours`
 - `last_verified`: latest date
 
-**Output:** One `NormalizedLocation` per real-world business, with the most complete data from all sources.
+**Output:** One `Location` per real-world business, with the most complete data from its source records. Each
+`Location` has an accompanying `LocationProvenace`, which is linker table mapping `Location.id` to all of its
+sources and source ids.
+
+Rerun [`merge_process_to_local.py`](src/etl/jobs/merge_process_to_local.py) from existing source snapshots to regenerate old output with the required `Location.id`.
 
 ### Matching details
 
@@ -155,9 +170,10 @@ locations_by_source = {
 }
 
 processor = MergeProcessor()
-merged_locations = processor.process(locations_by_source)
+merged_locations, merged_location_provenance = processor.process(locations_by_source)
 
 store.write_output_locations(merged_locations)
+store.write_location_provenance(write_output_locations)
 ```
 
 See [`src/etl/jobs/merge_process_to_local.py`](src/etl/jobs/merge_process_to_local.py) for the full job implementation.

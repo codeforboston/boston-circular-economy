@@ -1,6 +1,6 @@
 # Shared Contracts
 
-`boston-circular-economy-contracts` provides data models shared by local Python projects.
+`boston-circular-economy-contracts` provides data models shared by components in this application (eg. `etl/`, `server/`).
 
 ## Install in a local project
 **(Already done for `etl/` and `server/`. Skip this section to *# Add more shared models* section)**
@@ -11,7 +11,7 @@ From the *consuming* project (eg. `etl/` or `server/`), add the package. It is a
 uv add boston-circular-economy-contracts
 ```
 
-Then import data models in consuming projects:
+Then import data models in consuming component:
 ```
 from contracts.domain import Address
 ```

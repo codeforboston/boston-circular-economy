@@ -1,11 +1,14 @@
 """Field-level merging logic for combining locations from multiple sources."""
 
+import uuid
+
 from contracts.domain import (
     Address,
     Availability,
     Contact,
     DataSource,
-    NormalizedLocation,
+    Location,
+    LocationProvenance,
     Service,
 )
 
@@ -15,9 +18,9 @@ from etl.dtos import MatchGroup
 SOURCE_PRIORITY = [DataSource.GOOGLE_PLACES, DataSource.OPENSTREETMAP]
 
 
-def merge_group(group: MatchGroup) -> NormalizedLocation:
+def merge_group(group: MatchGroup) -> tuple[Location, LocationProvenance]:
     """
-    Merge a MatchGroup into a single NormalizedLocation.
+    Merge a MatchGroup into a single tuple[Location, LocationProvenance].
 
     Applies field-level merge policies:
     - Most fields: first non-empty value in SOURCE_PRIORITY order
@@ -26,17 +29,23 @@ def merge_group(group: MatchGroup) -> NormalizedLocation:
     - services: union across sources, deduplicated
     - availability: prefer source with opening_hours (OSM preferred)
     - last_verified: latest date
-    - data_source/data_source_id: from preferred source for stability
 
     Args:
         group: MatchGroup containing 1-2 NormalizedLocations keyed by source.
 
     Returns:
-        Merged NormalizedLocation with the most complete data.
+        Location with the most complete data and an application-level ID.
+        LocationProvenance links Location id to all of its sources' ids.
     """
+    uid = str(uuid.uuid4())
     if len(group) == 1:
-        # Single-source group, return as-is
-        return list(group.values())[0]
+        loc = next(iter(group.values()))
+        return Location(
+            id=uid,
+            **loc.model_dump(exclude={"data_source", "data_source_id"}),
+        ), LocationProvenance(
+            location_id=uid,
+            source_to_id={loc.data_source: loc.data_source_id})
 
     # Get locations in priority order
     locs = [group[src] for src in SOURCE_PRIORITY if src in group]
@@ -64,17 +73,8 @@ def merge_group(group: MatchGroup) -> NormalizedLocation:
     # last_verified: latest date
     last_verified = _merge_last_verified([loc.last_verified for loc in locs])
 
-    # data_source/data_source_id: from preferred source for output stability
-    # TODO(stbrody): This is a bit of a lie since the data is actually a merger of both sources.
-    # Consider introducing a new MergedLocation type that omits the source information, instead of
-    # reusing NormalizedLocation.
-    preferred = locs[0]
-    data_source = preferred.data_source
-    data_source_id = preferred.data_source_id
-
-    return NormalizedLocation(
-        data_source_id=data_source_id,
-        data_source=data_source,
+    return Location(
+        id=uid,
         name=name,
         lat=lat,
         lon=lon,
@@ -83,6 +83,11 @@ def merge_group(group: MatchGroup) -> NormalizedLocation:
         services=services,
         availability=availability,
         last_verified=last_verified,
+    ), LocationProvenance(
+        location_id=uid,
+        source_to_id={
+            data_source: info.data_source_id for data_source, info in group.items()
+        },
     )
 
 

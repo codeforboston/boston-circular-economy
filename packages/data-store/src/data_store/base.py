@@ -1,6 +1,12 @@
 from abc import ABC, abstractmethod
 
-from contracts.domain import DataSource, NormalizedLocation, ServiceClaim
+from contracts.domain import (
+    DataSource,
+    Location,
+    LocationProvenance,
+    NormalizedLocation,
+    ServiceClaim,
+)
 
 
 class BaseDataStore(ABC):
@@ -13,7 +19,6 @@ class BaseDataStore(ABC):
         normalized_locations: list[NormalizedLocation],
     ) -> None:
         """Create or update NormalizedLocations for one source. Never deletes."""
-        pass
 
     @abstractmethod
     def read_source_snapshot(
@@ -21,7 +26,6 @@ class BaseDataStore(ABC):
         source: DataSource,
     ) -> list[NormalizedLocation]:
         """Load the latest NormalizedLocation snapshot for one source."""
-        pass
 
     @abstractmethod
     def write_service_claims(
@@ -39,12 +43,21 @@ class BaseDataStore(ABC):
     @abstractmethod
     def write_output_locations(
         self,
-        output_locations: list[NormalizedLocation],
+        output_locations: list[Location],
     ) -> None:
         """Persist merged locations after deduplication across sources."""
-        pass
 
     @abstractmethod
-    def read_output_locations(self) -> list[NormalizedLocation]:
+    def read_output_locations(self) -> list[Location]:
         """Load the merged locations after deduplication across sources."""
-        pass
+
+    @abstractmethod
+    def write_location_provenance(
+        self,
+        location_provenance: list[LocationProvenance],
+    ) -> None:
+        """Persist location provenance information."""
+
+    @abstractmethod
+    def read_location_provenance(self) -> list[LocationProvenance]:
+        """Load the location provenance information."""
