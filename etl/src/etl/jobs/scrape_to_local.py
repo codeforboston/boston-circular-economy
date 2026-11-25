@@ -4,6 +4,7 @@ from pathlib import Path
 from contracts.domain import DataSource
 from data_store import LocalDataStore
 
+from etl.service_claims import build_service_claims
 from etl.sources.google_places.normalizer import GooglePlacesNormalizer
 from etl.sources.google_places.querier import GooglePlacesQuerier
 from etl.sources.google_places.queries import GOOGLE_PLACES_QUERY_ARGS
@@ -31,6 +32,10 @@ def main() -> None:
         # writes the normalized locations to the local output file
         store.write_source_snapshot(DataSource.GOOGLE_PLACES, normalized_locations)
 
+        # records that these locations offer this query's services
+        service_claims = build_service_claims(normalized_locations, query_args["services"])
+        store.write_service_claims(service_claims)
+
     for query_args in OPENSTREETMAP_QUERY_ARGS:
         # queries the OpenStreetMap API
         querier = OpenStreetMapQuerier(**query_args["querier"])
@@ -42,6 +47,10 @@ def main() -> None:
 
         # writes the normalized locations to the local output file
         store.write_source_snapshot(DataSource.OPENSTREETMAP, normalized_locations)
+
+        # records that these locations offer this query's services
+        service_claims = build_service_claims(normalized_locations, query_args["services"])
+        store.write_service_claims(service_claims)
 
     print("scrape-to-local finished")
 
