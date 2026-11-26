@@ -13,6 +13,6 @@ dev = [
 # pytest finds this config from any directory in the repo, so `uv run pytest`
 # behaves the same from the root, etl/, or anywhere else.
 [tool.pytest.ini_options]
-testpaths = ["etl/tests"]
+testpaths = ["etl/tests", "packages/*/tests"]
 addopts = ["-m", "not network"]
 markers = ["network: hits a live external API; run with `-m network`"]
